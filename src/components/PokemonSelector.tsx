@@ -67,7 +67,7 @@ export function PokemonSelector({
 
     return pokemon.filter((entry) => {
       const searchTarget = normalizeSearchText(
-        `${entry.displayName} ${entry.speciesId} ${entry.dex}`,
+        `${entry.displayName} ${entry.speciesName} ${entry.speciesId} ${entry.dex}`,
       );
       return words.every((word) => searchTarget.includes(word));
     });
@@ -165,7 +165,7 @@ export function PokemonSelector({
                 type="search"
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
-                placeholder="名前・図鑑番号で検索"
+                placeholder="日本語名・図鑑番号で検索"
                 autoComplete="off"
                 enterKeyHint="search"
               />
@@ -187,7 +187,7 @@ export function PokemonSelector({
                   <span className="pokemon-results__dex">#{entry.dex || '—'}</span>
                   <span className="pokemon-results__name">
                     <strong>{entry.displayName}</strong>
-                    <small>{entry.speciesId}</small>
+                    <small>{entry.form ? 'フォルム違い' : '通常のすがた'}</small>
                   </span>
                   {entry.isShadow ? <span className="pokemon-results__tag">シャドウ</span> : null}
                 </button>

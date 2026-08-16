@@ -1,5 +1,5 @@
 import type { EventCategory } from "../types/events";
-import { getEventCategoryLabel } from "../utils/date";
+import { getEventCategoryLabel } from "../utils/eventLocalization";
 
 const FILTER_OPTIONS: readonly EventCategory[] = [
   "all",

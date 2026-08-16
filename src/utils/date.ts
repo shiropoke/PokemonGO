@@ -256,18 +256,3 @@ export function getEventCategory(eventType: string | null | undefined): EventCat
 
   return "other";
 }
-
-export function getEventCategoryLabel(category: EventCategory): string {
-  const labels: Record<EventCategory, string> = {
-    all: "すべて",
-    "community-day": "コミュニティ・デイ",
-    "spotlight-hour": "スポットライトアワー",
-    raid: "レイド",
-    research: "リサーチ",
-    "battle-league": "GOバトルリーグ",
-    rocket: "GOロケット団",
-    other: "その他",
-  };
-
-  return labels[category];
-}

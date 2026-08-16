@@ -21,17 +21,20 @@ https://<GitHubユーザー名>.github.io/PokemonGO/
 - UTC の絶対時刻と、タイムゾーン指定なしの現地時間を区別
 - 画像の遅延読み込みと読み込み失敗時プレースホルダー
 - Leek Duck イベント詳細への外部リンク
+- ポケモン名と定型イベント表現を使った日本語タイトル表示
+- ScrapedDuck の `eventType` ごとの日本語種別表示
 
 ### 個体値チェッカー
 
-- 名前・図鑑番号で検索できるポケモン選択
-- フォルム違い、シャドウを `speciesId` 単位で個別に表示
+- 日本語名・英語名・図鑑番号・`speciesId` で検索できるポケモン選択
+- PokeAPI の日本語名を優先し、フォルム違い、シャドウを `speciesId` 単位で個別に表示
 - PL40 / PL50 と、相棒ブースト PL41 / PL51
 - 0〜15 の攻撃・防御・HP 個体値入力
 - IV 合計、個体値%、星評価のリアルタイム計算
 - 任意 CP から一致する現在 PL 候補を探索
-- スーパーリーグ（CP1500）・ハイパーリーグ（CP2500）の 4096 通り順位計算
-- マスターリーグの最大強化時ステータス
+- リーグ選択なしで、スーパー・ハイパー・マスターの結果を同時表示
+- 全 3 リーグで 0〜15 の全 4096 通りを比較する順位計算
+- マスターリーグは全個体を同じ最大 PL（PL40 / 41 / 50 / 51）で比較
 - ポケモン・リーグ・PL 上限ごとのランキングをメモリキャッシュ
 - 最後に選択した条件を `localStorage` へ保存
 
@@ -76,6 +79,7 @@ npm run preview
 - 計算結果が選択した PL 上限を超えない
 - スーパーリーグで CP1500、ハイパーリーグで CP2500 を超えない
 - 0〜15 の 4096 通りすべてが順位対象
+- マスターリーグで 15 / 15 / 15 が 1 位になり、全個体が同じ最大 PL で比較される
 - 相棒ブーストなし / ありで PL40 / 41、PL50 / 51 になる
 - Venusaur の既知例 0 / 14 / 11、PL21、CP1498 がスーパーリーグ 1 位になる
 
@@ -109,7 +113,16 @@ Event data provided by [Leek Duck](https://leekduck.com/) / [ScrapedDuck](https:
 - [PvPoke Game Master](https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/gamemaster.json)
 - [PvPoke repository](https://github.com/pvpoke/pvpoke)
 
-`npm run data:pokemon` が Game Master から `dex`、`speciesName`、`speciesId`、`baseStats`、`released`、`tags` など計算に必要な項目だけを抽出し、`public/data/pokemon.json` を生成します。GitHub Actions でもデプロイ前に更新し、通信に失敗した場合はコミット済みの軽量データを維持してビルドを続行します。ブラウザはこの約 230 KB の軽量 JSON だけを読み込み、7 日間キャッシュします。期限切れ後の読み込みに失敗した場合は保存済みデータを使用します。
+`npm run data:pokemon` が Game Master から `dex`、`speciesName`、`speciesId`、`baseStats`、`released`、`tags` など計算に必要な項目だけを抽出し、`public/data/pokemon.json` を生成します。GitHub Actions でもデプロイ前に更新し、通信に失敗した場合はコミット済みの軽量データを維持してビルドを続行します。ブラウザは生成済みの軽量 JSON だけを読み込み、7 日間キャッシュします。期限切れ後の読み込みに失敗した場合は保存済みデータを使用します。
+
+### ポケモン日本語名
+
+- [PokeAPI `pokemon_species_names.csv`](https://github.com/PokeAPI/pokeapi/blob/master/data/v2/csv/pokemon_species_names.csv)
+- [PokeAPI `pokemon_form_names.csv`](https://github.com/PokeAPI/pokeapi/blob/master/data/v2/csv/pokemon_form_names.csv)
+- [PokeAPI `pokemon.csv`](https://github.com/PokeAPI/pokeapi/blob/master/data/v2/csv/pokemon.csv)
+- [PokeAPI `pokemon_forms.csv`](https://github.com/PokeAPI/pokeapi/blob/master/data/v2/csv/pokemon_forms.csv)
+
+同じ生成処理で PokeAPI の日本語種族名・フォルム名を静的データへ変換します。選択画面を開くたびに PokeAPI へアクセスすることはありません。日本語名はポケモン選択とイベントタイトルの両方で共有し、対応する日本語名がない項目だけ英語へフォールバックします。PokeAPI は [BSD 3-Clause License](https://github.com/PokeAPI/pokeapi/blob/master/LICENSE.md) で公開されています。ライセンス全文は [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) を参照してください。
 
 ローカルのポケモンデータを明示的に更新する場合は次を実行します。
 
@@ -124,7 +137,7 @@ CP・PvP 順位のコードは Pokémon GO の公開されている計算式と 
 ```text
 src/
   components/      イベントカード、検索、IV入力、結果表示
-  data/            PL1〜51 の CP Multiplier
+  data/            PL1〜51 の CP Multiplier、日本語名の静的辞書
   pages/           イベント、個体値チェッカー
   services/        外部データ取得とキャッシュ
   types/           外部データと計算の型
@@ -136,7 +149,7 @@ scripts/            軽量ポケモンデータ生成スクリプト
 
 ## 注意点
 
-- イベント名とポケモン名は、データソースに日本語名がない場合は英語で表示します。
+- ポケモン名は PokeAPI に日本語種族名・フォルム名がない場合、イベント固有名は確認済みの定型表現で日本語化できない場合に英語で表示します。
 - イベント内容・基礎ステータス・リリース状態は各外部データソースの更新に依存します。
-- PvP 順位は各 IV の 0〜15 全組み合わせを、同じリーグ上限と最大 PL 条件で比較します。捕獲方法ごとの IV 下限は順位母集団に適用しません。
+- PvP 順位は各 IV の 0〜15 全組み合わせを比較します。スーパー・ハイパーは同じ CP 上限と最大 PL 条件、マスターは同じ最大 PL 条件を使用し、捕獲方法ごとの IV 下限は順位母集団に適用しません。
 - Pokémon および Pokémon GO は The Pokémon Company、Nintendo、Creatures、GAME FREAK、Niantic の商標です。本プロジェクトは各社の公式サービスではありません。

@@ -6,14 +6,13 @@ import { fetchPokemonData } from '../services/pokemonData';
 import type {
   IndividualValues,
   League,
-  MasterLeagueResult,
   PvpRankResult,
   StandardMaxLevel,
 } from '../types/calculations';
 import type { Pokemon, PokemonDataSource } from '../types/pokemon';
 import { findMatchingLevels, getEffectiveLevelCap } from '../utils/cp';
 import { calculateIvSummary } from '../utils/iv';
-import { calculateMasterLeagueStats, getPvpRankResult } from '../utils/pvp';
+import { getPvpRankResult } from '../utils/pvp';
 
 const SETTINGS_KEY = 'pokemon-go-information:iv-checker:v1';
 
@@ -21,7 +20,6 @@ interface CheckerSettings {
   speciesId: string | null;
   maxLevel: StandardMaxLevel;
   buddyBoost: boolean;
-  league: League;
   ivs: IndividualValues;
 }
 
@@ -37,9 +35,10 @@ const DEFAULT_SETTINGS: CheckerSettings = {
   speciesId: null,
   maxLevel: 50,
   buddyBoost: false,
-  league: 'great',
   ivs: { attack: 15, defense: 15, hp: 15 },
 };
+
+const LEAGUES = ['great', 'ultra', 'master'] as const satisfies readonly League[];
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -60,13 +59,11 @@ function loadSettings(): CheckerSettings {
     if (!isRecord(value)) return DEFAULT_SETTINGS;
 
     const rawIvs = isRecord(value.ivs) ? value.ivs : {};
-    const league = value.league;
 
     return {
       speciesId: typeof value.speciesId === 'string' ? value.speciesId : null,
       maxLevel: value.maxLevel === 40 ? 40 : 50,
       buddyBoost: value.buddyBoost === true,
-      league: league === 'ultra' || league === 'master' ? league : 'great',
       ivs: {
         attack: readIv(rawIvs.attack, DEFAULT_SETTINGS.ivs.attack),
         defense: readIv(rawIvs.defense, DEFAULT_SETTINGS.ivs.defense),
@@ -170,46 +167,43 @@ export function IvCheckerPage() {
     }
   }, [effectiveLevelCap, enteredCp, selectedPokemon, settings.ivs]);
 
-  const leagueCalculation = useMemo<{
-    pvpResult: PvpRankResult | null;
-    masterResult: MasterLeagueResult | null;
+  const leagueCalculations = useMemo<{
+    pvpResults: Record<League, PvpRankResult | null>;
     error: string | null;
   }>(() => {
+    const pvpResults: Record<League, PvpRankResult | null> = {
+      great: null,
+      ultra: null,
+      master: null,
+    };
+
     if (!selectedPokemon) {
-      return { pvpResult: null, masterResult: null, error: null };
+      return { pvpResults, error: null };
     }
 
-    try {
-      if (settings.league === 'master') {
-        return {
-          pvpResult: null,
-          masterResult: calculateMasterLeagueStats(
-            selectedPokemon.baseStats,
-            settings.ivs,
-            effectiveLevelCap,
-          ),
-          error: null,
-        };
-      }
-
-      return {
-        pvpResult: getPvpRankResult(
+    let calculationFailed = false;
+    for (const league of LEAGUES) {
+      try {
+        // ランキング表はbaseStats・リーグ・PL上限ごとにpvp.ts内で
+        // キャッシュされるため、IV変更時は4096通りを再計算しない。
+        pvpResults[league] = getPvpRankResult(
           selectedPokemon.baseStats,
           settings.ivs,
-          settings.league,
+          league,
           effectiveLevelCap,
-        ),
-        masterResult: null,
-        error: null,
-      };
-    } catch {
-      return {
-        pvpResult: null,
-        masterResult: null,
-        error: 'このポケモンの計算結果を表示できませんでした',
-      };
+        );
+      } catch {
+        calculationFailed = true;
+      }
     }
-  }, [effectiveLevelCap, selectedPokemon, settings.ivs, settings.league]);
+
+    return {
+      pvpResults,
+      error: calculationFailed
+        ? '一部のリーグ計算結果を表示できませんでした'
+        : null,
+    };
+  }, [effectiveLevelCap, selectedPokemon, settings.ivs]);
 
   return (
     <div className="iv-checker-page">
@@ -217,7 +211,7 @@ export function IvCheckerPage() {
         <div>
           <span className="page-kicker">個体値・PvP計算</span>
           <h1>個体値チェッカー</h1>
-          <p>個体値と強化条件からPvP順位を確認できます。</p>
+          <p>個体値と強化条件から3リーグのPvP順位をまとめて確認できます。</p>
         </div>
       </header>
 
@@ -245,7 +239,6 @@ export function IvCheckerPage() {
             maxLevel={settings.maxLevel}
             buddyBoost={settings.buddyBoost}
             effectiveLevelCap={effectiveLevelCap}
-            league={settings.league}
             cp={cp}
             ivs={settings.ivs}
             onMaxLevelChange={(maxLevel) => {
@@ -253,9 +246,6 @@ export function IvCheckerPage() {
             }}
             onBuddyBoostChange={(buddyBoost) => {
               setSettings((current) => ({ ...current, buddyBoost }));
-            }}
-            onLeagueChange={(league) => {
-              setSettings((current) => ({ ...current, league }));
             }}
             onCpChange={setCp}
             onIvsChange={(ivs) => {
@@ -266,13 +256,11 @@ export function IvCheckerPage() {
 
         <IvResults
           summary={ivSummary}
-          league={settings.league}
           pokemonSelected={selectedPokemon !== null}
           cpWasEntered={enteredCp !== null}
           matchingLevels={matchingLevels}
-          pvpResult={leagueCalculation.pvpResult}
-          masterResult={leagueCalculation.masterResult}
-          calculationError={leagueCalculation.error}
+          pvpResults={leagueCalculations.pvpResults}
+          calculationError={leagueCalculations.error}
         />
       </div>
 

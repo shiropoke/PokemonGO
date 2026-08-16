@@ -1,4 +1,4 @@
-import type { IndividualValues, League, StandardMaxLevel } from '../types/calculations';
+import type { IndividualValues, StandardMaxLevel } from '../types/calculations';
 import { IvSelector } from './IvSelector';
 import { SegmentedControl } from './SegmentedControl';
 
@@ -12,22 +12,14 @@ const BUDDY_OPTIONS = [
   { value: 'on' as const, label: 'あり' },
 ];
 
-const LEAGUE_OPTIONS = [
-  { value: 'great' as const, label: 'スーパー' },
-  { value: 'ultra' as const, label: 'ハイパー' },
-  { value: 'master' as const, label: 'マスター' },
-];
-
 interface IvInputPanelProps {
   maxLevel: StandardMaxLevel;
   buddyBoost: boolean;
   effectiveLevelCap: number;
-  league: League;
   cp: string;
   ivs: IndividualValues;
   onMaxLevelChange: (value: StandardMaxLevel) => void;
   onBuddyBoostChange: (value: boolean) => void;
-  onLeagueChange: (value: League) => void;
   onCpChange: (value: string) => void;
   onIvsChange: (value: IndividualValues) => void;
 }
@@ -36,12 +28,10 @@ export function IvInputPanel({
   maxLevel,
   buddyBoost,
   effectiveLevelCap,
-  league,
   cp,
   ivs,
   onMaxLevelChange,
   onBuddyBoostChange,
-  onLeagueChange,
   onCpChange,
   onIvsChange,
 }: IvInputPanelProps) {
@@ -95,31 +85,19 @@ export function IvInputPanel({
         <IvSelector
           label="攻撃"
           value={ivs.attack}
-          tone="attack"
           onChange={(attack) => onIvsChange({ ...ivs, attack })}
         />
         <IvSelector
           label="防御"
           value={ivs.defense}
-          tone="defense"
           onChange={(defense) => onIvsChange({ ...ivs, defense })}
         />
         <IvSelector
           label="HP"
           value={ivs.hp}
-          tone="hp"
           onChange={(hp) => onIvsChange({ ...ivs, hp })}
         />
       </div>
-
-      <SegmentedControl
-        label="リーグ"
-        value={league}
-        options={LEAGUE_OPTIONS}
-        onChange={onLeagueChange}
-        className="league-selector"
-      />
     </section>
   );
 }
-

@@ -1,6 +1,5 @@
 import type {
   BaseStats,
-  CappedLeague,
   IndividualValues,
   League,
   MasterLeagueResult,
@@ -36,7 +35,7 @@ function ivKey(ivs: IndividualValues): string {
 
 function rankingCacheKey(
   baseStats: BaseStats,
-  league: CappedLeague,
+  league: League,
   maxLevel: number,
 ): string {
   return `${baseStats.atk}/${baseStats.def}/${baseStats.hp}|${league}|${maxLevel}`;
@@ -55,22 +54,22 @@ function compareRankCandidates(
   return (
     right.statProduct - left.statProduct ||
     right.attack - left.attack ||
+    right.defense - left.defense ||
     right.hp - left.hp ||
     right.cp - left.cp ||
-    right.ivs.hp - left.ivs.hp ||
+    right.ivs.attack - left.ivs.attack ||
     right.ivs.defense - left.ivs.defense ||
-    right.ivs.attack - left.ivs.attack
+    right.ivs.hp - left.ivs.hp
   );
 }
 
 function buildPvpRanking(
   baseStats: BaseStats,
-  league: CappedLeague,
+  league: League,
   maxLevel: number,
 ): CachedRanking {
   // Validate maxLevel once before entering the hot loop.
   getCpMultiplier(maxLevel);
-  const cpCap = LEAGUE_CP_CAPS[league];
   const candidates: Array<
     Omit<PvpRankResult, 'rank' | 'total' | 'topPercent'>
   > = [];
@@ -79,12 +78,15 @@ function buildPvpRanking(
     for (let defense = 0; defense <= 15; defense += 1) {
       for (let hp = 0; hp <= 15; hp += 1) {
         const ivs: IndividualValues = { attack, defense, hp };
-        const battleStats = findHighestLevelAtOrBelowCp(
-          baseStats,
-          ivs,
-          cpCap,
-          maxLevel,
-        );
+        const battleStats =
+          league === 'master'
+            ? calculateBattleStats(baseStats, ivs, maxLevel)
+            : findHighestLevelAtOrBelowCp(
+                baseStats,
+                ivs,
+                LEAGUE_CP_CAPS[league],
+                maxLevel,
+              );
 
         // With valid positive base stats, every IV combination has at least
         // the minimum CP 10 at PL1, so this branch is only defensive.
@@ -112,7 +114,7 @@ function buildPvpRanking(
 
 function getCachedRanking(
   baseStats: BaseStats,
-  league: CappedLeague,
+  league: League,
   maxLevel: number,
 ): CachedRanking {
   if (!isValidBaseStats(baseStats)) {
@@ -138,7 +140,7 @@ function getCachedRanking(
 
 export function getPvpRankings(
   baseStats: BaseStats,
-  league: CappedLeague,
+  league: League,
   maxLevel: number,
 ): PvpRankResult[] {
   return getCachedRanking(baseStats, league, maxLevel).entries;
@@ -147,7 +149,7 @@ export function getPvpRankings(
 export function getPvpRankResult(
   baseStats: BaseStats,
   ivs: IndividualValues,
-  league: CappedLeague,
+  league: League,
   maxLevel: number,
 ): PvpRankResult | null {
   if (!isValidIndividualValues(ivs)) return null;

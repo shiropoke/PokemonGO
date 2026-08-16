@@ -4,13 +4,14 @@ import type {
   PokemonDataResult,
   PokemonDataSource,
 } from '../types/pokemon';
+import { getPokemonDisplayName } from '../utils/pokemonLocalization';
 
 export const PVPokeGameMasterUrl =
   'https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/gamemaster.json';
 export const POKEMON_DATA_URL = `${import.meta.env.BASE_URL}data/pokemon.json`;
 
-const CACHE_KEY = 'pokemon-go-information:pokemon-data:v1';
-const CACHE_VERSION = 1;
+const CACHE_KEY = 'pokemon-go-information:pokemon-data:v2';
+const CACHE_VERSION = 2;
 export const POKEMON_CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 
 interface StoredPokemonCache {
@@ -51,8 +52,15 @@ function readBaseStats(value: unknown): PokemonBaseStats | null {
 }
 
 function getFormName(speciesName: string): string | undefined {
-  const match = speciesName.match(/\(([^()]+)\)\s*$/);
-  return match?.[1]?.trim() || undefined;
+  const forms = [...speciesName.matchAll(/[（(]([^()（）]+)[）)]/g)]
+    .map((match) => match[1]?.trim())
+    .filter(
+      (name): name is string =>
+        typeof name === 'string' &&
+        name.length > 0 &&
+        !/^(?:shadow|シャドウ)$/i.test(name),
+    );
+  return forms.join('・') || undefined;
 }
 
 function normalizePokemon(value: unknown): Pokemon | null {
@@ -66,6 +74,8 @@ function normalizePokemon(value: unknown): Pokemon | null {
 
   const rawName = typeof value.speciesName === 'string' ? value.speciesName.trim() : '';
   const speciesName = rawName || speciesId.replaceAll('_', ' ');
+  const displayNameJa =
+    typeof value.displayNameJa === 'string' ? value.displayNameJa.trim() : '';
   const tags = Array.isArray(value.tags)
     ? value.tags.filter((tag): tag is string => typeof tag === 'string')
     : [];
@@ -73,23 +83,27 @@ function normalizePokemon(value: unknown): Pokemon | null {
     tags.includes('shadow') ||
     speciesId.endsWith('_shadow') ||
     /\(shadow\)\s*$/i.test(speciesName);
-  const displayName = isShadow && !/\(shadow\)\s*$/i.test(speciesName)
-    ? `${speciesName} (Shadow)`
-    : speciesName;
   const dex =
     typeof value.dex === 'number' && Number.isFinite(value.dex) && value.dex >= 0
       ? Math.trunc(value.dex)
       : 0;
+  const displayName = getPokemonDisplayName({
+    speciesId,
+    speciesName,
+    dex,
+    embeddedJapaneseName: displayNameJa,
+  });
 
   return {
     dex,
     speciesId,
     speciesName,
+    ...(displayNameJa ? { displayNameJa } : {}),
     displayName,
     baseStats,
     released: value.released !== false,
     tags,
-    form: getFormName(displayName),
+    form: getFormName(displayName) ?? getFormName(speciesName),
     isShadow,
   };
 }
@@ -106,7 +120,8 @@ function extractPokemon(value: unknown): Pokemon[] {
   }
 
   return [...unique.values()].sort(
-    (a, b) => a.dex - b.dex || a.displayName.localeCompare(b.displayName, 'en'),
+    (a, b) =>
+      a.dex - b.dex || a.displayName.localeCompare(b.displayName, 'ja-JP'),
   );
 }
 
@@ -122,7 +137,8 @@ function restoreCachedPokemon(value: unknown): Pokemon[] {
   }
 
   return [...unique.values()].sort(
-    (a, b) => a.dex - b.dex || a.displayName.localeCompare(b.displayName, 'en'),
+    (a, b) =>
+      a.dex - b.dex || a.displayName.localeCompare(b.displayName, 'ja-JP'),
   );
 }
 

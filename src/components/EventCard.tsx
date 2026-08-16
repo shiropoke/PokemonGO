@@ -2,11 +2,13 @@ import { useEffect, useState, type ReactNode } from "react";
 import type { EventTimingStatus, ScrapedDuckEvent } from "../types/events";
 import {
   formatEventDate,
-  getEventCategory,
-  getEventCategoryLabel,
   getEventCountdown,
   parseEventDate,
 } from "../utils/date";
+import {
+  getEventTypeLabel,
+  localizeEventTitle,
+} from "../utils/eventLocalization";
 
 interface EventCardProps {
   event: ScrapedDuckEvent;
@@ -61,7 +63,7 @@ export function EventCard({ event, status, now }: EventCardProps) {
   const eventUrl = safeExternalUrl(event.link);
   const startDate = parseEventDate(event.start);
   const endDate = parseEventDate(event.end);
-  const category = getEventCategory(event.eventType);
+  const localizedTitle = localizeEventTitle(event.name);
 
   useEffect(() => {
     setImageFailed(false);
@@ -93,10 +95,12 @@ export function EventCard({ event, status, now }: EventCardProps) {
           <span className="event-card__status" data-status={status}>
             {STATUS_LABELS[status]}
           </span>
-          <span className="event-card__type">{getEventCategoryLabel(category)}</span>
+          <span className="event-card__type">
+            {getEventTypeLabel(event.eventType)}
+          </span>
         </div>
 
-        <h3 className="event-card__title">{event.name}</h3>
+        <h3 className="event-card__title">{localizedTitle}</h3>
 
         <dl className="event-card__dates">
           <div className="event-card__date-row">
@@ -147,7 +151,7 @@ export function EventCard({ event, status, now }: EventCardProps) {
       href={eventUrl}
       target="_blank"
       rel="noopener noreferrer"
-      aria-label={`${event.name}の詳細を外部サイトで開く`}
+      aria-label={`${localizedTitle}の詳細を外部サイトで開く`}
     >
       {cardContent}
     </a>
