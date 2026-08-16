@@ -1,7 +1,44 @@
-import { useEffect, useId, useMemo, useRef, useState } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
+import type { CSSProperties } from 'react';
 import type { Pokemon } from '../types/pokemon';
 
 const MAX_VISIBLE_RESULTS = 160;
+
+export interface PickerViewportMetrics {
+  height: number;
+  offsetTop: number;
+}
+
+type PickerViewportStyle = CSSProperties & {
+  '--picker-viewport-height': string;
+  '--picker-viewport-offset-top': string;
+};
+
+export function resolvePickerViewportMetrics(
+  viewport: Pick<VisualViewport, 'height' | 'offsetTop'> | null | undefined,
+  fallbackHeight: number,
+): PickerViewportMetrics {
+  const fallback = Number.isFinite(fallbackHeight)
+    ? Math.max(0, fallbackHeight)
+    : 0;
+  const height =
+    viewport && Number.isFinite(viewport.height) && viewport.height > 0
+      ? viewport.height
+      : fallback;
+  const offsetTop =
+    viewport && Number.isFinite(viewport.offsetTop)
+      ? Math.max(0, viewport.offsetTop)
+      : 0;
+
+  return { height, offsetTop };
+}
 
 interface PokemonSelectorProps {
   pokemon: Pokemon[];
@@ -57,8 +94,12 @@ export function PokemonSelector({
 }: PokemonSelectorProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState('');
+  const [viewportMetrics, setViewportMetrics] = useState<PickerViewportMetrics>(
+    () => resolvePickerViewportMetrics(window.visualViewport, window.innerHeight),
+  );
   const titleId = useId();
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const resultsRef = useRef<HTMLDivElement>(null);
 
   const filteredPokemon = useMemo(() => {
     const normalizedQuery = normalizeSearchText(query);
@@ -75,27 +116,91 @@ export function PokemonSelector({
 
   const visiblePokemon = filteredPokemon.slice(0, MAX_VISIBLE_RESULTS);
 
+  const closeSelector = useCallback(() => {
+    searchInputRef.current?.blur();
+    setIsOpen(false);
+  }, []);
+
   useEffect(() => {
     if (!isOpen) return undefined;
 
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    const focusTimer = window.setTimeout(() => searchInputRef.current?.focus(), 0);
+    const visualViewport = window.visualViewport;
+    const updateViewportMetrics = () => {
+      const nextMetrics = resolvePickerViewportMetrics(
+        visualViewport,
+        window.innerHeight,
+      );
+      setViewportMetrics((currentMetrics) =>
+        currentMetrics.height === nextMetrics.height &&
+        currentMetrics.offsetTop === nextMetrics.offsetTop
+          ? currentMetrics
+          : nextMetrics,
+      );
+    };
+    updateViewportMetrics();
+
+    visualViewport?.addEventListener('resize', updateViewportMetrics);
+    visualViewport?.addEventListener('scroll', updateViewportMetrics);
+    window.addEventListener('resize', updateViewportMetrics);
+
+    const lockedScrollX = window.scrollX;
+    const lockedScrollY = window.scrollY;
+    const useFixedBodyLock = window.matchMedia('(max-width: 680px)').matches;
+    const bodyStyle = document.body.style;
+    const previousBodyStyle = {
+      position: bodyStyle.position,
+      top: bodyStyle.top,
+      left: bodyStyle.left,
+      width: bodyStyle.width,
+      overflow: bodyStyle.overflow,
+    };
+    bodyStyle.overflow = 'hidden';
+    if (useFixedBodyLock) {
+      bodyStyle.position = 'fixed';
+      bodyStyle.top = `-${lockedScrollY}px`;
+      bodyStyle.left = `-${lockedScrollX}px`;
+      bodyStyle.width = '100%';
+    }
+
+    const focusTimer = window.setTimeout(
+      () => searchInputRef.current?.focus({ preventScroll: true }),
+      0,
+    );
     const handleEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setIsOpen(false);
+      if (event.key === 'Escape') closeSelector();
     };
     window.addEventListener('keydown', handleEscape);
 
     return () => {
       window.clearTimeout(focusTimer);
-      document.body.style.overflow = previousOverflow;
       window.removeEventListener('keydown', handleEscape);
+      window.removeEventListener('resize', updateViewportMetrics);
+      visualViewport?.removeEventListener('resize', updateViewportMetrics);
+      visualViewport?.removeEventListener('scroll', updateViewportMetrics);
+
+      bodyStyle.position = previousBodyStyle.position;
+      bodyStyle.top = previousBodyStyle.top;
+      bodyStyle.left = previousBodyStyle.left;
+      bodyStyle.width = previousBodyStyle.width;
+      bodyStyle.overflow = previousBodyStyle.overflow;
+
+      if (useFixedBodyLock) {
+        window.scrollTo(lockedScrollX, lockedScrollY);
+      }
     };
-  }, [isOpen]);
+  }, [closeSelector, isOpen]);
 
   const openSelector = () => {
     setQuery('');
+    setViewportMetrics(
+      resolvePickerViewportMetrics(window.visualViewport, window.innerHeight),
+    );
     setIsOpen(true);
+  };
+
+  const pickerViewportStyle: PickerViewportStyle = {
+    '--picker-viewport-height': `${viewportMetrics.height}px`,
+    '--picker-viewport-offset-top': `${viewportMetrics.offsetTop}px`,
   };
 
   return (
@@ -133,8 +238,9 @@ export function PokemonSelector({
       {isOpen ? (
         <div
           className="picker-backdrop"
+          style={pickerViewportStyle}
           onMouseDown={(event) => {
-            if (event.currentTarget === event.target) setIsOpen(false);
+            if (event.currentTarget === event.target) closeSelector();
           }}
         >
           <section
@@ -152,7 +258,7 @@ export function PokemonSelector({
                 type="button"
                 className="icon-button"
                 aria-label="閉じる"
-                onClick={() => setIsOpen(false)}
+                onClick={closeSelector}
               >
                 <CloseIcon />
               </button>
@@ -163,15 +269,24 @@ export function PokemonSelector({
               <input
                 ref={searchInputRef}
                 type="search"
+                aria-label="ポケモンを検索"
                 value={query}
-                onChange={(event) => setQuery(event.target.value)}
+                onChange={(event) => {
+                  setQuery(event.target.value);
+                  if (resultsRef.current) resultsRef.current.scrollTop = 0;
+                }}
                 placeholder="日本語名・図鑑番号で検索"
                 autoComplete="off"
                 enterKeyHint="search"
               />
             </label>
 
-            <div className="pokemon-results" role="listbox" aria-label="ポケモン候補">
+            <div
+              ref={resultsRef}
+              className="pokemon-results"
+              role="listbox"
+              aria-label="ポケモン候補"
+            >
               {visiblePokemon.map((entry) => (
                 <button
                   type="button"
@@ -181,7 +296,7 @@ export function PokemonSelector({
                   key={entry.speciesId}
                   onClick={() => {
                     onSelect(entry);
-                    setIsOpen(false);
+                    closeSelector();
                   }}
                 >
                   <span className="pokemon-results__dex">#{entry.dex || '—'}</span>
@@ -193,15 +308,14 @@ export function PokemonSelector({
                 </button>
               ))}
               {filteredPokemon.length === 0 ? (
-                <p className="empty-state">一致するポケモンが見つかりません</p>
+                <p className="empty-state">該当するポケモンが見つかりません</p>
+              ) : null}
+              {filteredPokemon.length > visiblePokemon.length ? (
+                <p className="picker-dialog__hint">
+                  候補が多いため先頭{MAX_VISIBLE_RESULTS}件を表示しています。検索で絞り込んでください。
+                </p>
               ) : null}
             </div>
-
-            {filteredPokemon.length > visiblePokemon.length ? (
-              <p className="picker-dialog__hint">
-                候補が多いため先頭{MAX_VISIBLE_RESULTS}件を表示しています。検索で絞り込んでください。
-              </p>
-            ) : null}
           </section>
         </div>
       ) : null}
