@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { IvInputPanel } from '../components/IvInputPanel';
 import { IvResults } from '../components/IvResults';
+import { FavoriteButton } from '../components/FavoriteButton';
 import { PokemonSelector } from '../components/PokemonSelector';
 import { fetchPokemonData } from '../services/pokemonData';
 import type {
@@ -83,6 +84,13 @@ function saveSettings(settings: CheckerSettings): void {
   }
 }
 
+function getLinkedSpeciesId(): string | null {
+  const query = window.location.hash.split('?')[1];
+  if (!query) return null;
+  const speciesId = new URLSearchParams(query).get('species')?.trim() ?? '';
+  return /^[a-z0-9_-]+$/i.test(speciesId) ? speciesId.toLowerCase() : null;
+}
+
 function formatDataTime(timestamp: number): string {
   return new Intl.DateTimeFormat('ja-JP', {
     month: 'numeric',
@@ -103,6 +111,13 @@ export function IvCheckerPage() {
     loading: true,
     error: null,
   });
+
+  useEffect(() => {
+    const linkedSpeciesId = getLinkedSpeciesId();
+    if (linkedSpeciesId) {
+      setSettings((current) => ({ ...current, speciesId: linkedSpeciesId }));
+    }
+  }, []);
 
   useEffect(() => {
     let ignore = false;
@@ -228,6 +243,15 @@ export function IvCheckerPage() {
             onRetry={() => setRequestVersion((version) => version + 1)}
           />
 
+          {selectedPokemon ? (
+            <div className="selected-pokemon-actions">
+              <FavoriteButton
+                speciesId={selectedPokemon.speciesId}
+                displayName={selectedPokemon.displayName}
+              />
+            </div>
+          ) : null}
+
           {dataState.fetchedAt ? (
             <p className="pokemon-data-meta">
               データ更新 {formatDataTime(dataState.fetchedAt)}
@@ -254,14 +278,26 @@ export function IvCheckerPage() {
           />
         </div>
 
-        <IvResults
-          summary={ivSummary}
-          pokemonSelected={selectedPokemon !== null}
-          cpWasEntered={enteredCp !== null}
-          matchingLevels={matchingLevels}
-          pvpResults={leagueCalculations.pvpResults}
-          calculationError={leagueCalculations.error}
-        />
+        <div className="checker-result-column">
+          <IvResults
+            summary={ivSummary}
+            pokemonSelected={selectedPokemon !== null}
+            cpWasEntered={enteredCp !== null}
+            matchingLevels={matchingLevels}
+            pvpResults={leagueCalculations.pvpResults}
+            calculationError={leagueCalculations.error}
+          />
+          {selectedPokemon ? (
+            <div className="checker-tool-links">
+              <a href={`#/evolution-cp?species=${encodeURIComponent(selectedPokemon.speciesId)}&level=${matchingLevels[0] ?? 25}&attack=${settings.ivs.attack}&defense=${settings.ivs.defense}&hp=${settings.ivs.hp}${enteredCp ? `&cp=${enteredCp}` : ''}`}>
+                進化後CPを見る
+              </a>
+              <a href={`#/power-up?species=${encodeURIComponent(selectedPokemon.speciesId)}&level=${matchingLevels[0] ?? 20}`}>
+                強化コストを見る
+              </a>
+            </div>
+          ) : null}
+        </div>
       </div>
 
       <p className="data-credit iv-data-credit">

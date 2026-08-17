@@ -8,6 +8,7 @@ import {
 } from 'react';
 import type { CSSProperties } from 'react';
 import type { Pokemon } from '../types/pokemon';
+import { FavoriteButton } from './FavoriteButton';
 
 const MAX_VISIBLE_RESULTS = 160;
 
@@ -288,24 +289,31 @@ export function PokemonSelector({
               aria-label="ポケモン候補"
             >
               {visiblePokemon.map((entry) => (
-                <button
-                  type="button"
-                  role="option"
-                  aria-selected={entry.speciesId === selectedPokemon?.speciesId}
-                  className={entry.speciesId === selectedPokemon?.speciesId ? 'is-selected' : ''}
-                  key={entry.speciesId}
-                  onClick={() => {
-                    onSelect(entry);
-                    closeSelector();
-                  }}
-                >
-                  <span className="pokemon-results__dex">#{entry.dex || '—'}</span>
-                  <span className="pokemon-results__name">
-                    <strong>{entry.displayName}</strong>
-                    <small>{entry.form ? 'フォルム違い' : '通常のすがた'}</small>
-                  </span>
-                  {entry.isShadow ? <span className="pokemon-results__tag">シャドウ</span> : null}
-                </button>
+                <div className="pokemon-result-row" role="presentation" key={entry.speciesId}>
+                  <button
+                    type="button"
+                    role="option"
+                    aria-selected={entry.speciesId === selectedPokemon?.speciesId}
+                    className={entry.speciesId === selectedPokemon?.speciesId ? 'is-selected' : ''}
+                    onClick={() => {
+                      onSelect(entry);
+                      closeSelector();
+                    }}
+                  >
+                    <span className="pokemon-results__dex">#{entry.dex || '—'}</span>
+                    <span className="pokemon-results__name">
+                      <strong>{entry.displayName}</strong>
+                      <small>{entry.form ? 'フォルム違い' : '通常のすがた'}</small>
+                    </span>
+                    {entry.isShadow ? <span className="pokemon-results__tag">シャドウ</span> : null}
+                  </button>
+                  <FavoriteButton
+                    speciesId={entry.speciesId}
+                    displayName={entry.displayName}
+                    compact
+                    iconOnly
+                  />
+                </div>
               ))}
               {filteredPokemon.length === 0 ? (
                 <p className="empty-state">該当するポケモンが見つかりません</p>

@@ -28,7 +28,14 @@ jobs:
       - name: Install dependencies
         run: npm ci
       - name: Generate compact Pokémon data
+        continue-on-error: true
         run: npm run data:pokemon
+      - name: Refresh compact Game Master data
+        continue-on-error: true
+        run: npm run data:game
+      - name: Refresh PvPoke rankings
+        continue-on-error: true
+        run: npm run data:pvp
       - name: Build
         run: npm run build
       - name: Setup Pages

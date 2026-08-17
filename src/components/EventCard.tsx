@@ -9,6 +9,7 @@ import {
   getEventTypeLabel,
   localizeEventTitle,
 } from "../utils/eventLocalization";
+import { safeExternalUrl } from "../utils/url";
 
 interface EventCardProps {
   event: ScrapedDuckEvent;
@@ -22,19 +23,6 @@ const STATUS_LABELS: Record<EventTimingStatus, string> = {
   ended: "終了済み",
   unknown: "日時未定",
 };
-
-function safeExternalUrl(value: string | null): string | null {
-  if (!value) {
-    return null;
-  }
-
-  try {
-    const url = new URL(value);
-    return url.protocol === "https:" || url.protocol === "http:" ? url.href : null;
-  } catch {
-    return null;
-  }
-}
 
 function ExternalLinkIcon() {
   return (
