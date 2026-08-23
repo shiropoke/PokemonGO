@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import type { ReactNode } from 'react';
 import { PrimaryNavigation, SideDrawer, SiteHeader } from './components/AppNavigation';
 import { EventsPage } from './pages/EventsPage';
 import { EggsPage } from './pages/EggsPage';
@@ -22,6 +21,19 @@ import {
 import type { Theme } from './services/theme';
 import { getPageFromHash, getPageHash } from './types/navigation';
 import type { Page } from './types/navigation';
+import {
+  getMainTabTransitionDirection,
+  type MainTabTransitionDirection,
+} from './utils/mainTabTransition';
+
+const PAGE_TRANSITION_FALLBACK_MS = 360;
+
+interface PageTransition {
+  id: number;
+  from: Page;
+  to: Page;
+  direction: MainTabTransitionDirection;
+}
 
 function getStorage(): Storage | null {
   try {
@@ -31,9 +43,9 @@ function getStorage(): Storage | null {
   }
 }
 
-function renderPage(page: Page, homeNavigation?: ReactNode) {
+function renderPage(page: Page) {
   switch (page) {
-    case 'home': return <HomePage navigation={homeNavigation} />;
+    case 'home': return <HomePage />;
     case 'events': return <EventsPage />;
     case 'raids': return <RaidsPage />;
     case 'iv': return <IvCheckerPage />;
@@ -49,10 +61,15 @@ function renderPage(page: Page, homeNavigation?: ReactNode) {
 }
 
 export default function App() {
-  const [page, setPage] = useState<Page>(() => getPageFromHash(window.location.hash));
+  const initialPage = getPageFromHash(window.location.hash);
+  const [page, setPage] = useState<Page>(initialPage);
+  const [visiblePage, setVisiblePage] = useState<Page>(initialPage);
+  const [pageTransition, setPageTransition] = useState<PageTransition | null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const pageContentRef = useRef<HTMLDivElement>(null);
+  const transitionSequenceRef = useRef(0);
+  const pageTransitionRef = useRef<PageTransition | null>(null);
   const [theme, setTheme] = useState<Theme>(() =>
     resolveInitialTheme(
       getStorage(),
@@ -69,6 +86,43 @@ export default function App() {
     if (!window.location.hash) window.history.replaceState(null, '', getPageHash('home'));
     return () => window.removeEventListener('hashchange', onHashChange);
   }, []);
+
+  useEffect(() => {
+    if (pageTransition || page === visiblePage) return;
+
+    const direction = getMainTabTransitionDirection(visiblePage, page);
+    if (!direction) {
+      setVisiblePage(page);
+      return;
+    }
+
+    transitionSequenceRef.current += 1;
+    const nextTransition = {
+      id: transitionSequenceRef.current,
+      from: visiblePage,
+      to: page,
+      direction,
+    } satisfies PageTransition;
+    pageTransitionRef.current = nextTransition;
+    setPageTransition(nextTransition);
+  }, [page, pageTransition, visiblePage]);
+
+  const finishPageTransition = useCallback((transitionId: number) => {
+    const current = pageTransitionRef.current;
+    if (!current || current.id !== transitionId) return;
+    pageTransitionRef.current = null;
+    setVisiblePage(current.to);
+    setPageTransition(null);
+  }, []);
+
+  useEffect(() => {
+    if (!pageTransition) return undefined;
+    const fallbackTimer = window.setTimeout(
+      () => finishPageTransition(pageTransition.id),
+      PAGE_TRANSITION_FALLBACK_MS,
+    );
+    return () => window.clearTimeout(fallbackTimer);
+  }, [finishPageTransition, pageTransition]);
 
   useEffect(() => {
     applyTheme(theme);
@@ -90,8 +144,11 @@ export default function App() {
   }, []);
 
   const navigate = useCallback((nextPage: Page) => {
-    window.location.hash = getPageHash(nextPage);
-    setPage(nextPage);
+    if (getPageFromHash(window.location.hash) !== nextPage) {
+      window.location.hash = getPageHash(nextPage);
+    } else {
+      setPage(nextPage);
+    }
     window.scrollTo({ top: 0, behavior: 'auto' });
   }, []);
 
@@ -100,9 +157,8 @@ export default function App() {
     saveTheme(nextTheme, getStorage());
   };
 
-  const primaryNavigation = (
-    <PrimaryNavigation current={page} onNavigate={navigate} />
-  );
+  const navigationPage = pageTransition?.to ?? visiblePage;
+  const activeContentPage = pageTransition?.to ?? visiblePage;
 
   return (
     <div className="app-shell">
@@ -119,10 +175,34 @@ export default function App() {
           onNavigate={navigate}
         />
 
-        {page === 'home' ? null : primaryNavigation}
+        <PrimaryNavigation current={navigationPage} onNavigate={navigate} />
 
-        <main id="main-content" className="main-content">
-          {renderPage(page, page === 'home' ? primaryNavigation : undefined)}
+        <main
+          id="main-content"
+          className={`main-content page-transition-viewport${pageTransition ? ' is-transitioning' : ''}`}
+        >
+          <>
+            {pageTransition ? (
+              <div
+                key={pageTransition.from}
+                className={`page-transition-layer page-transition-layer--outgoing page-transition-layer--${pageTransition.direction}`}
+                aria-hidden="true"
+              >
+                {renderPage(pageTransition.from)}
+              </div>
+            ) : null}
+            <div
+              key={activeContentPage}
+              className={`page-transition-layer${pageTransition ? ` page-transition-layer--incoming page-transition-layer--${pageTransition.direction}` : ''}`}
+              onAnimationEnd={pageTransition ? (event) => {
+                if (event.target === event.currentTarget) {
+                  finishPageTransition(pageTransition.id);
+                }
+              } : undefined}
+            >
+              {renderPage(activeContentPage)}
+            </div>
+          </>
         </main>
       </div>
 

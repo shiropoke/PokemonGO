@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from 'react';
-import type { ReactNode } from 'react';
 import { useFavorites } from '../contexts/FavoritesContext';
 import { loadEvents } from '../services/events';
 import { fetchPokemonData } from '../services/pokemonData';
@@ -7,6 +6,7 @@ import { loadEggs, loadRaids, loadResearch } from '../services/scrapedDuck';
 import type { ScrapedDuckEvent } from '../types/events';
 import type { Pokemon } from '../types/pokemon';
 import type { EggHatch, FieldResearchTask, RaidBoss } from '../types/scrapedDuck';
+import { WeeklyEvents } from '../components/WeeklyEvents';
 import {
   formatCountdown,
   formatEventDate,
@@ -16,8 +16,10 @@ import {
 } from '../utils/date';
 import { getEventTypeLabel, localizeEventTitle } from '../utils/eventLocalization';
 import { eventTitleMentionsPokemon, externalPokemonMatches } from '../utils/pokemonMatching';
+import { groupRaidsByTier } from '../utils/raidClassification';
 import { getRaidTierLabel } from '../utils/scrapedDuckLocalization';
 import { safeExternalUrl } from '../utils/url';
+import { getWeeklyEvents } from '../utils/weeklyEvents';
 
 interface HomeDataState {
   events: ScrapedDuckEvent[];
@@ -49,16 +51,6 @@ const LIMITED_EVENT_TYPES = new Set([
   'community-day-classic',
   'research-day',
 ]);
-
-function getRaidPriority(raid: RaidBoss): number {
-  if (/^shadow\s/i.test(raid.name)) return 2;
-  const tier = getRaidTierLabel(raid.tier);
-  if (tier === '伝説 / ★5') return 0;
-  if (tier === 'メガ') return 1;
-  if (tier === '★3') return 3;
-  if (tier === '★1') return 4;
-  return 5;
-}
 
 function HomeEventList({
   events,
@@ -157,7 +149,7 @@ function FeaturedEvent({
   );
 }
 
-export function HomePage({ navigation }: { navigation?: ReactNode }) {
+export function HomePage() {
   const { favorites } = useFavorites();
   const [now, setNow] = useState(() => Date.now());
   const [reloadKey, setReloadKey] = useState(0);
@@ -249,35 +241,16 @@ export function HomePage({ navigation }: { navigation?: ReactNode }) {
     [startsToday],
   );
   const featuredEvent = groups.ongoing[0] ?? groups.upcoming[0] ?? null;
-  const weekEvents = useMemo(() => {
-    const weekEnd = now + 7 * 24 * 60 * 60 * 1000;
-    const candidates = [...groups.ongoing, ...groups.upcoming];
-    const seen = new Set<string>();
-
-    return candidates.filter((event) => {
-      if (seen.has(event.eventID)) return false;
-      seen.add(event.eventID);
-      const start = parseEventDate(event.start)?.getTime();
-      const end = parseEventDate(event.end)?.getTime();
-      return (
-        (start !== undefined && start < weekEnd && (end === undefined || end > now)) ||
-        (start === undefined && end !== undefined && end > now && end < weekEnd)
-      );
-    });
-  }, [groups.ongoing, groups.upcoming, now]);
+  const weeklyEvents = useMemo(
+    () => getWeeklyEvents(state.events, now),
+    [now, state.events],
+  );
   const featuredRaids = useMemo(
     () => {
-      const buckets = new Map<number, RaidBoss[]>();
-      for (const raid of state.raids) {
-        const priority = getRaidPriority(raid);
-        buckets.set(priority, [...(buckets.get(priority) ?? []), raid]);
-      }
-      const orderedBuckets = [...buckets.entries()]
-        .sort(([left], [right]) => left - right)
-        .map(([, raids]) => raids);
+      const tierGroups = groupRaidsByTier(state.raids);
       return [
-        ...orderedBuckets.flatMap((raids) => raids.slice(0, 1)),
-        ...orderedBuckets.flatMap((raids) => raids.slice(1)),
+        ...tierGroups.flatMap((group) => group.raids.slice(0, 1)),
+        ...tierGroups.flatMap((group) => group.raids.slice(1)),
       ].slice(0, 6);
     },
     [state.raids],
@@ -330,8 +303,6 @@ export function HomePage({ navigation }: { navigation?: ReactNode }) {
         ) : null}
       </header>
 
-      {navigation}
-
       {state.stale ? <p className="data-notice">保存済みデータを表示しています。</p> : null}
       {state.loading ? (
         <div className="dashboard-skeleton" aria-label="今日の情報を読み込み中" />
@@ -378,7 +349,7 @@ export function HomePage({ navigation }: { navigation?: ReactNode }) {
               <h2>今週のイベント</h2>
               <a href="#/events">イベント一覧</a>
             </div>
-            <HomeEventList events={weekEvents} now={now} empty="今週のイベントはありません。" limit={6} />
+            <WeeklyEvents events={weeklyEvents} now={now} />
           </section>
 
           <section className="dashboard-card dashboard-card--wide">
@@ -393,7 +364,13 @@ export function HomePage({ navigation }: { navigation?: ReactNode }) {
                 {featuredRaids.map((raid) => (
                   <a href="#/raids" className="dashboard-raid" key={raid.id}>
                     {raid.image ? <img src={raid.image} alt="" loading="lazy" /> : <span className="dashboard-raid__placeholder" aria-hidden="true" />}
-                    <span><strong>{raid.displayName}</strong><small>{getRaidTierLabel(raid.tier)}</small></span>
+                    <span>
+                      <strong>{raid.displayName}</strong>
+                      <small>
+                        {getRaidTierLabel(raid.tier)}
+                        {raid.isShadow ? <span className="dashboard-raid__shadow">シャドウ</span> : null}
+                      </small>
+                    </span>
                   </a>
                 ))}
               </div>

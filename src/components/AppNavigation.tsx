@@ -133,14 +133,6 @@ export function SiteHeader({
           <Brand compact />
         </a>
 
-        <a
-          className="pokemon-go-open"
-          href="https://pokemongolive.com/ja/"
-          target="_blank"
-          rel="noreferrer"
-        >
-          Pokémon GOを開く
-        </a>
       </div>
     </header>
   );
@@ -250,6 +242,7 @@ export function SideDrawer({
   const [otherOpen, setOtherOpen] = useState(true);
   const [scrollLocked, setScrollLocked] = useState(false);
   const navigationPendingRef = useRef(false);
+  const pendingNavigationRef = useRef<Page | null>(null);
 
   useEffect(() => {
     if (open) {
@@ -266,8 +259,14 @@ export function SideDrawer({
   const finishClose = useCallback(() => {
     if (open) return;
     setScrollLocked(false);
-    menuButtonRef.current?.focus({ preventScroll: true });
-  }, [menuButtonRef, open]);
+    const pendingPage = pendingNavigationRef.current;
+    pendingNavigationRef.current = null;
+    if (pendingPage) {
+      onNavigate(pendingPage);
+    } else {
+      menuButtonRef.current?.focus({ preventScroll: true });
+    }
+  }, [menuButtonRef, onNavigate, open]);
 
   useEffect(() => {
     if (open || !scrollLocked) return undefined;
@@ -350,7 +349,7 @@ export function SideDrawer({
 
   const navigateFromDrawer = (page: Page) => {
     navigationPendingRef.current = true;
-    onNavigate(page);
+    pendingNavigationRef.current = page;
     onClose();
   };
 

@@ -25,6 +25,8 @@ export interface RaidBoss {
   /** 既存Game Master辞書と照合できた場合だけ設定する内部ID。 */
   speciesId: string | null;
   tier: string;
+  /** ScrapedDuckの現行データでは、nameの `Shadow ` 接頭辞で表現される。 */
+  isShadow: boolean;
   canBeShiny: boolean;
   types: string[];
   combatPower: {

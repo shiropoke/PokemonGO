@@ -139,6 +139,9 @@ function normalizeRaid(item: unknown, index: number): RaidBoss | null {
     displayName: localizeExternalPokemonName(name),
     speciesId: resolveExternalPokemonSpeciesId(name),
     tier,
+    // raids.jsonにshadow/isShadowフィールドはなく、現行スキーマでは
+    // `Shadow ` で始まるnameと通常と同じtierの組み合わせで表現される。
+    isShadow: /^Shadow\s+/i.test(name),
     canBeShiny: item.canBeShiny === true,
     types: readNamedObjectArray(item.types),
     combatPower,

@@ -48,7 +48,23 @@ describe('ScrapedDuckデータの防御的パース', () => {
       displayName: 'バリヤード（ガラルのすがた）',
       speciesId: 'mr_mime_galarian',
       tier: '3-Star Raids',
+      isShadow: false,
       types: ['ice'],
+    });
+  });
+
+  it('現行raids.jsonのShadow接頭辞を明示的な判定値へ正規化する', () => {
+    const raids = normalizeRaids([{
+      ...raidPayload[0],
+      name: 'Shadow Giratina (Altered)',
+      tier: '5-Star Raids',
+    }]);
+
+    expect(raids?.[0]).toMatchObject({
+      name: 'Shadow Giratina (Altered)',
+      tier: '5-Star Raids',
+      isShadow: true,
+      speciesId: 'giratina_altered_shadow',
     });
   });
 

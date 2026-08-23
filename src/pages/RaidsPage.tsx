@@ -9,38 +9,15 @@ import {
 import { RaidCard } from '../components/RaidCard';
 import { useCachedDataset } from '../hooks/useCachedDataset';
 import { loadRaids } from '../services/scrapedDuck';
-import type { RaidBoss } from '../types/scrapedDuck';
-import { getRaidTierLabel } from '../utils/scrapedDuckLocalization';
+import { groupRaidsByTier } from '../utils/raidClassification';
 import '../styles/data-pages.css';
-
-interface RaidGroup {
-  key: string;
-  title: string;
-  raids: RaidBoss[];
-}
-
-function getRaidGroup(raid: RaidBoss): { key: string; title: string; order: number } {
-  if (/^shadow\s/i.test(raid.name)) return { key: 'shadow', title: 'シャドウレイド', order: 5 };
-  const tier = getRaidTierLabel(raid.tier);
-  if (tier === '伝説 / ★5') return { key: 'five', title: tier, order: 1 };
-  if (tier === 'メガ') return { key: 'mega', title: tier, order: 2 };
-  if (tier === '★3') return { key: 'three', title: tier, order: 3 };
-  if (tier === '★1') return { key: 'one', title: tier, order: 4 };
-  return { key: raid.tier || 'other', title: tier || 'その他', order: 6 };
-}
 
 export function RaidsPage() {
   const state = useCachedDataset(loadRaids);
-  const groups = useMemo(() => {
-    const grouped = new Map<string, RaidGroup & { order: number }>();
-    for (const raid of state.result?.data ?? []) {
-      const category = getRaidGroup(raid);
-      const group = grouped.get(category.key);
-      if (group) group.raids.push(raid);
-      else grouped.set(category.key, { ...category, raids: [raid] });
-    }
-    return [...grouped.values()].sort((left, right) => left.order - right.order);
-  }, [state.result]);
+  const groups = useMemo(
+    () => groupRaidsByTier(state.result?.data ?? []),
+    [state.result],
+  );
 
   return (
     <div className="dataset-page raids-page">

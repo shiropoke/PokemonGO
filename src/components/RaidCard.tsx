@@ -14,6 +14,7 @@ export function RaidCard({ raid }: { raid: RaidBoss }) {
         <DatasetImage src={raid.image} alt={raid.displayName} />
         <div className="raid-card__title">
           <span className="data-chip">{getRaidTierLabel(raid.tier)}</span>
+          {raid.isShadow ? <span className="data-chip data-chip--shadow">シャドウ</span> : null}
           {raid.canBeShiny ? <span className="data-chip data-chip--shiny">色違いあり</span> : null}
           <h3>{raid.displayName}</h3>
           {raid.speciesId ? (
