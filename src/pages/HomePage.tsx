@@ -288,19 +288,21 @@ export function HomePage() {
   return (
     <div className="home-page">
       <header className="page-heading dashboard-heading home-hero-heading">
-        <div>
-          <h1>ホーム</h1>
-          <p>最新のイベントやレイド情報をチェックしよう！</p>
+        <div className="home-hero-heading__meta">
           <time dateTime={today.toISOString()}>{new Intl.DateTimeFormat('ja-JP', {
             year: 'numeric',
             month: 'long',
             day: 'numeric',
             weekday: 'short',
           }).format(today)}</time>
+          {state.fetchedAt ? (
+            <span className="dashboard-updated">最終更新 {formatLastUpdated(state.fetchedAt)}</span>
+          ) : null}
         </div>
-        {state.fetchedAt ? (
-          <span className="dashboard-updated">最終更新 {formatLastUpdated(state.fetchedAt)}</span>
-        ) : null}
+        <div className="home-hero-heading__copy">
+          <h1>ホーム</h1>
+          <p>最新のイベントやレイド情報をチェックしよう！</p>
+        </div>
       </header>
 
       {state.stale ? <p className="data-notice">保存済みデータを表示しています。</p> : null}

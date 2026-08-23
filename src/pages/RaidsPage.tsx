@@ -7,6 +7,7 @@ import {
   StaleDataNotice,
 } from '../components/DatasetPageHeader';
 import { RaidCard } from '../components/RaidCard';
+import { RefreshButton } from '../components/RefreshButton';
 import { useCachedDataset } from '../hooks/useCachedDataset';
 import { loadRaids } from '../services/scrapedDuck';
 import { groupRaidsByTier } from '../utils/raidClassification';
@@ -25,8 +26,7 @@ export function RaidsPage() {
         eyebrow="現在のラインナップ"
         title="レイド"
         fetchedAt={state.result?.fetchedAt}
-        refreshing={state.refreshing}
-        onReload={() => void state.reload()}
+        action={<RefreshButton />}
       />
       <p className="dataset-page__intro">
         現在公開されているレイドボスを、取得データに含まれるレイド区分で表示します。
@@ -34,11 +34,11 @@ export function RaidsPage() {
 
       {state.result?.stale ? <StaleDataNotice /> : null}
       {state.loading && !state.result ? <DatasetSkeleton /> : null}
-      {state.error && !state.result ? <DatasetError onRetry={() => void state.reload()} /> : null}
+      {state.error && !state.result ? <DatasetError action={<RefreshButton />} /> : null}
 
       {state.result ? (
         groups.length > 0 ? (
-          <div className="dataset-sections" aria-busy={state.refreshing}>
+          <div className="dataset-sections" aria-busy={state.loading}>
             {groups.map((group) => (
               <section className="dataset-section" key={group.key}>
                 <div className="dataset-section__heading">

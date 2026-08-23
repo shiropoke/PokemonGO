@@ -290,7 +290,6 @@ dd {
   white-space: nowrap;
 }
 
-.events-page__refresh,
 .events-error button,
 .inline-error button {
   min-height: 38px;
@@ -302,11 +301,6 @@ dd {
   font-size: 0.8rem;
   font-weight: 700;
   cursor: pointer;
-}
-
-.events-page__refresh:disabled {
-  color: var(--gray-500);
-  cursor: wait;
 }
 
 .events-notice,
@@ -1464,11 +1458,6 @@ dd {
     gap: 4px;
     justify-items: end;
     font-size: 0.66rem;
-  }
-
-  .events-page__refresh {
-    min-height: 34px;
-    padding: 0 11px;
   }
 
   .event-filters {

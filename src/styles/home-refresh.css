@@ -4,8 +4,15 @@
 
 .home-hero-heading {
   display: grid;
+  min-width: 0;
+  grid-template-areas:
+    'meta'
+    'copy';
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+  justify-content: stretch;
   justify-items: center;
-  gap: 8px;
+  gap: 10px;
   padding: 22px 16px 20px;
   margin-bottom: 0;
   border: 1px solid var(--border, var(--gray-200));
@@ -14,8 +21,27 @@
   text-align: center;
 }
 
-.home-hero-heading > div {
+.home-hero-heading__copy {
+  grid-area: copy;
+  width: 100%;
+  max-width: 760px;
   min-width: 0;
+  margin-inline: auto;
+  text-align: center;
+}
+
+.home-hero-heading__meta {
+  display: grid;
+  max-width: 100%;
+  grid-area: meta;
+  justify-self: end;
+  justify-items: end;
+  gap: 2px;
+  color: var(--text-secondary, var(--gray-500));
+  font-size: 0.72rem;
+  line-height: 1.45;
+  text-align: right;
+  white-space: nowrap;
 }
 
 .home-hero-heading h1 {
@@ -24,20 +50,19 @@
 }
 
 .home-hero-heading p {
-  margin: 7px 0 0;
+  margin: 7px auto 0;
   color: var(--text-secondary, var(--gray-600));
   font-size: clamp(0.78rem, 2.8vw, 0.92rem);
 }
 
 .home-hero-heading time {
-  display: block;
-  margin-top: 7px;
-  color: var(--text-secondary, var(--gray-500));
-  font-size: 0.7rem;
+  color: inherit;
+  font: inherit;
 }
 
 .home-hero-heading .dashboard-updated {
-  color: var(--text-secondary, var(--gray-500));
+  color: inherit;
+  font: inherit;
 }
 
 .home-page .dashboard-grid {

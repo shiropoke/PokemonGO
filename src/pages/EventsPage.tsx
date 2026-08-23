@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { EventCard } from "../components/EventCard";
 import { EventFilters } from "../components/EventFilters";
 import { EventSkeleton } from "../components/EventSkeleton";
+import { RefreshButton } from "../components/RefreshButton";
 import { loadEvents } from "../services/events";
 import type {
   EventCategory,
@@ -59,7 +60,6 @@ function EventSection({
 export function EventsPage() {
   const [result, setResult] = useState<EventsFetchResult | null>(null);
   const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(false);
   const [filter, setFilter] = useState<EventCategory>("all");
   const [showEnded, setShowEnded] = useState(false);
@@ -67,11 +67,7 @@ export function EventsPage() {
 
   const requestEvents = useCallback(
     async (signal?: AbortSignal) => {
-      if (result) {
-        setRefreshing(true);
-      } else {
-        setLoading(true);
-      }
+      setLoading(true);
       setError(false);
 
       try {
@@ -87,21 +83,17 @@ export function EventsPage() {
       } finally {
         if (!signal?.aborted) {
           setLoading(false);
-          setRefreshing(false);
         }
       }
     },
-    [result],
+    [],
   );
 
   useEffect(() => {
     const controller = new AbortController();
     void requestEvents(controller.signal);
     return () => controller.abort();
-    // The initial request intentionally runs once. Manual refreshes use the same
-    // callback without restarting this effect when data arrives.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [requestEvents]);
 
   useEffect(() => {
     const updateNow = () => setNow(Date.now());
@@ -138,14 +130,7 @@ export function EventsPage() {
         {result ? (
           <div className="events-page__update">
             <span>最終更新 {formatLastUpdated(result.fetchedAt)}</span>
-            <button
-              className="events-page__refresh"
-              type="button"
-              onClick={() => void requestEvents()}
-              disabled={refreshing}
-            >
-              {refreshing ? "取得中" : "再取得"}
-            </button>
+            <RefreshButton />
           </div>
         ) : null}
       </header>
@@ -161,15 +146,13 @@ export function EventsPage() {
       ) : error && !result ? (
         <div className="events-error" role="alert">
           <p>イベント情報を取得できませんでした</p>
-          <button type="button" onClick={() => void requestEvents()}>
-            再取得
-          </button>
+          <RefreshButton />
         </div>
       ) : result ? (
         <>
           <EventFilters selected={filter} onChange={setFilter} />
 
-          <div className="events-page__sections" aria-busy={refreshing}>
+          <div className="events-page__sections" aria-busy={loading}>
             <EventSection
               title="開催中"
               emptyMessage="現在開催中のイベントはありません。"

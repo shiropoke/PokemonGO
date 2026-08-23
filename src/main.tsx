@@ -8,6 +8,7 @@ import './styles/design-refresh.css';
 import './styles/home-refresh.css';
 import './styles/navigation-refresh.css';
 import './styles/type-badge.css';
+import './styles/refresh-button.css';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>

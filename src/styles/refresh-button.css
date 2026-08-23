@@ -1,0 +1,67 @@
+.refresh-button,
+.dataset-page__update .refresh-button,
+.dataset-error .refresh-button,
+.events-error .refresh-button {
+  display: inline-flex;
+  min-height: 40px;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 7px 13px;
+  border: 1px solid var(--border-strong, var(--gray-300));
+  border-radius: var(--radius-sm);
+  background: var(--surface, var(--white));
+  color: var(--accent, var(--blue-700));
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    border-color 150ms ease,
+    background-color 150ms ease,
+    color 150ms ease,
+    transform 100ms ease;
+}
+
+.refresh-button svg {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2;
+}
+
+.refresh-button:hover {
+  border-color: var(--accent, var(--blue-700));
+  background: var(--surface-secondary, var(--blue-50));
+}
+
+.refresh-button:active {
+  transform: translateY(1px);
+}
+
+.refresh-button:focus-visible {
+  outline: 2px solid var(--accent, var(--blue-700));
+  outline-offset: 2px;
+}
+
+@media (max-width: 520px) {
+  .refresh-button,
+  .dataset-page__update .refresh-button,
+  .dataset-error .refresh-button,
+  .events-error .refresh-button {
+    min-height: 38px;
+    padding-inline: 11px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .refresh-button {
+    transition: none;
+  }
+}

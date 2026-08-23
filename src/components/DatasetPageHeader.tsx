@@ -1,11 +1,13 @@
+import type { ReactNode } from 'react';
 import { formatLastUpdated } from '../utils/date';
 
 interface DatasetPageHeaderProps {
   eyebrow: string;
   title: string;
   fetchedAt?: number;
-  refreshing: boolean;
-  onReload: () => void;
+  refreshing?: boolean;
+  onReload?: () => void;
+  action?: ReactNode;
 }
 
 export function DatasetPageHeader({
@@ -14,6 +16,7 @@ export function DatasetPageHeader({
   fetchedAt,
   refreshing,
   onReload,
+  action,
 }: DatasetPageHeaderProps) {
   return (
     <header className="page-heading dataset-page__heading">
@@ -24,9 +27,11 @@ export function DatasetPageHeader({
       {fetchedAt !== undefined ? (
         <div className="dataset-page__update">
           <span>最終更新 {formatLastUpdated(fetchedAt)}</span>
-          <button type="button" onClick={onReload} disabled={refreshing}>
-            {refreshing ? '取得中' : '更新確認'}
-          </button>
+          {action ?? (onReload ? (
+            <button type="button" onClick={onReload} disabled={refreshing}>
+              {refreshing ? '取得中' : '更新確認'}
+            </button>
+          ) : null)}
         </div>
       ) : null}
     </header>
@@ -43,11 +48,19 @@ export function DatasetSkeleton() {
   );
 }
 
-export function DatasetError({ onRetry }: { onRetry: () => void }) {
+export function DatasetError({
+  onRetry,
+  action,
+}: {
+  onRetry?: () => void;
+  action?: ReactNode;
+}) {
   return (
     <div className="dataset-error" role="alert">
       <p>情報を取得できませんでした</p>
-      <button type="button" onClick={onRetry}>再試行</button>
+      {action ?? (
+        onRetry ? <button type="button" onClick={onRetry}>再試行</button> : null
+      )}
     </div>
   );
 }
