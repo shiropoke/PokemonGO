@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { PrimaryNavigation, SideDrawer, SiteHeader } from './components/AppNavigation';
+import { GlobalSearchDialog } from './components/GlobalSearchDialog';
 import { EventsPage } from './pages/EventsPage';
 import { EggsPage } from './pages/EggsPage';
 import { EvolutionCpPage } from './pages/EvolutionCpPage';
@@ -20,7 +21,7 @@ import {
 } from './services/theme';
 import type { Theme } from './services/theme';
 import { getPageFromHash, getPageHash } from './types/navigation';
-import type { Page } from './types/navigation';
+import type { NavigationQuery, Page } from './types/navigation';
 import {
   getMainTabTransitionDirection,
   type MainTabTransitionDirection,
@@ -66,7 +67,9 @@ export default function App() {
   const [visiblePage, setVisiblePage] = useState<Page>(initialPage);
   const [pageTransition, setPageTransition] = useState<PageTransition | null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
+  const searchButtonRef = useRef<HTMLButtonElement>(null);
   const pageContentRef = useRef<HTMLDivElement>(null);
   const transitionSequenceRef = useRef(0);
   const pageTransitionRef = useRef<PageTransition | null>(null);
@@ -81,6 +84,7 @@ export default function App() {
     const onHashChange = () => {
       setPage(getPageFromHash(window.location.hash));
       setIsMenuOpen(false);
+      setIsSearchOpen(false);
     };
     window.addEventListener('hashchange', onHashChange);
     if (!window.location.hash) window.history.replaceState(null, '', getPageHash('home'));
@@ -129,8 +133,8 @@ export default function App() {
   }, [theme]);
 
   useEffect(() => {
-    pageContentRef.current?.toggleAttribute('inert', isMenuOpen);
-  }, [isMenuOpen]);
+    pageContentRef.current?.toggleAttribute('inert', isMenuOpen || isSearchOpen);
+  }, [isMenuOpen, isSearchOpen]);
 
   useEffect(() => {
     if (readStoredTheme(getStorage())) return undefined;
@@ -143,9 +147,10 @@ export default function App() {
     return () => media.removeEventListener('change', followSystemTheme);
   }, []);
 
-  const navigate = useCallback((nextPage: Page) => {
-    if (getPageFromHash(window.location.hash) !== nextPage) {
-      window.location.hash = getPageHash(nextPage);
+  const navigate = useCallback((nextPage: Page, query?: NavigationQuery) => {
+    const nextHash = getPageHash(nextPage, query);
+    if (window.location.hash !== nextHash) {
+      window.location.hash = nextHash;
     } else {
       setPage(nextPage);
     }
@@ -165,7 +170,7 @@ export default function App() {
       <div
         ref={pageContentRef}
         className="page-shell-content"
-        aria-hidden={isMenuOpen || undefined}
+        aria-hidden={isMenuOpen || isSearchOpen || undefined}
       >
         <SiteHeader
           current={page}
@@ -173,6 +178,12 @@ export default function App() {
           menuOpen={isMenuOpen}
           onMenuToggle={() => setIsMenuOpen((open) => !open)}
           onNavigate={navigate}
+          searchButtonRef={searchButtonRef}
+          searchOpen={isSearchOpen}
+          onSearchOpen={() => {
+            setIsMenuOpen(false);
+            setIsSearchOpen(true);
+          }}
         />
 
         <PrimaryNavigation current={navigationPage} onNavigate={navigate} />
@@ -214,6 +225,12 @@ export default function App() {
         onNavigate={navigate}
         theme={theme}
         onThemeChange={changeTheme}
+      />
+      <GlobalSearchDialog
+        open={isSearchOpen}
+        triggerRef={searchButtonRef}
+        onClose={() => setIsSearchOpen(false)}
+        onNavigate={navigate}
       />
     </div>
   );

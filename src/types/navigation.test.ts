@@ -1,11 +1,20 @@
 import { describe, expect, it } from 'vitest';
-import { getPageFromHash, getPageHash } from './navigation';
+import { getHashQueryParam, getPageFromHash, getPageHash } from './navigation';
 
 describe('hash navigation', () => {
   it('GitHub Pagesで再読込可能なhashを生成・解析する', () => {
     expect(getPageHash('pvp-rankings')).toBe('#/pvp-rankings');
     expect(getPageFromHash('#/pvp-rankings')).toBe('pvp-rankings');
     expect(getPageFromHash('#/iv-checker?species=pikachu')).toBe('iv');
+    expect(getPageFromHash('#/events?event=go-fest')).toBe('events');
+    expect(getPageFromHash('#/raids?raid=raid-pikachu-0')).toBe('raids');
+  });
+
+  it('queryを安全に生成・取得する', () => {
+    const hash = getPageHash('events', { event: 'event name/2026' });
+    expect(hash).toBe('#/events?event=event+name%2F2026');
+    expect(getHashQueryParam(hash, 'event')).toBe('event name/2026');
+    expect(getHashQueryParam(hash, 'missing')).toBeNull();
   });
 
   it('空または未知のhashはホームへ戻す', () => {

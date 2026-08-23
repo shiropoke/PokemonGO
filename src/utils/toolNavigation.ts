@@ -1,3 +1,5 @@
+import { getPageHash } from '../types/navigation';
+
 const IV_SETTINGS_KEY = 'pokemon-go-information:iv-checker:v1';
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -25,7 +27,7 @@ export function openIvCheckerForSpecies(speciesId: string): void {
   } catch {
     // 保存できない環境でも、ページ遷移自体は行う。
   }
-  window.location.hash = '#/iv-checker';
+  window.location.hash = getPageHash('iv', { species: speciesId });
 }
 
 export function formatMoveId(moveId: string): string {

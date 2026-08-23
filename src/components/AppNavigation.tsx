@@ -1,21 +1,25 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { ReactNode, RefObject } from 'react';
 import { ThemeToggle } from './ThemeToggle';
+import { OTHER_LINKS, PRIMARY_LINKS, TOOL_LINKS } from '../constants/sitePages';
 import type { Theme } from '../services/theme';
-import type { Page } from '../types/navigation';
+import type { NavigationQuery, Page } from '../types/navigation';
 import { getPageHash } from '../types/navigation';
 
 type IconName = 'home' | 'calendar' | 'raid' | 'tools' | 'more';
 
 interface NavigationProps {
   current: Page;
-  onNavigate(page: Page): void;
+  onNavigate(page: Page, query?: NavigationQuery): void;
 }
 
 interface SiteHeaderProps extends NavigationProps {
   menuButtonRef: RefObject<HTMLButtonElement>;
   menuOpen: boolean;
   onMenuToggle(): void;
+  searchButtonRef: RefObject<HTMLButtonElement>;
+  searchOpen: boolean;
+  onSearchOpen(): void;
 }
 
 interface SideDrawerProps extends NavigationProps {
@@ -50,28 +54,6 @@ function Chevron({ expanded = false }: { expanded?: boolean }) {
   );
 }
 
-const TOOL_LINKS: { page: Page; label: string }[] = [
-  { page: 'iv', label: '個体値チェッカー' },
-  { page: 'evolution', label: '進化後CP' },
-  { page: 'power-up', label: '強化コスト' },
-  { page: 'moves', label: 'わざ性能' },
-];
-
-const OTHER_LINKS: { page: Page; label: string }[] = [
-  { page: 'pvp-rankings', label: 'PvPランキング' },
-  { page: 'research', label: 'フィールドリサーチ' },
-  { page: 'eggs', label: 'タマゴ' },
-  { page: 'rocket', label: 'GOロケット団' },
-  { page: 'favorites', label: 'お気に入り' },
-];
-
-const PRIMARY_LINKS: { page: Page; label: string }[] = [
-  { page: 'home', label: 'ホーム' },
-  { page: 'events', label: 'イベント' },
-  { page: 'raids', label: 'レイド' },
-  { page: 'iv', label: '個体値チェッカー' },
-];
-
 const focusableSelector = [
   'a[href]',
   'button:not([disabled])',
@@ -102,6 +84,9 @@ export function SiteHeader({
   menuOpen,
   onMenuToggle,
   onNavigate,
+  searchButtonRef,
+  searchOpen,
+  onSearchOpen,
 }: SiteHeaderProps) {
   return (
     <header className="site-header shell-header">
@@ -133,6 +118,21 @@ export function SiteHeader({
           <Brand compact />
         </a>
 
+        <button
+          ref={searchButtonRef}
+          className="site-search-trigger"
+          type="button"
+          aria-label="サイト内を検索"
+          aria-haspopup="dialog"
+          aria-expanded={searchOpen}
+          aria-controls="global-search-dialog"
+          onClick={onSearchOpen}
+        >
+          <svg aria-hidden="true" viewBox="0 0 24 24" fill="none">
+            <circle cx="10.5" cy="10.5" r="6.5" />
+            <path d="m15.5 15.5 4 4" />
+          </svg>
+        </button>
       </div>
     </header>
   );

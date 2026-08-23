@@ -15,6 +15,7 @@ import {
   getEventCategory,
   groupAndSortEvents,
 } from "../utils/date";
+import { getHashQueryParam } from "../types/navigation";
 
 interface EventSectionProps {
   title: string;
@@ -22,6 +23,7 @@ interface EventSectionProps {
   events: ScrapedDuckEvent[];
   status: EventTimingStatus;
   now: number;
+  highlightedEventId: string | null;
 }
 
 function EventSection({
@@ -30,6 +32,7 @@ function EventSection({
   events,
   status,
   now,
+  highlightedEventId,
 }: EventSectionProps) {
   return (
     <section className="events-section" aria-labelledby={`events-${status}-title`}>
@@ -42,12 +45,13 @@ function EventSection({
       {events.length > 0 ? (
         <div className="event-list">
           {events.map((event, index) => (
-            <EventCard
-              event={event}
-              status={status}
-              now={now}
+            <div
+              className={`search-target-anchor${highlightedEventId === event.eventID ? " is-search-target" : ""}`}
+              data-event-id={event.eventID}
               key={`${event.eventID}-${index}`}
-            />
+            >
+              <EventCard event={event} status={status} now={now} />
+            </div>
           ))}
         </div>
       ) : (
@@ -64,6 +68,10 @@ export function EventsPage() {
   const [filter, setFilter] = useState<EventCategory>("all");
   const [showEnded, setShowEnded] = useState(false);
   const [now, setNow] = useState(() => Date.now());
+  const [targetEventId, setTargetEventId] = useState(() =>
+    getHashQueryParam(window.location.hash, "event"),
+  );
+  const [highlightedEventId, setHighlightedEventId] = useState<string | null>(null);
 
   const requestEvents = useCallback(
     async (signal?: AbortSignal) => {
@@ -107,6 +115,46 @@ export function EventsPage() {
       document.removeEventListener("visibilitychange", updateNow);
     };
   }, []);
+
+  useEffect(() => {
+    const syncTarget = () => {
+      setTargetEventId(getHashQueryParam(window.location.hash, "event"));
+    };
+    window.addEventListener("hashchange", syncTarget);
+    return () => window.removeEventListener("hashchange", syncTarget);
+  }, []);
+
+  useEffect(() => {
+    if (!targetEventId || !result) return;
+    setFilter("all");
+    const allGroups = groupAndSortEvents(result.events, Date.now());
+    if (allGroups.ended.some((event) => event.eventID === targetEventId)) {
+      setShowEnded(true);
+    }
+  }, [result, targetEventId]);
+
+  useEffect(() => {
+    if (!targetEventId || !result) return undefined;
+    let clearTimer: number | undefined;
+    const scrollTimer = window.setTimeout(() => {
+      const target = Array.from(
+        document.querySelectorAll<HTMLElement>("[data-event-id]"),
+      ).find((element) => element.dataset.eventId === targetEventId);
+      if (!target) return;
+      setHighlightedEventId(targetEventId);
+      target.scrollIntoView({
+        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+          ? "auto"
+          : "smooth",
+        block: "center",
+      });
+      clearTimer = window.setTimeout(() => setHighlightedEventId(null), 2600);
+    }, 40);
+    return () => {
+      window.clearTimeout(scrollTimer);
+      if (clearTimer !== undefined) window.clearTimeout(clearTimer);
+    };
+  }, [filter, result, showEnded, targetEventId]);
 
   const filteredEvents = useMemo(() => {
     const events = result?.events ?? [];
@@ -159,6 +207,7 @@ export function EventsPage() {
               events={groups.ongoing}
               status="ongoing"
               now={now}
+              highlightedEventId={highlightedEventId}
             />
             <EventSection
               title="今後のイベント"
@@ -166,6 +215,7 @@ export function EventsPage() {
               events={groups.upcoming}
               status="upcoming"
               now={now}
+              highlightedEventId={highlightedEventId}
             />
 
             <section className="events-section events-section--ended" aria-labelledby="ended-events-title">
@@ -188,12 +238,13 @@ export function EventsPage() {
                   {groups.ended.length > 0 ? (
                     <div className="event-list">
                       {groups.ended.map((event, index) => (
-                        <EventCard
-                          event={event}
-                          status="ended"
-                          now={now}
+                        <div
+                          className={`search-target-anchor${highlightedEventId === event.eventID ? " is-search-target" : ""}`}
+                          data-event-id={event.eventID}
                           key={`${event.eventID}-ended-${index}`}
-                        />
+                        >
+                          <EventCard event={event} status="ended" now={now} />
+                        </div>
                       ))}
                     </div>
                   ) : (
@@ -212,6 +263,7 @@ export function EventsPage() {
                 events={groups.unknown}
                 status="unknown"
                 now={now}
+                highlightedEventId={highlightedEventId}
               />
             ) : null}
           </div>

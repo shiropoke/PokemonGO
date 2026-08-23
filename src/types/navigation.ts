@@ -27,6 +27,11 @@ export const PAGE_PATHS: Record<Page, string> = {
   favorites: 'favorites',
 };
 
+export type NavigationQuery = Record<
+  string,
+  string | number | boolean | null | undefined
+>;
+
 export function getPageFromHash(hash: string): Page {
   const path = hash.replace(/^#\/?/, '').split('?')[0];
   const entry = (Object.entries(PAGE_PATHS) as [Page, string][]).find(
@@ -35,6 +40,20 @@ export function getPageFromHash(hash: string): Page {
   return entry?.[0] ?? 'home';
 }
 
-export function getPageHash(page: Page): string {
-  return `#/${PAGE_PATHS[page]}`;
+export function getHashQueryParam(hash: string, name: string): string | null {
+  const query = hash.split('?')[1];
+  if (!query) return null;
+  const value = new URLSearchParams(query).get(name)?.trim() ?? '';
+  return value || null;
+}
+
+export function getPageHash(page: Page, query?: NavigationQuery): string {
+  const params = new URLSearchParams();
+  for (const [name, value] of Object.entries(query ?? {})) {
+    if (value !== null && value !== undefined && String(value).length > 0) {
+      params.set(name, String(value));
+    }
+  }
+  const serialized = params.toString();
+  return `#/${PAGE_PATHS[page]}${serialized ? `?${serialized}` : ''}`;
 }

@@ -15,6 +15,15 @@ import {
   parseEventDate,
 } from '../utils/date';
 import { getEventTypeLabel, localizeEventTitle } from '../utils/eventLocalization';
+import { selectFeaturedEvent } from '../utils/featuredEvent';
+import {
+  HOME_DATASET_KEYS,
+  HOME_DATASET_LABELS,
+  createEmptyHomeDataUpdates,
+  formatHomeDataUpdateSummary,
+  hasStaleHomeData,
+  type HomeDataUpdates,
+} from '../utils/homeDataUpdates';
 import { eventTitleMentionsPokemon, externalPokemonMatches } from '../utils/pokemonMatching';
 import { groupRaidsByTier } from '../utils/raidClassification';
 import { getRaidTierLabel } from '../utils/scrapedDuckLocalization';
@@ -27,8 +36,7 @@ interface HomeDataState {
   raids: RaidBoss[];
   eggs: EggHatch[];
   research: FieldResearchTask[];
-  fetchedAt: number | null;
-  stale: boolean;
+  updates: HomeDataUpdates;
   loading: boolean;
   error: boolean;
 }
@@ -159,8 +167,7 @@ export function HomePage() {
     raids: [],
     eggs: [],
     research: [],
-    fetchedAt: null,
-    stale: false,
+    updates: createEmptyHomeDataUpdates(),
     loading: true,
     error: false,
   });
@@ -189,10 +196,32 @@ export function HomePage() {
         eggs: eggsResult.status === 'fulfilled' ? eggsResult.value.data : [],
         research:
           researchResult.status === 'fulfilled' ? researchResult.value.data : [],
-        fetchedAt:
-          eventsResult.status === 'fulfilled' ? eventsResult.value.fetchedAt : null,
-        stale:
-          eventsResult.status === 'fulfilled' ? eventsResult.value.stale : false,
+        updates: {
+          events: eventsResult.status === 'fulfilled'
+            ? {
+                fetchedAt: eventsResult.value.fetchedAt,
+                stale: eventsResult.value.stale,
+              }
+            : { fetchedAt: null, stale: false },
+          raids: raidsResult.status === 'fulfilled'
+            ? {
+                fetchedAt: raidsResult.value.fetchedAt,
+                stale: raidsResult.value.stale,
+              }
+            : { fetchedAt: null, stale: false },
+          eggs: eggsResult.status === 'fulfilled'
+            ? {
+                fetchedAt: eggsResult.value.fetchedAt,
+                stale: eggsResult.value.stale,
+              }
+            : { fetchedAt: null, stale: false },
+          research: researchResult.status === 'fulfilled'
+            ? {
+                fetchedAt: researchResult.value.fetchedAt,
+                stale: researchResult.value.stale,
+              }
+            : { fetchedAt: null, stale: false },
+        },
         loading: false,
         error: [eventsResult, raidsResult, eggsResult, researchResult].every(
           (result) => result.status === 'rejected',
@@ -240,7 +269,18 @@ export function HomePage() {
     () => startsToday.filter((event) => LIMITED_EVENT_TYPES.has(event.eventType)),
     [startsToday],
   );
-  const featuredEvent = groups.ongoing[0] ?? groups.upcoming[0] ?? null;
+  const featuredEvent = useMemo(
+    () => selectFeaturedEvent(state.events, now),
+    [now, state.events],
+  );
+  const dataUpdateSummary = useMemo(
+    () => formatHomeDataUpdateSummary(state.updates),
+    [state.updates],
+  );
+  const hasStaleData = useMemo(
+    () => hasStaleHomeData(state.updates),
+    [state.updates],
+  );
   const weeklyEvents = useMemo(
     () => getWeeklyEvents(state.events, now),
     [now, state.events],
@@ -295,8 +335,28 @@ export function HomePage() {
             day: 'numeric',
             weekday: 'short',
           }).format(today)}</time>
-          {state.fetchedAt ? (
-            <span className="dashboard-updated">最終更新 {formatLastUpdated(state.fetchedAt)}</span>
+          {dataUpdateSummary ? (
+            <details className="home-data-updates">
+              <summary>{dataUpdateSummary}</summary>
+              <dl className="home-data-updates__panel">
+                {HOME_DATASET_KEYS.map((key) => {
+                  const update = state.updates[key];
+                  return (
+                    <div key={key}>
+                      <dt>{HOME_DATASET_LABELS[key]}</dt>
+                      <dd>
+                        <span>
+                          {update.fetchedAt !== null
+                            ? formatLastUpdated(update.fetchedAt)
+                            : '取得できませんでした'}
+                        </span>
+                        {update.stale ? <small>保存済みデータ</small> : null}
+                      </dd>
+                    </div>
+                  );
+                })}
+              </dl>
+            </details>
           ) : null}
         </div>
         <div className="home-hero-heading__copy">
@@ -305,7 +365,7 @@ export function HomePage() {
         </div>
       </header>
 
-      {state.stale ? <p className="data-notice">保存済みデータを表示しています。</p> : null}
+      {hasStaleData ? <p className="data-notice">一部の保存済みデータを表示しています。</p> : null}
       {state.loading ? (
         <div className="dashboard-skeleton" aria-label="今日の情報を読み込み中" />
       ) : state.error && state.events.length === 0 ? (

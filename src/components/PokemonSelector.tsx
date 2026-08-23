@@ -8,38 +8,23 @@ import {
 } from 'react';
 import type { CSSProperties } from 'react';
 import type { Pokemon } from '../types/pokemon';
+import { searchPokemon } from '../utils/search';
+import {
+  resolveVisualViewportMetrics,
+  type VisualViewportMetrics,
+} from '../utils/visualViewport';
 import { FavoriteButton } from './FavoriteButton';
 
 const MAX_VISIBLE_RESULTS = 160;
 
-export interface PickerViewportMetrics {
-  height: number;
-  offsetTop: number;
-}
+export type PickerViewportMetrics = VisualViewportMetrics;
 
 type PickerViewportStyle = CSSProperties & {
   '--picker-viewport-height': string;
   '--picker-viewport-offset-top': string;
 };
 
-export function resolvePickerViewportMetrics(
-  viewport: Pick<VisualViewport, 'height' | 'offsetTop'> | null | undefined,
-  fallbackHeight: number,
-): PickerViewportMetrics {
-  const fallback = Number.isFinite(fallbackHeight)
-    ? Math.max(0, fallbackHeight)
-    : 0;
-  const height =
-    viewport && Number.isFinite(viewport.height) && viewport.height > 0
-      ? viewport.height
-      : fallback;
-  const offsetTop =
-    viewport && Number.isFinite(viewport.offsetTop)
-      ? Math.max(0, viewport.offsetTop)
-      : 0;
-
-  return { height, offsetTop };
-}
+export const resolvePickerViewportMetrics = resolveVisualViewportMetrics;
 
 interface PokemonSelectorProps {
   pokemon: Pokemon[];
@@ -48,16 +33,6 @@ interface PokemonSelectorProps {
   error?: string | null;
   onSelect: (pokemon: Pokemon) => void;
   onRetry: () => void;
-}
-
-function normalizeSearchText(value: string): string {
-  return value
-    .normalize('NFKC')
-    .toLocaleLowerCase()
-    .replaceAll('_', ' ')
-    .replace(/[()\-]/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
 }
 
 function SearchIcon() {
@@ -103,16 +78,7 @@ export function PokemonSelector({
   const resultsRef = useRef<HTMLDivElement>(null);
 
   const filteredPokemon = useMemo(() => {
-    const normalizedQuery = normalizeSearchText(query);
-    if (!normalizedQuery) return pokemon;
-    const words = normalizedQuery.split(' ');
-
-    return pokemon.filter((entry) => {
-      const searchTarget = normalizeSearchText(
-        `${entry.displayName} ${entry.speciesName} ${entry.speciesId} ${entry.dex}`,
-      );
-      return words.every((word) => searchTarget.includes(word));
-    });
+    return searchPokemon(pokemon, query).map(({ pokemon: entry }) => entry);
   }, [pokemon, query]);
 
   const visiblePokemon = filteredPokemon.slice(0, MAX_VISIBLE_RESULTS);

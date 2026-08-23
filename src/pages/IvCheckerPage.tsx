@@ -11,6 +11,7 @@ import type {
   StandardMaxLevel,
 } from '../types/calculations';
 import type { Pokemon, PokemonDataSource } from '../types/pokemon';
+import { getHashQueryParam } from '../types/navigation';
 import { findMatchingLevels, getEffectiveLevelCap } from '../utils/cp';
 import { calculateIvSummary } from '../utils/iv';
 import { getPvpRankResult } from '../utils/pvp';
@@ -85,9 +86,7 @@ function saveSettings(settings: CheckerSettings): void {
 }
 
 function getLinkedSpeciesId(): string | null {
-  const query = window.location.hash.split('?')[1];
-  if (!query) return null;
-  const speciesId = new URLSearchParams(query).get('species')?.trim() ?? '';
+  const speciesId = getHashQueryParam(window.location.hash, 'species')?.trim() ?? '';
   return /^[a-z0-9_-]+$/i.test(speciesId) ? speciesId.toLowerCase() : null;
 }
 
@@ -113,10 +112,19 @@ export function IvCheckerPage() {
   });
 
   useEffect(() => {
-    const linkedSpeciesId = getLinkedSpeciesId();
-    if (linkedSpeciesId) {
-      setSettings((current) => ({ ...current, speciesId: linkedSpeciesId }));
-    }
+    const syncLinkedSpecies = () => {
+      const linkedSpeciesId = getLinkedSpeciesId();
+      if (linkedSpeciesId) {
+        setSettings((current) =>
+          current.speciesId === linkedSpeciesId
+            ? current
+            : { ...current, speciesId: linkedSpeciesId },
+        );
+      }
+    };
+    syncLinkedSpecies();
+    window.addEventListener('hashchange', syncLinkedSpecies);
+    return () => window.removeEventListener('hashchange', syncLinkedSpecies);
   }, []);
 
   useEffect(() => {

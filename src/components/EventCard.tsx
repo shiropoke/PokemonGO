@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useId, useMemo, useState } from "react";
 import type { EventTimingStatus, ScrapedDuckEvent } from "../types/events";
 import {
   formatEventDate,
@@ -9,7 +9,9 @@ import {
   getEventTypeLabel,
   localizeEventTitle,
 } from "../utils/eventLocalization";
+import { parseEventSummary } from "../utils/eventDetails";
 import { safeExternalUrl } from "../utils/url";
+import "../styles/event-details.css";
 
 interface EventCardProps {
   event: ScrapedDuckEvent;
@@ -47,17 +49,30 @@ function ExternalLinkIcon() {
 
 export function EventCard({ event, status, now }: EventCardProps) {
   const [imageFailed, setImageFailed] = useState(false);
+  const [expanded, setExpanded] = useState(false);
+  const panelId = useId();
   const imageUrl = safeExternalUrl(event.image);
   const eventUrl = safeExternalUrl(event.link);
   const startDate = parseEventDate(event.start);
   const endDate = parseEventDate(event.end);
   const localizedTitle = localizeEventTitle(event.name);
+  const summary = useMemo(() => parseEventSummary(event), [event]);
+  const hasSummary = Boolean(
+    summary.description ||
+      summary.bonuses.length ||
+      summary.pokemon.length ||
+      summary.other.length,
+  );
 
   useEffect(() => {
     setImageFailed(false);
   }, [event.image]);
 
-  const cardContent: ReactNode = (
+  useEffect(() => {
+    setExpanded(false);
+  }, [event.eventID]);
+
+  return (
     <article className="event-card" data-status={status}>
       <div className="event-card__media">
         {imageUrl && !imageFailed ? (
@@ -121,29 +136,90 @@ export function EventCard({ event, status, now }: EventCardProps) {
           <p className="event-card__countdown">
             {getEventCountdown(event, status, now)}
           </p>
-          {eventUrl ? (
-            <span className="event-card__external">
-              詳細を見る
-              <span className="sr-only">（外部サイト）</span>
-              <ExternalLinkIcon />
-            </span>
-          ) : null}
+          <button
+            className="event-card__details-toggle"
+            type="button"
+            aria-expanded={expanded}
+            aria-controls={panelId}
+            onClick={() => setExpanded((current) => !current)}
+          >
+            詳細
+            <svg
+              className="event-card__details-chevron"
+              viewBox="0 0 20 20"
+              aria-hidden="true"
+            >
+              <path
+                d="m5 7.5 5 5 5-5"
+                fill="none"
+                stroke="currentColor"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="1.7"
+              />
+            </svg>
+          </button>
+        </div>
+
+        <div
+          className="event-card__details-panel"
+          id={panelId}
+          data-open={expanded}
+          aria-hidden={!expanded}
+          role="region"
+          aria-label={`${localizedTitle}の簡易詳細`}
+        >
+          <div className="event-card__details-inner">
+            <div className="event-card__details-content">
+              {summary.description ? (
+                <section className="event-card__details-section">
+                  <h4>概要</h4>
+                  <p>{summary.description}</p>
+                </section>
+              ) : null}
+              {summary.bonuses.length > 0 ? (
+                <SummaryList title="ボーナス" items={summary.bonuses} />
+              ) : null}
+              {summary.pokemon.length > 0 ? (
+                <SummaryList title="対象ポケモン" items={summary.pokemon} />
+              ) : null}
+              {summary.other.length > 0 ? (
+                <SummaryList title="その他" items={summary.other} />
+              ) : null}
+              {!hasSummary ? (
+                <p className="event-card__details-empty">
+                  このイベントの追加情報は提供されていません。
+                </p>
+              ) : null}
+              {eventUrl ? (
+                <a
+                  className="event-card__external"
+                  href={eventUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  外部サイトで詳しく見る
+                  <span className="sr-only">（新しいタブで開く）</span>
+                  <ExternalLinkIcon />
+                </a>
+              ) : null}
+            </div>
+          </div>
         </div>
       </div>
     </article>
   );
+}
 
-  return eventUrl ? (
-    <a
-      className="event-card-link"
-      href={eventUrl}
-      target="_blank"
-      rel="noopener noreferrer"
-      aria-label={`${localizedTitle}の詳細を外部サイトで開く`}
-    >
-      {cardContent}
-    </a>
-  ) : (
-    <div className="event-card-link event-card-link--disabled">{cardContent}</div>
+function SummaryList({ title, items }: { title: string; items: string[] }) {
+  return (
+    <section className="event-card__details-section">
+      <h4>{title}</h4>
+      <ul className="event-card__details-list">
+        {items.map((item) => (
+          <li key={item}>{item}</li>
+        ))}
+      </ul>
+    </section>
   );
 }
