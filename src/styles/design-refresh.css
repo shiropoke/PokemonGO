@@ -1,0 +1,294 @@
+/*
+ * Visual refresh shared by every page.
+ *
+ * Navigation and drawer-specific layout lives in navigation-refresh.css. This
+ * file deliberately limits itself to theme tokens, the page pattern, shared
+ * surfaces and defensive responsive rules so feature logic remains untouched.
+ */
+
+:root {
+  color-scheme: light;
+  --bg: #f1f3f5;
+  --surface: #ffffff;
+  --surface-secondary: #f6f7f8;
+  --text: #171a1f;
+  --text-secondary: #606873;
+  --border: rgba(24, 32, 42, 0.14);
+  --border-strong: rgba(24, 32, 42, 0.24);
+  --accent: #176fc1;
+  --accent-strong: #0f5797;
+  --accent-soft: rgba(23, 111, 193, 0.12);
+  --page-header: #ffffff;
+  --grid-line: rgba(27, 34, 42, 0.045);
+  --card-shadow: 0 2px 8px rgba(17, 25, 34, 0.055);
+
+  /* Keep the original token names usable by existing feature styles. */
+  --blue-900: #0f5797;
+  --blue-700: #176fc1;
+  --blue-600: #2483d3;
+  --blue-100: #e4f0fb;
+  --blue-50: #f1f7fc;
+  --gray-950: #171a1f;
+  --gray-800: #30363d;
+  --gray-700: #49515a;
+  --gray-600: #606873;
+  --gray-500: #7c858f;
+  --gray-300: #c6cbd1;
+  --gray-200: #dde1e5;
+  --gray-100: #e9ecef;
+  --gray-50: #f1f3f5;
+  --white: #ffffff;
+  --radius-sm: 6px;
+  --radius: 10px;
+  --shadow: var(--card-shadow);
+}
+
+[data-theme='dark'] {
+  color-scheme: dark;
+  --bg: #292929;
+  --surface: #1c1c1c;
+  --surface-secondary: #232323;
+  --text: #f5f5f5;
+  --text-secondary: #aaaaaa;
+  --border: rgba(255, 255, 255, 0.12);
+  --border-strong: rgba(255, 255, 255, 0.2);
+  --accent: #2998f2;
+  --accent-strong: #69baff;
+  --accent-soft: rgba(41, 152, 242, 0.14);
+  --page-header: #141414;
+  --grid-line: rgba(255, 255, 255, 0.035);
+  --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+
+  --blue-900: #8ac9ff;
+  --blue-700: #2998f2;
+  --blue-600: #3da7ff;
+  --blue-100: rgba(41, 152, 242, 0.2);
+  --blue-50: rgba(41, 152, 242, 0.1);
+  --gray-950: #f5f5f5;
+  --gray-800: #e4e4e4;
+  --gray-700: #cecece;
+  --gray-600: #aaaaaa;
+  --gray-500: #8e949b;
+  --gray-300: rgba(255, 255, 255, 0.2);
+  --gray-200: rgba(255, 255, 255, 0.12);
+  --gray-100: rgba(255, 255, 255, 0.075);
+  --gray-50: #232323;
+  --white: #1c1c1c;
+  --shadow: var(--card-shadow);
+  --danger-soft: rgba(191, 72, 72, 0.16);
+  --danger-border: rgba(238, 126, 126, 0.36);
+}
+
+html {
+  min-width: 0;
+  background: var(--bg);
+}
+
+body {
+  min-width: 0;
+  color: var(--text);
+  background-color: var(--bg);
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320' height='320' viewBox='0 0 320 320'%3E%3Cpath d='M7 23V7h16M297 7h16v16M7 297v16h16M297 313h16v-16' fill='none' stroke='%230f1720' stroke-opacity='.075' stroke-width='1.25'/%3E%3C/svg%3E"),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px),
+    linear-gradient(var(--grid-line) 1px, transparent 1px);
+  background-position: center top;
+  background-size: 320px 320px;
+  transition: background-color 160ms ease, color 160ms ease;
+}
+
+[data-theme='dark'] body {
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320' height='320' viewBox='0 0 320 320'%3E%3Cpath d='M7 23V7h16M297 7h16v16M7 297v16h16M297 313h16v-16' fill='none' stroke='%23ffffff' stroke-opacity='.07' stroke-width='1.25'/%3E%3C/svg%3E"),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px),
+    linear-gradient(var(--grid-line) 1px, transparent 1px);
+}
+
+#root,
+.app-shell {
+  width: 100%;
+  min-width: 0;
+  min-height: 100vh;
+}
+
+.app-shell {
+  background: transparent;
+}
+
+.main-content {
+  position: relative;
+  width: 100%;
+  max-width: 1100px;
+  min-width: 0;
+  margin-inline: auto;
+}
+
+.site-header {
+  border-color: var(--border);
+  background: var(--page-header);
+  box-shadow: none;
+}
+
+.page-heading h1,
+.page-heading h2,
+.dataset-page__heading h1,
+.dashboard-card h2,
+.empty-panel h2,
+.favorite-card h2 {
+  color: var(--text);
+}
+
+.page-heading p,
+.dataset-page__intro,
+.dataset-page__scope-note,
+.dataset-muted {
+  color: var(--text-secondary);
+}
+
+/* Flat, restrained shared surfaces. Rounded chips intentionally keep pills. */
+.dashboard-card,
+.empty-panel,
+.favorite-card,
+.event-card,
+.event-skeleton,
+.pokemon-picker,
+.checker-input-card,
+.checker-results,
+.result-card,
+.dataset-card,
+.dataset-notice,
+.dataset-error,
+.dataset-empty,
+.tool-card,
+.tool-data-status,
+.tool-notice,
+.move-card,
+.rankings-panel,
+.raid-counter-panel,
+.raid-counter-list,
+.picker-dialog {
+  border-color: var(--border);
+  border-radius: 10px;
+  background-color: var(--surface);
+  box-shadow: var(--card-shadow);
+}
+
+.dashboard-event,
+.dashboard-raid,
+.favorite-insight-list a,
+.tool-metric-grid > div,
+.evolution-primary-result > div,
+.power-cost-results > div,
+.tool-checks label,
+.ranking-summary,
+.ranking-stats div,
+.species-rank,
+.type-badge,
+.ranking-types span,
+.raid-counter-panel {
+  border-color: var(--border);
+  background-color: var(--surface-secondary);
+}
+
+.dashboard-card,
+.dataset-card,
+.tool-card,
+.event-card,
+.rankings-panel,
+.favorite-card,
+.checker-input-card,
+.checker-results {
+  backdrop-filter: none;
+}
+
+.event-card-link:not(.event-card-link--disabled):hover .event-card,
+.dataset-card:hover,
+.dashboard-card:hover {
+  border-color: var(--border-strong);
+  box-shadow: var(--card-shadow);
+}
+
+/* Images retain their source colour in both themes. */
+[data-theme='dark'] img,
+.event-card[data-status='ended'] .event-card__image {
+  filter: none;
+}
+
+.event-card[data-status='ended'] .event-card__image {
+  opacity: 1;
+}
+
+input,
+select,
+textarea,
+button {
+  max-width: 100%;
+}
+
+input,
+select,
+textarea {
+  border-color: var(--border-strong);
+  background-color: var(--surface);
+  color: var(--text);
+}
+
+/* Home is deliberately one information block per row at every width. */
+.dashboard-grid {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 14px;
+}
+
+.dashboard-card--wide {
+  grid-column: auto;
+}
+
+.dashboard-card {
+  padding: 18px;
+}
+
+.dashboard-event,
+.dashboard-raid {
+  border-color: var(--border);
+}
+
+@media (max-width: 680px) {
+  .main-content {
+    max-width: 100%;
+  }
+
+  .dashboard-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .dashboard-card {
+    padding: 15px 13px;
+  }
+}
+
+@media (max-width: 390px) {
+  body {
+    background-position: center top;
+    background-size: 300px 300px;
+  }
+
+  .dashboard-card,
+  .dataset-card,
+  .tool-card,
+  .checker-input-card,
+  .checker-results {
+    min-width: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  body,
+  .event-card,
+  .event-card-link:hover .event-card {
+    transition-duration: 1ms;
+  }
+}

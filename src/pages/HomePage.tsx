@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import type { ReactNode } from 'react';
 import { useFavorites } from '../contexts/FavoritesContext';
 import { loadEvents } from '../services/events';
 import { fetchPokemonData } from '../services/pokemonData';
@@ -63,16 +64,18 @@ function HomeEventList({
   events,
   now,
   empty,
+  limit = 3,
 }: {
   events: readonly ScrapedDuckEvent[];
   now: number;
   empty: string;
+  limit?: number;
 }) {
   if (events.length === 0) return <p className="dashboard-empty">{empty}</p>;
 
   return (
     <div className="dashboard-list">
-      {events.slice(0, 3).map((event) => {
+      {events.slice(0, limit).map((event) => {
         const start = parseEventDate(event.start);
         const future = start !== null && start.getTime() > now;
         const eventUrl = safeExternalUrl(event.link);
@@ -100,7 +103,61 @@ function HomeEventList({
   );
 }
 
-export function HomePage() {
+function FeaturedEvent({
+  event,
+  now,
+}: {
+  event: ScrapedDuckEvent | null;
+  now: number;
+}) {
+  const [imageFailed, setImageFailed] = useState(false);
+
+  if (!event) {
+    return (
+      <div className="home-featured-event home-featured-event--empty">
+        <p>現在ご案内できるイベントはありません。</p>
+      </div>
+    );
+  }
+
+  const start = parseEventDate(event.start)?.getTime();
+  const end = parseEventDate(event.end)?.getTime();
+  const eventUrl = safeExternalUrl(event.link);
+  const countdown =
+    start !== undefined && start > now
+      ? formatCountdown(start, now, '開始まで')
+      : end !== undefined && end > now
+        ? formatCountdown(end, now, '終了まで')
+        : `${formatEventDate(event.start)}〜${formatEventDate(event.end)}`;
+
+  return (
+    <a
+      className="home-featured-event"
+      href={eventUrl ?? '#/events'}
+      target={eventUrl ? '_blank' : undefined}
+      rel={eventUrl ? 'noreferrer' : undefined}
+    >
+      {event.image && !imageFailed ? (
+        <img
+          src={event.image}
+          alt=""
+          loading="eager"
+          onError={() => setImageFailed(true)}
+        />
+      ) : null}
+      <span className="home-featured-event__shade" aria-hidden="true" />
+      <span className="home-featured-event__content">
+        <span className="home-featured-event__badge">
+          {getEventTypeLabel(event.eventType)}
+        </span>
+        <strong>{localizeEventTitle(event.name)}</strong>
+        <small>{countdown}</small>
+      </span>
+    </a>
+  );
+}
+
+export function HomePage({ navigation }: { navigation?: ReactNode }) {
   const { favorites } = useFavorites();
   const [now, setNow] = useState(() => Date.now());
   const [reloadKey, setReloadKey] = useState(0);
@@ -191,6 +248,23 @@ export function HomePage() {
     () => startsToday.filter((event) => LIMITED_EVENT_TYPES.has(event.eventType)),
     [startsToday],
   );
+  const featuredEvent = groups.ongoing[0] ?? groups.upcoming[0] ?? null;
+  const weekEvents = useMemo(() => {
+    const weekEnd = now + 7 * 24 * 60 * 60 * 1000;
+    const candidates = [...groups.ongoing, ...groups.upcoming];
+    const seen = new Set<string>();
+
+    return candidates.filter((event) => {
+      if (seen.has(event.eventID)) return false;
+      seen.add(event.eventID);
+      const start = parseEventDate(event.start)?.getTime();
+      const end = parseEventDate(event.end)?.getTime();
+      return (
+        (start !== undefined && start < weekEnd && (end === undefined || end > now)) ||
+        (start === undefined && end !== undefined && end > now && end < weekEnd)
+      );
+    });
+  }, [groups.ongoing, groups.upcoming, now]);
   const featuredRaids = useMemo(
     () => {
       const buckets = new Map<number, RaidBoss[]>();
@@ -240,21 +314,23 @@ export function HomePage() {
 
   return (
     <div className="home-page">
-      <header className="page-heading dashboard-heading">
+      <header className="page-heading dashboard-heading home-hero-heading">
         <div>
-          <span className="page-kicker">Today</span>
-          <h1>今日のPokémon GO</h1>
-          <p>{new Intl.DateTimeFormat('ja-JP', {
+          <h1>ホーム</h1>
+          <p>最新のイベントやレイド情報をチェックしよう！</p>
+          <time dateTime={today.toISOString()}>{new Intl.DateTimeFormat('ja-JP', {
             year: 'numeric',
             month: 'long',
             day: 'numeric',
             weekday: 'short',
-          }).format(today)}</p>
+          }).format(today)}</time>
         </div>
         {state.fetchedAt ? (
           <span className="dashboard-updated">最終更新 {formatLastUpdated(state.fetchedAt)}</span>
         ) : null}
       </header>
+
+      {navigation}
 
       {state.stale ? <p className="data-notice">保存済みデータを表示しています。</p> : null}
       {state.loading ? (
@@ -268,23 +344,41 @@ export function HomePage() {
         <div className="dashboard-grid">
           <section className="dashboard-card dashboard-card--wide">
             <div className="section-heading-row">
-              <h2>開催中イベント</h2>
+              <h2>注目イベント</h2>
               <a href="#/events">すべて見る</a>
             </div>
-            <HomeEventList events={groups.ongoing} now={now} empty="現在開催中のイベントはありません。" />
+            <FeaturedEvent key={featuredEvent?.eventID ?? 'empty'} event={featuredEvent} now={now} />
           </section>
 
-          <section className="dashboard-card">
-            <h2>今日開始</h2>
-            <HomeEventList events={startsToday} now={now} empty="今日開始するイベントはありません。" />
-          </section>
-          <section className="dashboard-card">
-            <h2>今日終了</h2>
-            <HomeEventList events={endsToday} now={now} empty="今日終了するイベントはありません。" />
-          </section>
           <section className="dashboard-card dashboard-card--wide">
             <h2>今日の時間限定イベント</h2>
             <HomeEventList events={limitedToday} now={now} empty="今日の時間限定イベントはありません。" />
+            <div className="home-today-details">
+              <details>
+                <summary>今日開始するイベント <span>{startsToday.length}件</span></summary>
+                <HomeEventList events={startsToday} now={now} empty="今日開始するイベントはありません。" />
+              </details>
+              <details>
+                <summary>今日終了するイベント <span>{endsToday.length}件</span></summary>
+                <HomeEventList events={endsToday} now={now} empty="今日終了するイベントはありません。" />
+              </details>
+            </div>
+          </section>
+
+          <section className="dashboard-card dashboard-card--wide">
+            <div className="section-heading-row">
+              <h2>開催中のイベント</h2>
+              <a href="#/events">すべて見る</a>
+            </div>
+            <HomeEventList events={groups.ongoing} now={now} empty="現在開催中のイベントはありません。" limit={4} />
+          </section>
+
+          <section className="dashboard-card dashboard-card--wide">
+            <div className="section-heading-row">
+              <h2>今週のイベント</h2>
+              <a href="#/events">イベント一覧</a>
+            </div>
+            <HomeEventList events={weekEvents} now={now} empty="今週のイベントはありません。" limit={6} />
           </section>
 
           <section className="dashboard-card dashboard-card--wide">

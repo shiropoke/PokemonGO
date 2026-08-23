@@ -45,7 +45,7 @@ export function applyTheme(theme: Theme, documentNode: Document = document): voi
   const themeColor = documentNode.querySelector<HTMLMetaElement>(
     'meta[name="theme-color"]',
   );
-  themeColor?.setAttribute('content', theme === 'dark' ? '#182431' : '#1769aa');
+  themeColor?.setAttribute('content', theme === 'dark' ? '#141414' : '#1769aa');
 
   const colorScheme = documentNode.querySelector<HTMLMetaElement>(
     'meta[name="color-scheme"]',

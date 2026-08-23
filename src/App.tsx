@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
-import { DesktopNavigation, MobileNavigation } from './components/AppNavigation';
-import { ThemeToggle } from './components/ThemeToggle';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import type { ReactNode } from 'react';
+import { PrimaryNavigation, SideDrawer, SiteHeader } from './components/AppNavigation';
 import { EventsPage } from './pages/EventsPage';
 import { EggsPage } from './pages/EggsPage';
 import { EvolutionCpPage } from './pages/EvolutionCpPage';
@@ -31,9 +31,9 @@ function getStorage(): Storage | null {
   }
 }
 
-function renderPage(page: Page) {
+function renderPage(page: Page, homeNavigation?: ReactNode) {
   switch (page) {
-    case 'home': return <HomePage />;
+    case 'home': return <HomePage navigation={homeNavigation} />;
     case 'events': return <EventsPage />;
     case 'raids': return <RaidsPage />;
     case 'iv': return <IvCheckerPage />;
@@ -50,6 +50,9 @@ function renderPage(page: Page) {
 
 export default function App() {
   const [page, setPage] = useState<Page>(() => getPageFromHash(window.location.hash));
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+  const pageContentRef = useRef<HTMLDivElement>(null);
   const [theme, setTheme] = useState<Theme>(() =>
     resolveInitialTheme(
       getStorage(),
@@ -58,7 +61,10 @@ export default function App() {
   );
 
   useEffect(() => {
-    const onHashChange = () => setPage(getPageFromHash(window.location.hash));
+    const onHashChange = () => {
+      setPage(getPageFromHash(window.location.hash));
+      setIsMenuOpen(false);
+    };
     window.addEventListener('hashchange', onHashChange);
     if (!window.location.hash) window.history.replaceState(null, '', getPageHash('home'));
     return () => window.removeEventListener('hashchange', onHashChange);
@@ -67,6 +73,10 @@ export default function App() {
   useEffect(() => {
     applyTheme(theme);
   }, [theme]);
+
+  useEffect(() => {
+    pageContentRef.current?.toggleAttribute('inert', isMenuOpen);
+  }, [isMenuOpen]);
 
   useEffect(() => {
     if (readStoredTheme(getStorage())) return undefined;
@@ -79,33 +89,52 @@ export default function App() {
     return () => media.removeEventListener('change', followSystemTheme);
   }, []);
 
-  const navigate = (nextPage: Page) => {
+  const navigate = useCallback((nextPage: Page) => {
     window.location.hash = getPageHash(nextPage);
     setPage(nextPage);
-    document.querySelectorAll<HTMLDetailsElement>('.desktop-nav details[open]').forEach((details) => details.removeAttribute('open'));
     window.scrollTo({ top: 0, behavior: 'auto' });
-  };
+  }, []);
 
   const changeTheme = (nextTheme: Theme) => {
     setTheme(nextTheme);
     saveTheme(nextTheme, getStorage());
   };
 
+  const primaryNavigation = (
+    <PrimaryNavigation current={page} onNavigate={navigate} />
+  );
+
   return (
     <div className="app-shell">
-      <header className="site-header">
-        <a className="brand" href={getPageHash('home')} aria-label="Pokémon GO Information ホーム">
-          <span className="brand-mark" aria-hidden="true"><span /></span>
-          <span><strong>Pokémon GO</strong><small>Information</small></span>
-        </a>
-        <div className="site-header__actions">
-          <DesktopNavigation current={page} onNavigate={navigate} />
-          <ThemeToggle theme={theme} onChange={changeTheme} />
-        </div>
-      </header>
+      <div
+        ref={pageContentRef}
+        className="page-shell-content"
+        aria-hidden={isMenuOpen || undefined}
+      >
+        <SiteHeader
+          current={page}
+          menuButtonRef={menuButtonRef}
+          menuOpen={isMenuOpen}
+          onMenuToggle={() => setIsMenuOpen((open) => !open)}
+          onNavigate={navigate}
+        />
 
-      <main id="main-content" className="main-content">{renderPage(page)}</main>
-      <MobileNavigation current={page} onNavigate={navigate} />
+        {page === 'home' ? null : primaryNavigation}
+
+        <main id="main-content" className="main-content">
+          {renderPage(page, page === 'home' ? primaryNavigation : undefined)}
+        </main>
+      </div>
+
+      <SideDrawer
+        current={page}
+        menuButtonRef={menuButtonRef}
+        open={isMenuOpen}
+        onClose={() => setIsMenuOpen(false)}
+        onNavigate={navigate}
+        theme={theme}
+        onThemeChange={changeTheme}
+      />
     </div>
   );
 }

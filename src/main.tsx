@@ -4,6 +4,9 @@ import App from './App';
 import { FavoritesProvider } from './contexts/FavoritesContext';
 import './styles.css';
 import './styles/expansion.css';
+import './styles/design-refresh.css';
+import './styles/home-refresh.css';
+import './styles/navigation-refresh.css';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
