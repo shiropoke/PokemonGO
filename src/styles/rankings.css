@@ -170,15 +170,6 @@
   margin: 7px 0 0;
 }
 
-.ranking-types span {
-  padding: 3px 7px;
-  border: 1px solid var(--border, #dfe4ea);
-  border-radius: 999px;
-  background: var(--surface-secondary, #f7f9fb);
-  color: var(--text-secondary, #56616f);
-  font-size: 0.7rem;
-}
-
 .species-ranking-card details {
   margin-top: 9px;
   color: var(--text-secondary, #56616f);
@@ -352,15 +343,6 @@
   gap: 5px;
 }
 
-.raid-weaknesses span {
-  padding: 4px 7px;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--accent, #1676d2) 12%, var(--surface, #fff));
-  color: var(--text, #25303c);
-  font-size: 0.72rem;
-  white-space: nowrap;
-}
-
 .raid-counter-controls {
   display: flex;
   flex-wrap: wrap;
@@ -466,6 +448,12 @@
   overflow-wrap: anywhere;
   color: var(--text-secondary, #647080);
   font-size: 0.78rem;
+}
+
+.raid-counter-list .raid-counter-types {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
 }
 
 .raid-counter-score {

@@ -183,8 +183,6 @@ body {
 .ranking-summary,
 .ranking-stats div,
 .species-rank,
-.type-badge,
-.ranking-types span,
 .raid-counter-panel {
   border-color: var(--border);
   background-color: var(--surface-secondary);

@@ -344,20 +344,6 @@
   gap: 6px;
 }
 
-.type-badge {
-  display: inline-flex;
-  min-height: 26px;
-  padding: 4px 9px;
-  align-items: center;
-  border: 1px solid var(--border-strong, #c9d2dc);
-  border-radius: 999px;
-  background: var(--surface-secondary, #f5f7fa);
-  color: var(--text, #202934);
-  font-size: 0.74rem;
-  font-weight: 800;
-  white-space: nowrap;
-}
-
 .move-sections {
   display: grid;
   gap: 24px;

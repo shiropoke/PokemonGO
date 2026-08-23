@@ -1,29 +1,11 @@
+import { TYPE_LABELS_JA, isPokemonType } from '../constants/typeMeta';
 import { POKEMON_TYPES } from '../types/gameData';
 import type {
   PokemonType,
   TypeEffectivenessChart,
 } from '../types/gameData';
 
-export const TYPE_LABELS_JA: Record<PokemonType, string> = {
-  normal: 'ノーマル',
-  fighting: 'かくとう',
-  flying: 'ひこう',
-  poison: 'どく',
-  ground: 'じめん',
-  rock: 'いわ',
-  bug: 'むし',
-  ghost: 'ゴースト',
-  steel: 'はがね',
-  fire: 'ほのお',
-  water: 'みず',
-  grass: 'くさ',
-  electric: 'でんき',
-  psychic: 'エスパー',
-  ice: 'こおり',
-  dragon: 'ドラゴン',
-  dark: 'あく',
-  fairy: 'フェアリー',
-};
+export { TYPE_LABELS_JA } from '../constants/typeMeta';
 
 export interface TypeMatchup {
   type: PokemonType;
@@ -85,10 +67,6 @@ const IMMUNE: Readonly<Partial<Record<PokemonType, readonly PokemonType[]>>> = {
   ghost: ['normal'],
   dragon: ['fairy'],
 };
-
-function isPokemonType(value: string): value is PokemonType {
-  return (POKEMON_TYPES as readonly string[]).includes(value);
-}
 
 /** 同期表示用のPokémon GO標準タイプ倍率。Game Masterのチャートと同じ値です。 */
 export function getTypeEffectiveness(

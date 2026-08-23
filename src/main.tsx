@@ -7,6 +7,7 @@ import './styles/expansion.css';
 import './styles/design-refresh.css';
 import './styles/home-refresh.css';
 import './styles/navigation-refresh.css';
+import './styles/type-badge.css';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>

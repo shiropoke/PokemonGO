@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { getTypeEffectiveness, getTypeWeaknesses } from './typeEffectiveness';
+import { TYPE_META } from '../constants/typeMeta';
+import { POKEMON_TYPES } from '../types/gameData';
+import {
+  TYPE_LABELS_JA,
+  getTypeEffectiveness,
+  getTypeWeaknesses,
+} from './typeEffectiveness';
 
 describe('type effectiveness compatibility helpers', () => {
   it('単弱点と二重弱点をPokémon GO倍率で計算する', () => {
@@ -12,5 +18,11 @@ describe('type effectiveness compatibility helpers', () => {
     expect(getTypeWeaknesses(['ground']).map((entry) => entry.label)).toEqual(
       expect.arrayContaining(['くさ', 'こおり', 'みず']),
     );
+  });
+
+  it('相性計算の日本語名も共通タイプメタ情報を参照する', () => {
+    for (const type of POKEMON_TYPES) {
+      expect(TYPE_LABELS_JA[type]).toBe(TYPE_META[type].labelJa);
+    }
   });
 });

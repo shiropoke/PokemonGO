@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { FavoriteButton } from '../components/FavoriteButton';
+import { TypeBadge } from '../components/TypeBadge';
 import { fetchGameData } from '../services/gameData';
 import { fetchPvpRankings } from '../services/pvpoke';
 import type { League } from '../types/calculations';
@@ -7,7 +8,6 @@ import type { GameData } from '../types/gameData';
 import type { PvpRankingsData } from '../types/pvpRankings';
 import { getPokemonDisplayName } from '../utils/pokemonLocalization';
 import { formatMoveId, openIvCheckerForSpecies } from '../utils/toolNavigation';
-import { TYPE_LABELS_JA } from '../utils/typeEffectiveness';
 import '../styles/rankings.css';
 
 const PAGE_SIZE = 100;
@@ -193,7 +193,7 @@ export function PvpRankingsPage() {
                       {entry.types.length > 0 ? (
                         <p className="ranking-types" aria-label="タイプ">
                           {entry.types.map((type) => (
-                            <span key={type}>{TYPE_LABELS_JA[type]}</span>
+                            <TypeBadge key={type} type={type} variant="compact" />
                           ))}
                         </p>
                       ) : null}

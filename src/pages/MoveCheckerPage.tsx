@@ -1,10 +1,10 @@
 import { useMemo, useState } from 'react';
 import { PokemonSelector } from '../components/PokemonSelector';
 import { ToolDataStatus } from '../components/ToolDataStatus';
+import { TypeBadge } from '../components/TypeBadge';
 import { useToolData } from '../hooks/useToolData';
-import type { GameMoveData, PokemonType } from '../types/gameData';
+import type { GameMoveData } from '../types/gameData';
 import type { Pokemon } from '../types/pokemon';
-import { TYPE_LABELS_JA } from '../utils/typeEffectiveness';
 import '../styles/tools.css';
 
 interface MoveRowProps {
@@ -16,10 +16,6 @@ function metric(value: number | undefined, digits = 1): string {
   return value === undefined
     ? '—'
     : value.toLocaleString('ja-JP', { maximumFractionDigits: digits });
-}
-
-function TypeBadge({ type }: { type: PokemonType }) {
-  return <span className={`type-badge type-badge--${type}`}>{TYPE_LABELS_JA[type]}</span>;
 }
 
 function MoveRow({ move, elite }: MoveRowProps) {

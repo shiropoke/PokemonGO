@@ -1,3 +1,4 @@
+import { getTypeLabelJa as getTypeLabelFromMeta } from '../constants/typeMeta';
 import { getPokemonNameJa, replacePokemonNamesInText } from './pokemonLocalization';
 
 const REGIONAL_PREFIXES: Readonly<Record<string, string>> = {
@@ -211,30 +212,8 @@ export function localizeResearchText(value: string): string {
   return replacePokemonNamesInText(text);
 }
 
-const TYPE_LABELS: Readonly<Record<string, string>> = {
-  normal: 'ノーマル',
-  fire: 'ほのお',
-  water: 'みず',
-  electric: 'でんき',
-  grass: 'くさ',
-  ice: 'こおり',
-  fighting: 'かくとう',
-  poison: 'どく',
-  ground: 'じめん',
-  flying: 'ひこう',
-  psychic: 'エスパー',
-  bug: 'むし',
-  rock: 'いわ',
-  ghost: 'ゴースト',
-  dragon: 'ドラゴン',
-  dark: 'あく',
-  steel: 'はがね',
-  fairy: 'フェアリー',
-};
-
 export function getTypeLabelJa(type: string): string {
-  const normalized = type.trim().toLowerCase();
-  return TYPE_LABELS[normalized] ?? type;
+  return getTypeLabelFromMeta(type);
 }
 
 export function getRaidTierLabel(tier: string): string {

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  getTypeLabelJa,
   localizeExternalPokemonName,
   localizeResearchText,
   resolveExternalPokemonSpeciesId,
@@ -49,5 +50,10 @@ describe('ScrapedDuck表示の日本語化', () => {
     expect(localizeResearchText('<span>Unknown seasonal instruction</span>')).toBe(
       'Unknown seasonal instruction',
     );
+  });
+
+  it('外部タイプ名を大文字小文字に依存せず共通日本語名へ変換する', () => {
+    expect(getTypeLabelJa(' WATER ')).toBe('みず');
+    expect(getTypeLabelJa('stellar')).toBe('stellar');
   });
 });

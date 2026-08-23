@@ -1,9 +1,10 @@
 import type { RaidBoss } from '../types/scrapedDuck';
-import { getRaidTierLabel, getTypeLabelJa } from '../utils/scrapedDuckLocalization';
+import { getRaidTierLabel } from '../utils/scrapedDuckLocalization';
 import { getTypeWeaknesses } from '../utils/typeEffectiveness';
 import { DatasetImage } from './DatasetImage';
 import { FavoriteButton } from './FavoriteButton';
 import { RaidCountersPanel } from './RaidCountersPanel';
+import { TypeBadge } from './TypeBadge';
 
 export function RaidCard({ raid }: { raid: RaidBoss }) {
   const weaknesses = getTypeWeaknesses(raid.types);
@@ -27,9 +28,7 @@ export function RaidCard({ raid }: { raid: RaidBoss }) {
           {raid.types.length > 0 ? (
             <div className="data-chip-list" aria-label="タイプ">
               {raid.types.map((type) => (
-                <span className="data-chip data-chip--type" key={type}>
-                  {getTypeLabelJa(type)}
-                </span>
+                <TypeBadge key={type} type={type} variant="compact" />
               ))}
             </div>
           ) : null}
@@ -41,10 +40,9 @@ export function RaidCard({ raid }: { raid: RaidBoss }) {
           <strong>弱点</strong>
           <div className="data-chip-list">
             {weaknesses.map((weakness) => (
-              <span className="data-chip data-chip--weakness" key={weakness.type}>
-                {weakness.label}
-                {weakness.multiplier > 2 ? ` ×${weakness.multiplier.toFixed(2)}` : ''}
-              </span>
+              <TypeBadge key={weakness.type} type={weakness.type} variant="compact">
+                {weakness.multiplier > 2 ? `×${weakness.multiplier.toFixed(2)}` : null}
+              </TypeBadge>
             ))}
           </div>
         </div>

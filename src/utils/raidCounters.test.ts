@@ -61,6 +61,7 @@ describe('rankRaidCounters', () => {
     expect(result.map((entry) => entry.speciesId)).toEqual(['higher', 'lower']);
     expect(result[0]?.relativeScore).toBe(100);
     expect(result[0]?.chargedMoveMultiplier).toBe(1.6);
+    expect(result[0]?.types).toEqual(['ghost']);
   });
 
   it('弱点を突けない技だけの候補は対策リストに含めない', () => {

@@ -3,6 +3,7 @@ import { fetchRaidCounterAttackers } from '../services/raidCounters';
 import type { RaidCounterAttacker } from '../utils/raidCounters';
 import { rankRaidCounters } from '../utils/raidCounters';
 import { getTypeWeaknesses } from '../utils/typeEffectiveness';
+import { TypeBadge } from './TypeBadge';
 import '../styles/rankings.css';
 
 interface RaidCountersPanelProps {
@@ -82,9 +83,9 @@ export function RaidCountersPanel({
             {weaknesses.length > 0 ? (
               <div className="raid-weaknesses" aria-label="弱点">
                 {weaknesses.map((entry) => (
-                  <span key={entry.type}>
-                    {entry.label} ×{entry.multiplier.toFixed(2)}
-                  </span>
+                  <TypeBadge key={entry.type} type={entry.type} variant="compact">
+                    ×{entry.multiplier.toFixed(2)}
+                  </TypeBadge>
                 ))}
               </div>
             ) : null}
@@ -118,6 +119,11 @@ export function RaidCountersPanel({
                   <span className="raid-counter-rank">{index + 1}</span>
                   <div>
                     <strong>{counter.displayName}</strong>
+                    <span className="raid-counter-types" aria-label="タイプ">
+                      {counter.types.map((type) => (
+                        <TypeBadge key={type} type={type} variant="compact" />
+                      ))}
+                    </span>
                     <span>{moveLabel(counter.fastMove)} / {moveLabel(counter.chargedMove)}</span>
                   </div>
                   <span className="raid-counter-score">

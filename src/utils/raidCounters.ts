@@ -32,6 +32,7 @@ export interface RaidCounterOptions {
 export interface RaidCounterResult {
   speciesId: string;
   displayName: string;
+  types: string[];
   fastMove: RaidCounterMove;
   chargedMove: RaidCounterMove;
   fastMoveMultiplier: number;
@@ -100,6 +101,7 @@ function scoreMoveset(
   return {
     speciesId: attacker.speciesId,
     displayName: attacker.displayName,
+    types: [...attacker.types],
     fastMove,
     chargedMove,
     fastMoveMultiplier: fast.multiplier,

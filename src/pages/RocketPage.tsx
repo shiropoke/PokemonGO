@@ -7,6 +7,7 @@ import {
   ScrapedDuckCredit,
   StaleDataNotice,
 } from '../components/DatasetPageHeader';
+import { TypeBadge } from '../components/TypeBadge';
 import { useCachedDataset } from '../hooks/useCachedDataset';
 import { loadRocketLineups } from '../services/scrapedDuck';
 import type { RocketLineup, RocketPokemon } from '../types/scrapedDuck';
@@ -31,7 +32,7 @@ function RocketSlot({ number, pokemon }: { number: number; pokemon: RocketPokemo
             <div>
               <strong>{candidate.displayName}</strong>
               <div className="data-chip-list">
-                {candidate.types.map((type) => <span className="data-chip data-chip--type" key={type}>{getTypeLabelJa(type)}</span>)}
+                {candidate.types.map((type) => <TypeBadge key={type} type={type} variant="compact" />)}
                 {candidate.isEncounter ? <span className="data-chip">ゲット可能</span> : null}
                 {candidate.canBeShiny ? <span className="data-chip data-chip--shiny">色違いあり</span> : null}
               </div>
@@ -58,13 +59,13 @@ function RocketCard({ lineup }: { lineup: RocketLineup }) {
           <span className="data-chip">{lineup.titleLabel}</span>
           <h2>{lineup.displayName}</h2>
         </div>
-        {lineup.type ? <span className="data-chip data-chip--type">{getTypeLabelJa(lineup.type)}</span> : null}
+        {lineup.type ? <TypeBadge type={lineup.type} variant="compact" /> : null}
       </header>
       {counterTypes.length > 0 ? (
         <div className="rocket-card__counter-types">
           <strong>おすすめ対策タイプ</strong>
           <div className="data-chip-list">
-            {counterTypes.map((type) => <span className="data-chip data-chip--weakness" key={type.type}>{type.label}</span>)}
+            {counterTypes.map((type) => <TypeBadge key={type.type} type={type.type} variant="compact" />)}
           </div>
           <small>ラインナップのタイプ相性から算出</small>
         </div>
