@@ -271,7 +271,7 @@ export function EventsPage() {
       ) : null}
 
       <footer className="events-credit">
-        <span>Event data provided by </span>
+        <span>Data provided by </span>
         <a href="https://leekduck.com/" target="_blank" rel="noopener noreferrer">
           Leek Duck
         </a>

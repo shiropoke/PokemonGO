@@ -64,9 +64,6 @@ export function RaidsPage() {
         fetchedAt={state.result?.fetchedAt}
         action={<RefreshButton />}
       />
-      <p className="dataset-page__intro">
-        現在公開されているレイドボスを、取得データに含まれるレイド区分で表示します。
-      </p>
 
       {state.result?.stale ? <StaleDataNotice /> : null}
       {state.loading && !state.result ? <DatasetSkeleton /> : null}
@@ -100,9 +97,6 @@ export function RaidsPage() {
         )
       ) : null}
 
-      <p className="dataset-page__scope-note">
-        出現期間はScrapedDuckの現行レイドデータに含まれないため表示していません。
-      </p>
       <ScrapedDuckCredit />
     </div>
   );

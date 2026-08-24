@@ -131,7 +131,7 @@ npm run preview
 
 ScrapedDuckデータはデータセット別にブラウザで最低5分間キャッシュします。5分以内の再表示ではネットワークへ再アクセスせず、再取得に失敗した場合は期限切れのキャッシュも表示に使用します。
 
-Event data provided by [Leek Duck](https://leekduck.com/) / [ScrapedDuck](https://github.com/bigfoott/ScrapedDuck).
+Data provided by [Leek Duck](https://leekduck.com/) / [ScrapedDuck](https://github.com/bigfoott/ScrapedDuck).
 
 このアプリには広告、有料機能、ペイウォールを実装していません。
 

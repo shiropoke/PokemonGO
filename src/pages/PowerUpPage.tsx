@@ -165,7 +165,7 @@ export function PowerUpPage() {
       </div>
 
       <p className="data-credit tool-credit">
-        コストテーブル：<a href="https://github.com/PokeMiners/game_masters" target="_blank" rel="noreferrer">PokeMiners Game Master</a>
+        Data provided by <a href="https://github.com/PokeMiners/game_masters" target="_blank" rel="noreferrer">PokeMiners Game Master</a>
       </p>
     </div>
   );

@@ -237,7 +237,7 @@ export function PvpRankingsPage() {
         Scoreと推奨技はPvPokeの現行Overallランキング由来です。Scoreは全対面シミュレーションをもとにした相対評価で、環境やアップデートにより変動します。
       </p>
       <p className="data-credit">
-        PvPデータ：{' '}
+        Data provided by{' '}
         <a href="https://github.com/pvpoke/pvpoke" target="_blank" rel="noreferrer">
           PvPoke（MIT License）
         </a>

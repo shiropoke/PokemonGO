@@ -13,6 +13,7 @@ import { PvpRankingsPage } from './pages/PvpRankingsPage';
 import { RaidsPage } from './pages/RaidsPage';
 import { ResearchPage } from './pages/ResearchPage';
 import { RocketPage } from './pages/RocketPage';
+import { useMainTabSwipe } from './hooks/useMainTabSwipe';
 import {
   applyTheme,
   readStoredTheme,
@@ -72,6 +73,7 @@ export default function App() {
   const searchButtonRef = useRef<HTMLButtonElement>(null);
   const siteHeaderRef = useRef<HTMLElement>(null);
   const pageContentRef = useRef<HTMLDivElement>(null);
+  const pageSwipeSurfaceRef = useRef<HTMLElement>(null);
   const transitionSequenceRef = useRef(0);
   const pageTransitionRef = useRef<PageTransition | null>(null);
   const [theme, setTheme] = useState<Theme>(() =>
@@ -166,6 +168,16 @@ export default function App() {
 
   const navigationPage = pageTransition?.to ?? visiblePage;
   const activeContentPage = pageTransition?.to ?? visiblePage;
+  const mainTabSwipeHandlers = useMainTabSwipe({
+    currentPage: visiblePage,
+    disabled:
+      isMenuOpen
+      || isSearchOpen
+      || pageTransition !== null
+      || page !== visiblePage,
+    surfaceRef: pageSwipeSurfaceRef,
+    onNavigate: navigate,
+  });
 
   return (
     <div className="app-shell">
@@ -192,8 +204,10 @@ export default function App() {
         <PrimaryNavigation current={navigationPage} onNavigate={navigate} />
 
         <main
+          ref={pageSwipeSurfaceRef}
           id="main-content"
-          className={`main-content page-transition-viewport${pageTransition ? ' is-transitioning' : ''}`}
+          className={`main-content main-tab-swipe-surface page-transition-viewport${pageTransition ? ' is-transitioning' : ''}`}
+          {...mainTabSwipeHandlers}
         >
           <>
             {pageTransition ? (

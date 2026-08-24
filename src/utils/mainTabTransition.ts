@@ -1,11 +1,12 @@
 import type { Page } from '../types/navigation';
 
-export const MAIN_TAB_ORDER = {
-  home: 0,
-  events: 1,
-  raids: 2,
-  iv: 3,
-} as const satisfies Partial<Record<Page, number>>;
+export const MAIN_TABS = ['home', 'events', 'raids', 'iv'] as const satisfies readonly Page[];
+
+export type MainTabPage = (typeof MAIN_TABS)[number];
+
+export const MAIN_TAB_ORDER = Object.fromEntries(
+  MAIN_TABS.map((page, index) => [page, index]),
+) as Record<MainTabPage, number>;
 
 export type MainTabTransitionDirection = 'right' | 'left';
 
@@ -25,4 +26,13 @@ export function getMainTabTransitionDirection(
   }
 
   return toIndex > fromIndex ? 'right' : 'left';
+}
+
+export function getAdjacentMainTab(
+  current: Page,
+  offset: -1 | 1,
+): MainTabPage | null {
+  const currentIndex = MAIN_TAB_ORDER[current as MainTabPage];
+  if (currentIndex === undefined) return null;
+  return MAIN_TABS[currentIndex + offset] ?? null;
 }

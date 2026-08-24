@@ -378,7 +378,7 @@ export function IvCheckerPage() {
       </div>
 
       <p className="data-credit iv-data-credit">
-        基礎ステータス：{' '}
+        Data provided by{' '}
         <a href="https://github.com/pvpoke/pvpoke" target="_blank" rel="noreferrer">
           PvPoke Game Master
         </a>

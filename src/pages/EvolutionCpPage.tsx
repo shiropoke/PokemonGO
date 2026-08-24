@@ -222,7 +222,7 @@ export function EvolutionCpPage() {
       </div>
 
       <p className="data-credit tool-credit">
-        計算データ：<a href="https://github.com/PokeMiners/game_masters" target="_blank" rel="noreferrer">PokeMiners Game Master</a>
+        Data provided by <a href="https://github.com/PokeMiners/game_masters" target="_blank" rel="noreferrer">PokeMiners Game Master</a>
       </p>
     </div>
   );

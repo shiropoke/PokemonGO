@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import type { ReactNode, RefObject } from 'react';
+import type { CSSProperties, ReactNode, RefObject } from 'react';
+import raidMenuIcon from '../assets/navigation/raid-menu-icon.png';
 import { ThemeToggle } from './ThemeToggle';
 import { OTHER_LINKS, PRIMARY_LINKS, TOOL_LINKS } from '../constants/sitePages';
 import type { Theme } from '../services/theme';
@@ -32,10 +33,24 @@ interface SideDrawerProps extends NavigationProps {
 }
 
 function NavIcon({ name }: { name: IconName }) {
-  const paths: Record<IconName, ReactNode> = {
+  if (name === 'raid') {
+    const raidIconStyle: CSSProperties = {
+      WebkitMaskImage: `url("${raidMenuIcon}")`,
+      maskImage: `url("${raidMenuIcon}")`,
+    };
+
+    return (
+      <span
+        className="navigation-icon navigation-icon--raid"
+        style={raidIconStyle}
+        aria-hidden="true"
+      />
+    );
+  }
+
+  const paths: Record<Exclude<IconName, 'raid'>, ReactNode> = {
     home: <path d="m3.5 11 8.5-7 8.5 7M5.5 9.5V20h13V9.5M9.5 20v-6h5v6" />,
     calendar: <path d="M7 3v3m10-3v3M4.5 9h15M5 5.5h14a1 1 0 0 1 1-1V20H4V6.5a1 1 0 0 1 1-1Z" />,
-    raid: <path d="M12 3a7.5 7.5 0 1 0 7.5 7.5H12V3Zm2 0v5.5h5.5A7.5 7.5 0 0 0 14 3Z" />,
     tools: <path d="m14.5 5.5 4-2-2 4 3.5 3.5-4 4-3.5-3.5-7 7-2-2 7-7L7 6l4-4 3.5 3.5Z" />,
     more: <><circle cx="5" cy="12" r="1.4" /><circle cx="12" cy="12" r="1.4" /><circle cx="19" cy="12" r="1.4" /></>,
   };

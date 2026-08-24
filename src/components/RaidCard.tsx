@@ -19,11 +19,13 @@ export function RaidCard({ raid }: { raid: RaidBoss }) {
           {raid.canBeShiny ? <span className="data-chip data-chip--shiny">色違いあり</span> : null}
           <h3>{raid.displayName}</h3>
           {raid.speciesId ? (
-            <FavoriteButton
-              speciesId={raid.speciesId}
-              displayName={raid.displayName}
-              compact
-            />
+            <div className="raid-card__favorite">
+              <FavoriteButton
+                speciesId={raid.speciesId}
+                displayName={raid.displayName}
+                compact
+              />
+            </div>
           ) : null}
           {raid.types.length > 0 ? (
             <div className="data-chip-list" aria-label="タイプ">

@@ -226,6 +226,10 @@
   margin: 0 4px 5px 0;
 }
 
+.raid-card__favorite {
+  margin-bottom: 10px;
+}
+
 .raid-card h3,
 .egg-card h3 {
   margin: 2px 0 8px;
@@ -506,13 +510,25 @@
 }
 
 @media (max-width: 520px) {
-  .dataset-page__heading {
-    align-items: flex-start;
+  .page-heading.dataset-page__heading {
+    display: flex;
+    gap: 10px;
+    align-items: flex-end;
+    justify-content: space-between;
   }
 
   .dataset-page__update {
-    width: 100%;
-    justify-content: space-between;
+    display: grid;
+    width: auto;
+    flex: 0 0 auto;
+    gap: 4px;
+    justify-content: initial;
+    justify-items: end;
+    font-size: 0.66rem;
+  }
+
+  .dataset-page__update span {
+    white-space: nowrap;
   }
 
   .dataset-card {

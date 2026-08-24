@@ -215,6 +215,10 @@
   position: relative;
 }
 
+.main-tab-swipe-surface {
+  touch-action: pan-y;
+}
+
 .page-transition-viewport.is-transitioning {
   display: grid;
   overflow-x: hidden;
@@ -428,6 +432,17 @@
   stroke-width: 1.8;
   stroke-linecap: round;
   stroke-linejoin: round;
+}
+
+.navigation-icon--raid {
+  display: block;
+  background-color: currentColor;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: contain;
+  mask-size: contain;
 }
 
 .navigation-chevron {

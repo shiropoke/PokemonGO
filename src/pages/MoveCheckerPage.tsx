@@ -141,8 +141,8 @@ export function MoveCheckerPage() {
         「すごいわざマシン」はGame Masterのelite move項目で確認できた技だけに表示します。通常のわざマシン可否やイベント限定期間は判定していません。
       </p>
       <p className="data-credit tool-credit">
-        技・タイプ：<a href="https://github.com/PokeMiners/game_masters" target="_blank" rel="noreferrer">PokeMiners Game Master</a>
-        {' / '}技名：<a href="https://github.com/PokeMiners/pogo_assets" target="_blank" rel="noreferrer">PokeMiners Pokémon GO Assets</a>
+        Data provided by <a href="https://github.com/PokeMiners/game_masters" target="_blank" rel="noreferrer">PokeMiners Game Master</a>
+        {' / '}<a href="https://github.com/PokeMiners/pogo_assets" target="_blank" rel="noreferrer">PokeMiners Pokémon GO Assets</a>
       </p>
     </div>
   );
