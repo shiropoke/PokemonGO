@@ -414,15 +414,19 @@
 
 .move-metrics dl {
   display: grid;
+  width: fit-content;
+  max-width: 100%;
   margin: 0;
   gap: 4px;
 }
 
 .move-metrics dl > div {
-  display: flex;
+  display: grid;
   min-width: 0;
-  justify-content: space-between;
-  gap: 8px;
+  grid-template-columns: minmax(7.5rem, max-content) minmax(3.75rem, max-content);
+  column-gap: 14px;
+  align-items: baseline;
+  justify-content: start;
   font-size: 0.78rem;
 }
 
@@ -431,9 +435,12 @@
 }
 
 .move-metrics dd {
+  min-width: 0;
   margin: 0;
   color: var(--text, #202934);
   font-weight: 750;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
 }
 
 .tool-credit {

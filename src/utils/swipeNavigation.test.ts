@@ -76,6 +76,7 @@ describe('main tab swipe navigation', () => {
   it('excludes interactive controls and horizontal-scroll regions at gesture start', () => {
     expect(isSwipeStartTargetExcluded(targetMatching('button'))).toBe(true);
     expect(isSwipeStartTargetExcluded(targetMatching('input'))).toBe(true);
+    expect(isSwipeStartTargetExcluded(targetMatching('[data-main-tab-swipe-ignore]'))).toBe(true);
     expect(isSwipeStartTargetExcluded(targetMatching('.week-calendar-scroll'))).toBe(true);
     expect(isSwipeStartTargetExcluded(targetMatching(null))).toBe(false);
   });

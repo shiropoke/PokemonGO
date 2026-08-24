@@ -189,9 +189,17 @@
 }
 
 .data-chip--shiny {
-  border-color: var(--gray-300);
-  background: var(--gray-50);
-  color: var(--gray-800);
+  border-color: rgba(230, 145, 20, 0.48);
+  background: rgba(245, 166, 35, 0.14);
+  box-shadow: 0 0 8px rgba(245, 166, 35, 0.2);
+  color: #8a5700;
+}
+
+[data-theme='dark'] .data-chip--shiny {
+  border-color: rgba(255, 193, 73, 0.52);
+  background: rgba(245, 166, 35, 0.18);
+  box-shadow: 0 0 8px rgba(245, 166, 35, 0.2);
+  color: #ffd166;
 }
 
 .data-chip--shadow {

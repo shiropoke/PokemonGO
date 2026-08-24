@@ -3,6 +3,7 @@ import type { CSSProperties, ReactNode, RefObject } from 'react';
 import raidMenuIcon from '../assets/navigation/raid-menu-icon.png';
 import { ThemeToggle } from './ThemeToggle';
 import { OTHER_LINKS, PRIMARY_LINKS, TOOL_LINKS } from '../constants/sitePages';
+import type { TabPosition } from '../services/tabPosition';
 import type { Theme } from '../services/theme';
 import type { NavigationQuery, Page } from '../types/navigation';
 import { getPageHash } from '../types/navigation';
@@ -28,6 +29,8 @@ interface SideDrawerProps extends NavigationProps {
   menuButtonRef: RefObject<HTMLButtonElement>;
   open: boolean;
   onClose(): void;
+  tabPosition: TabPosition;
+  onTabPositionChange(position: TabPosition): void;
   theme: Theme;
   onThemeChange(theme: Theme): void;
 }
@@ -257,6 +260,8 @@ export function SideDrawer({
   onClose,
   onNavigate,
   open,
+  tabPosition,
+  onTabPositionChange,
   theme,
   onThemeChange,
 }: SideDrawerProps) {
@@ -434,6 +439,31 @@ export function SideDrawer({
         </nav>
 
         <footer className="side-drawer__footer">
+          <div className="drawer-setting">
+            <span id="drawer-tab-position-label" className="drawer-setting__label">
+              タブ位置
+            </span>
+            <div
+              className="drawer-segmented-control"
+              role="group"
+              aria-labelledby="drawer-tab-position-label"
+            >
+              {([
+                ['top', '上部'],
+                ['bottom', '下部'],
+              ] as const).map(([position, label]) => (
+                <button
+                  key={position}
+                  type="button"
+                  className={tabPosition === position ? 'is-selected' : ''}
+                  aria-pressed={tabPosition === position}
+                  onClick={() => onTabPositionChange(position)}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
           <ThemeToggle theme={theme} onChange={onThemeChange} />
         </footer>
       </aside>
@@ -443,7 +473,7 @@ export function SideDrawer({
 
 export function PrimaryNavigation({ current, onNavigate }: NavigationProps) {
   return (
-    <div className="primary-navigation-shell">
+    <div className="primary-navigation-shell" data-main-tab-swipe-ignore>
       <nav className="primary-navigation" aria-label="主要ページ">
         {PRIMARY_LINKS.map((item) => (
           <a

@@ -15,6 +15,11 @@ import { ResearchPage } from './pages/ResearchPage';
 import { RocketPage } from './pages/RocketPage';
 import { useMainTabSwipe } from './hooks/useMainTabSwipe';
 import {
+  resolveInitialTabPosition,
+  saveTabPosition,
+} from './services/tabPosition';
+import type { TabPosition } from './services/tabPosition';
+import {
   applyTheme,
   readStoredTheme,
   resolveInitialTheme,
@@ -81,6 +86,9 @@ export default function App() {
       getStorage(),
       window.matchMedia('(prefers-color-scheme: dark)').matches,
     ),
+  );
+  const [tabPosition, setTabPosition] = useState<TabPosition>(() =>
+    resolveInitialTabPosition(getStorage()),
   );
 
   useEffect(() => {
@@ -166,6 +174,11 @@ export default function App() {
     saveTheme(nextTheme, getStorage());
   };
 
+  const changeTabPosition = (nextPosition: TabPosition) => {
+    setTabPosition(nextPosition);
+    saveTabPosition(nextPosition, getStorage());
+  };
+
   const navigationPage = pageTransition?.to ?? visiblePage;
   const activeContentPage = pageTransition?.to ?? visiblePage;
   const mainTabSwipeHandlers = useMainTabSwipe({
@@ -180,7 +193,7 @@ export default function App() {
   });
 
   return (
-    <div className="app-shell">
+    <div className="app-shell" data-tab-position={tabPosition}>
       <SiteHeader
         current={page}
         headerRef={siteHeaderRef}
@@ -240,6 +253,8 @@ export default function App() {
         open={isMenuOpen}
         onClose={() => setIsMenuOpen(false)}
         onNavigate={navigate}
+        tabPosition={tabPosition}
+        onTabPositionChange={changeTabPosition}
         theme={theme}
         onThemeChange={changeTheme}
       />

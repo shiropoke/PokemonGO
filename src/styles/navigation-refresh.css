@@ -4,6 +4,7 @@
 :root {
   --site-header-bar-height: 68px;
   --site-header-height: calc(var(--site-header-bar-height) + env(safe-area-inset-top));
+  --primary-navigation-height: 52px;
   --z-content: 1;
   --z-primary-navigation: 20;
   --z-overlay: 40;
@@ -179,7 +180,7 @@
   position: relative;
   display: flex;
   min-width: 0;
-  min-height: 52px;
+  min-height: var(--primary-navigation-height);
   align-items: center;
   justify-content: center;
   padding: 8px 7px;
@@ -209,6 +210,28 @@
 
 .primary-navigation a.is-active::after {
   background: var(--blue-600);
+}
+
+.app-shell[data-tab-position='bottom'] .primary-navigation-shell {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  padding-bottom: env(safe-area-inset-bottom);
+  border-top: 1px solid var(--gray-200);
+  border-bottom: 0;
+  box-shadow: 0 -2px 8px rgba(13, 24, 34, 0.08);
+}
+
+[data-theme='dark'] .app-shell[data-tab-position='bottom'] .primary-navigation-shell {
+  border-top-color: rgba(255, 255, 255, 0.11);
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.24);
+}
+
+.app-shell[data-tab-position='bottom'] .primary-navigation a::after {
+  top: 0;
+  bottom: auto;
+  border-radius: 0 0 2px 2px;
 }
 
 .page-transition-viewport {
@@ -505,6 +528,8 @@
 }
 
 .side-drawer__footer {
+  display: grid;
+  gap: 12px;
   flex: 0 0 auto;
   padding: 12px max(16px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
   border-top: 1px solid rgba(255, 255, 255, 0.11);
@@ -512,6 +537,75 @@
 
 [data-theme='light'] .side-drawer__footer {
   border-color: rgba(16, 31, 43, 0.13);
+}
+
+.drawer-setting {
+  display: grid;
+  gap: 7px;
+}
+
+.drawer-setting__label {
+  color: #b8b8b8;
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+[data-theme='light'] .drawer-setting__label {
+  color: #596976;
+}
+
+.drawer-segmented-control {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 3px;
+  padding: 3px;
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  border-radius: 8px;
+  background: #1e1e1e;
+}
+
+.drawer-segmented-control button {
+  min-width: 0;
+  min-height: 36px;
+  padding: 6px 10px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: #bfc6cc;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.drawer-segmented-control button:hover {
+  color: #f4f8fb;
+}
+
+.drawer-segmented-control button.is-selected {
+  border-color: #1688ff;
+  background: #126fca;
+  color: #fff;
+}
+
+[data-theme='light'] .drawer-segmented-control {
+  border-color: rgba(16, 31, 43, 0.14);
+  background: #fff;
+}
+
+[data-theme='light'] .drawer-segmented-control button {
+  color: #52626f;
+}
+
+[data-theme='light'] .drawer-segmented-control button:hover {
+  color: #164f7c;
+}
+
+[data-theme='light'] .drawer-segmented-control button.is-selected {
+  border-color: var(--blue-600);
+  background: var(--blue-600);
+  color: #fff;
 }
 
 .side-drawer .theme-toggle {
@@ -543,6 +637,7 @@ body.is-drawer-scroll-locked .app-shell .shell-header {
 @media (max-width: 680px) {
   :root {
     --site-header-bar-height: 62px;
+    --primary-navigation-height: 48px;
   }
 
   .app-shell .shell-header {
@@ -572,7 +667,6 @@ body.is-drawer-scroll-locked .app-shell .shell-header {
   }
 
   .primary-navigation a {
-    min-height: 48px;
     padding-inline: 2px;
     font-size: clamp(0.64rem, 2.8vw, 0.76rem);
   }
@@ -581,6 +675,15 @@ body.is-drawer-scroll-locked .app-shell .shell-header {
     min-height: calc(100vh - 111px);
     padding-bottom: max(44px, calc(24px + env(safe-area-inset-bottom)));
   }
+}
+
+.app-shell[data-tab-position='bottom'] .main-content {
+  min-height: calc(100vh - var(--site-header-height));
+  min-height: calc(100dvh - var(--site-header-height));
+  padding-bottom: max(
+    64px,
+    calc(var(--primary-navigation-height) + env(safe-area-inset-bottom) + 24px)
+  );
 }
 
 @media (max-width: 360px) {
@@ -621,7 +724,8 @@ body.is-drawer-scroll-locked .app-shell .shell-header {
   .side-drawer,
   .menu-trigger__line,
   .drawer-group__collapse,
-  .navigation-chevron {
+  .navigation-chevron,
+  .primary-navigation-shell {
     transition-duration: 1ms !important;
   }
 
