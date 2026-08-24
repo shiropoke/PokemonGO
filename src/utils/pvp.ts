@@ -27,7 +27,9 @@ interface CachedRanking {
 }
 
 const rankingCache = new Map<string, CachedRanking>();
-const MAX_RANKING_CACHE_ENTRIES = 12;
+// イーブイのような分岐進化でも、選択種＋進化系の3リーグ分を
+// IV変更のたびに作り直さず再利用できる上限にする。
+const MAX_RANKING_CACHE_ENTRIES = 36;
 
 function ivKey(ivs: IndividualValues): string {
   return `${ivs.attack}/${ivs.defense}/${ivs.hp}`;

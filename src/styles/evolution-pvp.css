@@ -1,0 +1,187 @@
+.evolution-pvp-section {
+  min-width: 0;
+  padding: 18px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--card-shadow);
+}
+
+.evolution-pvp-section h2,
+.evolution-pvp-section h3,
+.evolution-pvp-section h4 {
+  color: var(--text);
+}
+
+.evolution-pvp-section__header {
+  margin-bottom: 14px;
+}
+
+.evolution-pvp-section__header h2,
+.evolution-pvp-section > h2 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.evolution-pvp-section__header p,
+.evolution-pvp-status {
+  margin: 5px 0 0;
+  color: var(--text-secondary);
+  font-size: 0.76rem;
+  line-height: 1.55;
+}
+
+.evolution-pvp-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  min-width: 0;
+}
+
+.evolution-pvp-card {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-secondary);
+}
+
+.evolution-pvp-card > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-width: 0;
+  padding: 13px 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+.evolution-pvp-card > header h3 {
+  min-width: 0;
+  margin: 0;
+  overflow-wrap: anywhere;
+  font-size: 0.92rem;
+}
+
+.evolution-pvp-card > header span {
+  flex: 0 0 auto;
+  color: var(--text-secondary);
+  font-size: 0.66rem;
+  white-space: nowrap;
+}
+
+.evolution-pvp-leagues {
+  display: grid;
+  min-width: 0;
+}
+
+.evolution-pvp-league {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 3px 10px;
+  min-width: 0;
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+.evolution-pvp-league__name {
+  min-width: 0;
+  color: var(--text);
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+.evolution-pvp-league__rank {
+  color: var(--accent-strong);
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.evolution-pvp-league small {
+  grid-column: 1 / -1;
+  color: var(--text-secondary);
+  font-size: 0.67rem;
+}
+
+.evolution-pvp-league__unavailable {
+  color: var(--text-secondary);
+  font-size: 0.72rem;
+}
+
+.evolution-pvp-card__error {
+  margin: 0;
+  padding: 9px 14px;
+  color: var(--text-secondary);
+  font-size: 0.7rem;
+}
+
+.evolution-pvp-details summary {
+  min-height: 44px;
+  padding: 13px 14px;
+  color: var(--accent-strong);
+  cursor: pointer;
+  font-size: 0.74rem;
+  font-weight: 700;
+  list-style-position: inside;
+}
+
+.evolution-pvp-details__content {
+  display: grid;
+  gap: 12px;
+  padding: 0 14px 14px;
+}
+
+.evolution-pvp-detail-league h4 {
+  margin: 0 0 7px;
+  font-size: 0.76rem;
+}
+
+.evolution-pvp-detail-league dl {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  overflow: hidden;
+  margin: 0;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  background: var(--border);
+}
+
+.evolution-pvp-detail-league dl div {
+  min-width: 0;
+  padding: 7px 8px;
+  background: var(--surface);
+}
+
+.evolution-pvp-detail-league dt {
+  color: var(--text-secondary);
+  font-size: 0.62rem;
+}
+
+.evolution-pvp-detail-league dd {
+  margin: 2px 0 0;
+  overflow-wrap: anywhere;
+  color: var(--text);
+  font-size: 0.72rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+}
+
+@media (max-width: 680px) {
+  .evolution-pvp-section {
+    padding: 14px;
+  }
+
+  .evolution-pvp-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 360px) {
+  .evolution-pvp-card > header,
+  .evolution-pvp-league {
+    padding-right: 11px;
+    padding-left: 11px;
+  }
+}

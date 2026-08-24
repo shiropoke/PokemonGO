@@ -70,6 +70,7 @@ export default function App() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const searchButtonRef = useRef<HTMLButtonElement>(null);
+  const siteHeaderRef = useRef<HTMLElement>(null);
   const pageContentRef = useRef<HTMLDivElement>(null);
   const transitionSequenceRef = useRef(0);
   const pageTransitionRef = useRef<PageTransition | null>(null);
@@ -133,6 +134,7 @@ export default function App() {
   }, [theme]);
 
   useEffect(() => {
+    siteHeaderRef.current?.toggleAttribute('inert', isSearchOpen);
     pageContentRef.current?.toggleAttribute('inert', isMenuOpen || isSearchOpen);
   }, [isMenuOpen, isSearchOpen]);
 
@@ -167,25 +169,26 @@ export default function App() {
 
   return (
     <div className="app-shell">
+      <SiteHeader
+        current={page}
+        headerRef={siteHeaderRef}
+        menuButtonRef={menuButtonRef}
+        menuOpen={isMenuOpen}
+        onMenuToggle={() => setIsMenuOpen((open) => !open)}
+        onNavigate={navigate}
+        searchButtonRef={searchButtonRef}
+        searchOpen={isSearchOpen}
+        onSearchOpen={() => {
+          setIsMenuOpen(false);
+          setIsSearchOpen(true);
+        }}
+      />
+
       <div
         ref={pageContentRef}
         className="page-shell-content"
         aria-hidden={isMenuOpen || isSearchOpen || undefined}
       >
-        <SiteHeader
-          current={page}
-          menuButtonRef={menuButtonRef}
-          menuOpen={isMenuOpen}
-          onMenuToggle={() => setIsMenuOpen((open) => !open)}
-          onNavigate={navigate}
-          searchButtonRef={searchButtonRef}
-          searchOpen={isSearchOpen}
-          onSearchOpen={() => {
-            setIsMenuOpen(false);
-            setIsSearchOpen(true);
-          }}
-        />
-
         <PrimaryNavigation current={navigationPage} onNavigate={navigate} />
 
         <main

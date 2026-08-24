@@ -2,7 +2,9 @@ import { useEffect, useMemo, useState } from 'react';
 import { IvInputPanel } from '../components/IvInputPanel';
 import { IvResults } from '../components/IvResults';
 import { FavoriteButton } from '../components/FavoriteButton';
+import { EvolutionPvpResults } from '../components/EvolutionPvpResults';
 import { PokemonSelector } from '../components/PokemonSelector';
+import { fetchGameData } from '../services/gameData';
 import { fetchPokemonData } from '../services/pokemonData';
 import type {
   IndividualValues,
@@ -11,10 +13,13 @@ import type {
   StandardMaxLevel,
 } from '../types/calculations';
 import type { Pokemon, PokemonDataSource } from '../types/pokemon';
+import type { GameData } from '../types/gameData';
 import { getHashQueryParam } from '../types/navigation';
 import { findMatchingLevels, getEffectiveLevelCap } from '../utils/cp';
 import { calculateIvSummary } from '../utils/iv';
 import { getPvpRankResult } from '../utils/pvp';
+import { getEvolutionDescendants } from '../utils/evolutionChain';
+import { calculateEvolutionPvpResults } from '../utils/evolutionPvp';
 
 const SETTINGS_KEY = 'pokemon-go-information:iv-checker:v1';
 
@@ -29,6 +34,12 @@ interface PokemonLoadState {
   pokemon: Pokemon[];
   fetchedAt: number | null;
   source: PokemonDataSource | null;
+  loading: boolean;
+  error: string | null;
+}
+
+interface EvolutionDataState {
+  gameData: GameData | null;
   loading: boolean;
   error: string | null;
 }
@@ -110,6 +121,11 @@ export function IvCheckerPage() {
     loading: true,
     error: null,
   });
+  const [evolutionDataState, setEvolutionDataState] = useState<EvolutionDataState>({
+    gameData: null,
+    loading: true,
+    error: null,
+  });
 
   useEffect(() => {
     const syncLinkedSpecies = () => {
@@ -160,12 +176,41 @@ export function IvCheckerPage() {
   }, [requestVersion]);
 
   useEffect(() => {
+    let ignore = false;
+    setEvolutionDataState((current) => ({ ...current, loading: true, error: null }));
+
+    void fetchGameData({ force: requestVersion > 0 })
+      .then((gameData) => {
+        if (ignore) return;
+        setEvolutionDataState({ gameData, loading: false, error: null });
+      })
+      .catch(() => {
+        if (ignore) return;
+        setEvolutionDataState((current) => ({
+          ...current,
+          loading: false,
+          error: '進化データを取得できませんでした',
+        }));
+      });
+
+    // 進化データの失敗は、既存の個体値チェッカーを利用不能にしない。
+    return () => {
+      ignore = true;
+    };
+  }, [requestVersion]);
+
+  useEffect(() => {
     saveSettings(settings);
   }, [settings]);
 
   const selectedPokemon = useMemo(
     () => dataState.pokemon.find((entry) => entry.speciesId === settings.speciesId) ?? null,
     [dataState.pokemon, settings.speciesId],
+  );
+
+  const pokemonById = useMemo(
+    () => new Map(dataState.pokemon.map((pokemon) => [pokemon.speciesId, pokemon])),
+    [dataState.pokemon],
   );
 
   const effectiveLevelCap = useMemo(
@@ -227,6 +272,24 @@ export function IvCheckerPage() {
         : null,
     };
   }, [effectiveLevelCap, selectedPokemon, settings.ivs]);
+
+  const evolutionDescendants = useMemo(() => {
+    if (!selectedPokemon || !evolutionDataState.gameData) return [];
+    return getEvolutionDescendants(
+      selectedPokemon.speciesId,
+      evolutionDataState.gameData,
+      pokemonById,
+    );
+  }, [evolutionDataState.gameData, pokemonById, selectedPokemon]);
+
+  const evolutionPvpResults = useMemo(
+    () => calculateEvolutionPvpResults(
+      evolutionDescendants,
+      settings.ivs,
+      effectiveLevelCap,
+    ),
+    [effectiveLevelCap, evolutionDescendants, settings.ivs],
+  );
 
   return (
     <div className="iv-checker-page">
@@ -294,6 +357,12 @@ export function IvCheckerPage() {
             matchingLevels={matchingLevels}
             pvpResults={leagueCalculations.pvpResults}
             calculationError={leagueCalculations.error}
+          />
+          <EvolutionPvpResults
+            results={evolutionPvpResults}
+            pokemonSelected={selectedPokemon !== null}
+            loading={evolutionDataState.loading}
+            error={evolutionDataState.error}
           />
           {selectedPokemon ? (
             <div className="checker-tool-links">

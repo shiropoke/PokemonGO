@@ -14,6 +14,7 @@ interface NavigationProps {
 }
 
 interface SiteHeaderProps extends NavigationProps {
+  headerRef: RefObject<HTMLElement>;
   menuButtonRef: RefObject<HTMLButtonElement>;
   menuOpen: boolean;
   onMenuToggle(): void;
@@ -80,6 +81,7 @@ function Brand({ compact = false }: { compact?: boolean }) {
 
 export function SiteHeader({
   current,
+  headerRef,
   menuButtonRef,
   menuOpen,
   onMenuToggle,
@@ -89,20 +91,26 @@ export function SiteHeader({
   onSearchOpen,
 }: SiteHeaderProps) {
   return (
-    <header className="site-header shell-header">
+    <header
+      ref={headerRef}
+      className="site-header shell-header"
+      aria-hidden={searchOpen || undefined}
+    >
       <div className="shell-header__inner">
         <button
           ref={menuButtonRef}
-          className="menu-trigger"
+          className={`menu-trigger${menuOpen ? ' is-open' : ''}`}
           type="button"
           aria-label={menuOpen ? 'メニューを閉じる' : 'メニューを開く'}
           aria-expanded={menuOpen}
           aria-controls="site-side-drawer"
           onClick={onMenuToggle}
         >
-          <svg aria-hidden="true" viewBox="0 0 24 24" fill="none">
-            <path d="M4 6.5h16M4 12h16M4 17.5h16" />
-          </svg>
+          <span className="menu-trigger__icon" aria-hidden="true">
+            <span className="menu-trigger__line" />
+            <span className="menu-trigger__line" />
+            <span className="menu-trigger__line" />
+          </span>
         </button>
 
         <a
@@ -237,7 +245,7 @@ export function SideDrawer({
   theme,
   onThemeChange,
 }: SideDrawerProps) {
-  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const drawerRef = useRef<HTMLElement>(null);
   const [toolsOpen, setToolsOpen] = useState(true);
   const [otherOpen, setOtherOpen] = useState(true);
   const [scrollLocked, setScrollLocked] = useState(false);
@@ -248,7 +256,9 @@ export function SideDrawer({
     if (open) {
       setScrollLocked(true);
       const focusTimer = window.setTimeout(
-        () => closeButtonRef.current?.focus({ preventScroll: true }),
+        () => drawerRef.current
+          ?.querySelector<HTMLElement>(focusableSelector)
+          ?.focus({ preventScroll: true }),
         20,
       );
       return () => window.clearTimeout(focusTimer);
@@ -292,6 +302,8 @@ export function SideDrawer({
       paddingRight: body.style.paddingRight,
     };
 
+    body.classList.add('is-drawer-scroll-locked');
+
     body.style.position = 'fixed';
     body.style.top = `-${scrollY}px`;
     body.style.right = '0';
@@ -308,6 +320,7 @@ export function SideDrawer({
       body.style.width = previous.width;
       body.style.overflow = previous.overflow;
       body.style.paddingRight = previous.paddingRight;
+      body.classList.remove('is-drawer-scroll-locked');
       const root = document.documentElement;
       const previousScrollBehavior = root.style.scrollBehavior;
       root.style.scrollBehavior = 'auto';
@@ -328,24 +341,32 @@ export function SideDrawer({
       if (event.key !== 'Tab') return;
 
       const drawer = document.getElementById('site-side-drawer');
-      const focusable = drawer
+      const drawerFocusable = drawer
         ? Array.from(drawer.querySelectorAll<HTMLElement>(focusableSelector))
         : [];
-      const first = focusable.at(0);
-      const last = focusable.at(-1);
-      if (!first || !last) return;
-      if (event.shiftKey && document.activeElement === first) {
+      const trigger = menuButtonRef.current;
+      const firstDrawerItem = drawerFocusable.at(0);
+      const lastDrawerItem = drawerFocusable.at(-1);
+      if (!trigger || !firstDrawerItem || !lastDrawerItem) return;
+
+      if (event.shiftKey && document.activeElement === firstDrawerItem) {
         event.preventDefault();
-        last.focus();
-      } else if (!event.shiftKey && document.activeElement === last) {
+        trigger.focus();
+      } else if (event.shiftKey && document.activeElement === trigger) {
         event.preventDefault();
-        first.focus();
+        lastDrawerItem.focus();
+      } else if (!event.shiftKey && document.activeElement === trigger) {
+        event.preventDefault();
+        firstDrawerItem.focus();
+      } else if (!event.shiftKey && document.activeElement === lastDrawerItem) {
+        event.preventDefault();
+        trigger.focus();
       }
     };
 
     document.addEventListener('keydown', onKeyDown);
     return () => document.removeEventListener('keydown', onKeyDown);
-  }, [onClose, open]);
+  }, [menuButtonRef, onClose, open]);
 
   const navigateFromDrawer = (page: Page) => {
     navigationPendingRef.current = true;
@@ -360,10 +381,10 @@ export function SideDrawer({
     >
       <button className="drawer-overlay" type="button" tabIndex={-1} aria-label="メニューを閉じる" onClick={onClose} />
       <aside
+        ref={drawerRef}
         id="site-side-drawer"
         className="side-drawer"
         role="dialog"
-        aria-modal="true"
         aria-label="サイトメニュー"
         onTransitionEnd={(event) => {
           if (event.target === event.currentTarget && event.propertyName === 'transform' && !open) {
@@ -371,13 +392,6 @@ export function SideDrawer({
           }
         }}
       >
-        <header className="side-drawer__header">
-          <button ref={closeButtonRef} className="drawer-close" type="button" aria-label="メニューを閉じる" onClick={onClose}>
-            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none"><path d="m5 5 14 14M19 5 5 19" /></svg>
-          </button>
-          <Brand />
-        </header>
-
         <nav className="side-drawer__nav" aria-label="サイトメニュー">
           <DrawerLink page="home" label="ホーム" icon="home" current={current} onNavigate={navigateFromDrawer} />
           <DrawerLink page="events" label="イベント" icon="calendar" current={current} onNavigate={navigateFromDrawer} />
