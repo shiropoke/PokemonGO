@@ -34,8 +34,7 @@ const FOCUSABLE_SELECTOR = [
 ].join(',');
 
 type SearchViewportStyle = CSSProperties & {
-  '--search-viewport-height': string;
-  '--search-viewport-offset-top': string;
+  '--search-keyboard-inset': string;
 };
 
 interface SearchDataState {
@@ -141,6 +140,7 @@ export function GlobalSearchDialog({
   const dialogRef = useRef<HTMLElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const resultsRef = useRef<HTMLDivElement>(null);
+  const layoutViewportHeightRef = useRef(window.innerHeight);
   const loadedRef = useRef(false);
   const loadingRef = useRef(false);
   const requestedVersionRef = useRef(-1);
@@ -204,11 +204,15 @@ export function GlobalSearchDialog({
     restoreFocusRef.current = true;
     pendingNavigationRef.current = false;
     setQuery('');
+    layoutViewportHeightRef.current = window.innerHeight;
     const visualViewport = window.visualViewport;
     const updateViewport = () => {
-      const next = resolveVisualViewportMetrics(visualViewport, window.innerHeight);
+      const next = resolveVisualViewportMetrics(
+        visualViewport,
+        layoutViewportHeightRef.current,
+      );
       setViewportMetrics((current) =>
-        current.height === next.height && current.offsetTop === next.offsetTop
+        current.keyboardInset === next.keyboardInset
           ? current
           : next,
       );
@@ -317,8 +321,7 @@ export function GlobalSearchDialog({
   if (!open) return null;
 
   const viewportStyle: SearchViewportStyle = {
-    '--search-viewport-height': `${viewportMetrics.height}px`,
-    '--search-viewport-offset-top': `${viewportMetrics.offsetTop}px`,
+    '--search-keyboard-inset': `${viewportMetrics.keyboardInset}px`,
   };
 
   return (
@@ -338,10 +341,7 @@ export function GlobalSearchDialog({
         aria-labelledby="global-search-title"
       >
         <header className="global-search-dialog__header">
-          <div>
-            <h2 id="global-search-title">サイト内検索</h2>
-            <p>Pokémon GO Informationを横断して探せます</p>
-          </div>
+          <h2 id="global-search-title">サイト内検索</h2>
           <button
             type="button"
             className="global-search-close"
@@ -375,15 +375,11 @@ export function GlobalSearchDialog({
           aria-live="polite"
           aria-busy={data.loading}
         >
-          {!hasQuery ? (
-            <p className="global-search-results__heading">
-              検索語を入力するか、よく使う機能を選択してください
-            </p>
-          ) : (
+          {hasQuery ? (
             <p className="global-search-results__heading">
               {resultCount.toLocaleString('ja-JP')}件の候補
             </p>
-          )}
+          ) : null}
 
           {data.loading ? (
             <p className="global-search-state">検索データを読み込んでいます</p>

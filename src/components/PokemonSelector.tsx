@@ -20,8 +20,7 @@ const MAX_VISIBLE_RESULTS = 160;
 export type PickerViewportMetrics = VisualViewportMetrics;
 
 type PickerViewportStyle = CSSProperties & {
-  '--picker-viewport-height': string;
-  '--picker-viewport-offset-top': string;
+  '--picker-keyboard-inset': string;
 };
 
 export const resolvePickerViewportMetrics = resolveVisualViewportMetrics;
@@ -76,6 +75,7 @@ export function PokemonSelector({
   const titleId = useId();
   const searchInputRef = useRef<HTMLInputElement>(null);
   const resultsRef = useRef<HTMLDivElement>(null);
+  const layoutViewportHeightRef = useRef(window.innerHeight);
 
   const filteredPokemon = useMemo(() => {
     return searchPokemon(pokemon, query).map(({ pokemon: entry }) => entry);
@@ -95,11 +95,10 @@ export function PokemonSelector({
     const updateViewportMetrics = () => {
       const nextMetrics = resolvePickerViewportMetrics(
         visualViewport,
-        window.innerHeight,
+        layoutViewportHeightRef.current,
       );
       setViewportMetrics((currentMetrics) =>
-        currentMetrics.height === nextMetrics.height &&
-        currentMetrics.offsetTop === nextMetrics.offsetTop
+        currentMetrics.keyboardInset === nextMetrics.keyboardInset
           ? currentMetrics
           : nextMetrics,
       );
@@ -159,15 +158,18 @@ export function PokemonSelector({
 
   const openSelector = () => {
     setQuery('');
+    layoutViewportHeightRef.current = window.innerHeight;
     setViewportMetrics(
-      resolvePickerViewportMetrics(window.visualViewport, window.innerHeight),
+      resolvePickerViewportMetrics(
+        window.visualViewport,
+        layoutViewportHeightRef.current,
+      ),
     );
     setIsOpen(true);
   };
 
   const pickerViewportStyle: PickerViewportStyle = {
-    '--picker-viewport-height': `${viewportMetrics.height}px`,
-    '--picker-viewport-offset-top': `${viewportMetrics.offsetTop}px`,
+    '--picker-keyboard-inset': `${viewportMetrics.keyboardInset}px`,
   };
 
   return (
@@ -242,7 +244,7 @@ export function PokemonSelector({
                   setQuery(event.target.value);
                   if (resultsRef.current) resultsRef.current.scrollTop = 0;
                 }}
-                placeholder="日本語名・図鑑番号で検索"
+                placeholder="ポケモン名・ローマ字で検索"
                 autoComplete="off"
                 enterKeyHint="search"
               />

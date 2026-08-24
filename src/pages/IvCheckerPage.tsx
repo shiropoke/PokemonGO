@@ -297,7 +297,6 @@ export function IvCheckerPage() {
         <div>
           <span className="page-kicker">個体値・PvP計算</span>
           <h1>個体値チェッカー</h1>
-          <p>個体値と強化条件から3リーグのPvP順位をまとめて確認できます。</p>
         </div>
       </header>
 

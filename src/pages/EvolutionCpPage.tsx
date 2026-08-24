@@ -7,6 +7,7 @@ import type { IndividualValues } from '../types/calculations';
 import type { Pokemon } from '../types/pokemon';
 import { getLevels } from '../utils/cp';
 import { calculateEvolutionCp } from '../utils/evolutionCp';
+import { getEvolutionDescendants } from '../utils/evolutionChain';
 import '../styles/tools.css';
 
 const SIMULATION_LEVELS = [40, 50, 51] as const;
@@ -58,10 +59,21 @@ export function EvolutionCpPage() {
   const selectedPokemon = speciesId ? pokemonById.get(speciesId) ?? null : null;
   const evolutionTargets = useMemo(() => {
     if (!speciesId || !toolData.gameData) return [];
-    return (toolData.gameData.pokemon[speciesId]?.evolutions ?? []).flatMap((target) => {
-      const pokemon = pokemonById.get(target.speciesId);
-      return pokemon ? [{ ...target, pokemon }] : [];
-    });
+    const directCandyCosts = new Map(
+      (toolData.gameData.pokemon[speciesId]?.evolutions ?? []).map((target) => [
+        target.speciesId,
+        target.candyCost,
+      ]),
+    );
+    return getEvolutionDescendants(speciesId, toolData.gameData, pokemonById).map(
+      (target) => ({
+        ...target,
+        // 直接進化以外へ、途中段階だけのアメ数を誤表示しない。
+        candyCost: target.depth === 1
+          ? directCandyCosts.get(target.speciesId)
+          : undefined,
+      }),
+    );
   }, [pokemonById, speciesId, toolData.gameData]);
 
   useEffect(() => {
@@ -75,7 +87,7 @@ export function EvolutionCpPage() {
   }, [evolutionTargets, targetSpeciesId]);
 
   const targetPokemon = targetSpeciesId
-    ? pokemonById.get(targetSpeciesId) ?? null
+    ? evolutionTargets.find((target) => target.speciesId === targetSpeciesId)?.pokemon ?? null
     : null;
   const result = useMemo(() => {
     if (!selectedPokemon || !targetPokemon) return null;
@@ -182,7 +194,10 @@ export function EvolutionCpPage() {
                   onClick={() => setTargetSpeciesId(target.speciesId)}
                 >
                   <strong>{target.pokemon.displayName}</strong>
-                  {target.candyCost ? <small>アメ {target.candyCost}</small> : null}
+                  <small>
+                    {target.depth}段階進化
+                    {target.candyCost ? `・アメ ${target.candyCost}` : ''}
+                  </small>
                 </button>
               ))}
             </div>

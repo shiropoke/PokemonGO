@@ -55,10 +55,105 @@ export interface GlobalSearchSource {
   raids: readonly RaidBoss[];
 }
 
+const HEPBURN_ROMAJI: Readonly<Record<string, string>> = {
+  きゃ: 'kya', きゅ: 'kyu', きょ: 'kyo',
+  しゃ: 'sha', しゅ: 'shu', しょ: 'sho',
+  ちゃ: 'cha', ちゅ: 'chu', ちょ: 'cho',
+  にゃ: 'nya', にゅ: 'nyu', にょ: 'nyo',
+  ひゃ: 'hya', ひゅ: 'hyu', ひょ: 'hyo',
+  みゃ: 'mya', みゅ: 'myu', みょ: 'myo',
+  りゃ: 'rya', りゅ: 'ryu', りょ: 'ryo',
+  ぎゃ: 'gya', ぎゅ: 'gyu', ぎょ: 'gyo',
+  じゃ: 'ja', じゅ: 'ju', じょ: 'jo',
+  びゃ: 'bya', びゅ: 'byu', びょ: 'byo',
+  ぴゃ: 'pya', ぴゅ: 'pyu', ぴょ: 'pyo',
+  てぃ: 'ti', でぃ: 'di', とぅ: 'tu', どぅ: 'du',
+  ふぁ: 'fa', ふぃ: 'fi', ふぇ: 'fe', ふぉ: 'fo',
+  うぃ: 'wi', うぇ: 'we', うぉ: 'wo',
+  ゔぁ: 'va', ゔぃ: 'vi', ゔぇ: 've', ゔぉ: 'vo',
+  あ: 'a', い: 'i', う: 'u', え: 'e', お: 'o',
+  か: 'ka', き: 'ki', く: 'ku', け: 'ke', こ: 'ko',
+  さ: 'sa', し: 'shi', す: 'su', せ: 'se', そ: 'so',
+  た: 'ta', ち: 'chi', つ: 'tsu', て: 'te', と: 'to',
+  な: 'na', に: 'ni', ぬ: 'nu', ね: 'ne', の: 'no',
+  は: 'ha', ひ: 'hi', ふ: 'fu', へ: 'he', ほ: 'ho',
+  ま: 'ma', み: 'mi', む: 'mu', め: 'me', も: 'mo',
+  や: 'ya', ゆ: 'yu', よ: 'yo',
+  ら: 'ra', り: 'ri', る: 'ru', れ: 're', ろ: 'ro',
+  わ: 'wa', を: 'wo', ん: 'n',
+  が: 'ga', ぎ: 'gi', ぐ: 'gu', げ: 'ge', ご: 'go',
+  ざ: 'za', じ: 'ji', ず: 'zu', ぜ: 'ze', ぞ: 'zo',
+  だ: 'da', ぢ: 'ji', づ: 'zu', で: 'de', ど: 'do',
+  ば: 'ba', び: 'bi', ぶ: 'bu', べ: 'be', ぼ: 'bo',
+  ぱ: 'pa', ぴ: 'pi', ぷ: 'pu', ぺ: 'pe', ぽ: 'po',
+  ゔ: 'vu', ぁ: 'a', ぃ: 'i', ぅ: 'u', ぇ: 'e', ぉ: 'o',
+};
+
+const KUNREI_ROMAJI: Readonly<Record<string, string>> = {
+  ...HEPBURN_ROMAJI,
+  しゃ: 'sya', しゅ: 'syu', しょ: 'syo',
+  ちゃ: 'tya', ちゅ: 'tyu', ちょ: 'tyo',
+  じゃ: 'zya', じゅ: 'zyu', じょ: 'zyo',
+  し: 'si', ち: 'ti', つ: 'tu', ふ: 'hu', じ: 'zi',
+  ぢ: 'zi', づ: 'zu',
+};
+
+export function katakanaToHiragana(value: string): string {
+  return value.replace(/[ァ-ヶ]/g, (character) =>
+    String.fromCharCode(character.charCodeAt(0) - 0x60));
+}
+
+function kanaToRomaji(value: string, map: Readonly<Record<string, string>>): string {
+  let result = '';
+  for (let index = 0; index < value.length; index += 1) {
+    const character = value[index] ?? '';
+    if (character === 'ー') {
+      const lastVowel = result.match(/[aeiou](?!.*[aeiou])/i)?.[0];
+      result += lastVowel ?? '';
+      continue;
+    }
+
+    const pair = value.slice(index, index + 2);
+    const syllable = map[pair] ?? map[character];
+    if (character === 'っ') {
+      const nextPair = value.slice(index + 1, index + 3);
+      const nextSyllable = map[nextPair] ?? map[value[index + 1] ?? ''] ?? '';
+      const consonant = nextSyllable.match(/^[^aeiou]/)?.[0];
+      result += consonant ?? '';
+      continue;
+    }
+    if (map[pair]) index += 1;
+    result += syllable ?? character;
+  }
+  return result;
+}
+
+function collapseLongVowels(value: string): string {
+  return value.replace(/([aeiou])\1+/g, '$1');
+}
+
+/** 表示文字列から、かな表記と一般的なローマ字表記揺れを検索専用aliasにする。 */
+export function createSearchAliases(value: string): string[] {
+  const normalized = normalizeSearchText(value);
+  if (!normalized) return [];
+
+  const aliases = new Set<string>([normalized]);
+  if (/[ぁ-ゖ]/.test(normalized)) {
+    for (const map of [HEPBURN_ROMAJI, KUNREI_ROMAJI]) {
+      const romaji = kanaToRomaji(normalized, map);
+      aliases.add(romaji);
+      aliases.add(collapseLongVowels(romaji));
+      // 「レイド」を raido と入力するような、外来語の一般的な入力差も許容する。
+      aliases.add(romaji.replaceAll('ei', 'ai'));
+    }
+  }
+  return [...aliases].filter(Boolean);
+}
+
 export function normalizeSearchText(value: string): string {
-  return value
+  return katakanaToHiragana(value
     .normalize('NFKC')
-    .toLocaleLowerCase('ja-JP')
+    .toLocaleLowerCase('ja-JP'))
     .replaceAll('_', ' ')
     .replace(/[()（）\-‐‑‒–—]/g, ' ')
     .replace(/\s+/g, ' ')
@@ -72,19 +167,21 @@ export function getSearchMatchRank(
   const normalizedQuery = normalizeSearchText(query);
   if (!normalizedQuery) return null;
 
-  const normalizedCandidates = candidates
-    .map(normalizeSearchText)
-    .filter(Boolean);
-  if (normalizedCandidates.some((candidate) => candidate === normalizedQuery)) {
+  const queryAliases = createSearchAliases(query);
+  const candidateAliases = [...new Set(candidates.flatMap(createSearchAliases))];
+  if (queryAliases.some((alias) => candidateAliases.includes(alias))) {
     return 0;
   }
-  if (normalizedCandidates.some((candidate) => candidate.startsWith(normalizedQuery))) {
+  if (queryAliases.some((queryAlias) =>
+    candidateAliases.some((candidate) => candidate.startsWith(queryAlias)))) {
     return 1;
   }
 
-  const words = normalizedQuery.split(' ');
-  const combinedTarget = normalizedCandidates.join(' ');
-  return words.every((word) => combinedTarget.includes(word)) ? 2 : null;
+  const combinedTarget = candidateAliases.join(' ');
+  return queryAliases.some((queryAlias) =>
+    queryAlias.split(' ').every((word) => combinedTarget.includes(word)))
+    ? 2
+    : null;
 }
 
 function pokemonCandidates(pokemon: Pokemon): string[] {

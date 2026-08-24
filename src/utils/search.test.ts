@@ -23,6 +23,22 @@ const costumePikachu: Pokemon = {
   form: 'そらをとぶ・5周年',
 };
 
+const bulbasaur: Pokemon = {
+  ...pikachu,
+  dex: 1,
+  speciesId: 'bulbasaur',
+  speciesName: 'Bulbasaur',
+  displayName: 'フシギダネ',
+};
+
+const charizard: Pokemon = {
+  ...pikachu,
+  dex: 6,
+  speciesId: 'charizard',
+  speciesName: 'Charizard',
+  displayName: 'リザードン',
+};
+
 const event: ScrapedDuckEvent = {
   eventID: 'pikachu-hour',
   name: 'Pikachu Spotlight Hour',
@@ -49,7 +65,11 @@ const raid: RaidBoss = {
   image: null,
 };
 
-const source = { pokemon: [costumePikachu, pikachu], events: [event], raids: [raid] };
+const source = {
+  pokemon: [costumePikachu, pikachu, bulbasaur, charizard],
+  events: [event],
+  raids: [raid],
+};
 
 describe('共通Pokémon検索', () => {
   it('完全一致をフォーム違いの部分一致より先にする', () => {
@@ -64,6 +84,22 @@ describe('共通Pokémon検索', () => {
       .toBe('pikachu_flying_5th_anniv');
     expect(searchPokemon(source.pokemon, '025')[0]?.pokemon.speciesId).toBe('pikachu');
   });
+
+  it.each(['ピカチュウ', 'ぴかちゅう', 'pikachu', 'pikatyu'])(
+    '%s をピカチュウの完全一致相当として検索できる',
+    (query) => {
+      expect(searchPokemon(source.pokemon, query)[0]?.pokemon.speciesId).toBe('pikachu');
+      expect(searchPokemon(source.pokemon, query)[0]?.rank).toBe(0);
+    },
+  );
+
+  it.each([
+    ['ふしぎだね', 'bulbasaur'],
+    ['fushigidane', 'bulbasaur'],
+    ['りざーどん', 'charizard'],
+  ])('%s で日本語名の表記違いを検索できる', (query, speciesId) => {
+    expect(searchPokemon(source.pokemon, query)[0]?.pokemon.speciesId).toBe(speciesId);
+  });
 });
 
 describe('グローバル検索', () => {
@@ -76,6 +112,7 @@ describe('グローバル検索', () => {
 
   it('サイト内ページの別名を検索できる', () => {
     expect(searchGlobalData(source, '強化').pages[0]?.page).toBe('power-up');
+    expect(searchGlobalData(source, 'raido').pages[0]?.page).toBe('raids');
   });
 
   it('該当なしでは全カテゴリが0件になる', () => {

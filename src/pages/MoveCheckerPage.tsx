@@ -95,7 +95,6 @@ export function MoveCheckerPage() {
         <div>
           <span className="page-kicker">技データ</span>
           <h1>わざ性能</h1>
-          <p>現在のGame Masterに収録されたジム・レイドとPvPの性能を比較できます。</p>
         </div>
       </header>
 
