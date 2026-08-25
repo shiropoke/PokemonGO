@@ -11,6 +11,7 @@ import { HomePage } from './pages/HomePage';
 import { IvCheckerPage } from './pages/IvCheckerPage';
 import { MoveCheckerPage } from './pages/MoveCheckerPage';
 import { PowerUpPage } from './pages/PowerUpPage';
+import { PokefutaPage } from './pages/PokefutaPage';
 import { PvpRankingsPage } from './pages/PvpRankingsPage';
 import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage';
 import { RaidsPage } from './pages/RaidsPage';
@@ -30,7 +31,7 @@ import {
   saveTheme,
 } from './services/theme';
 import type { Theme } from './services/theme';
-import { getPageFromHash, getPageHash, getPageTitle } from './types/navigation';
+import { getHashQueryParam, getPageFromHash, getPageHash, getPageTitle } from './types/navigation';
 import type { NavigationQuery, Page } from './types/navigation';
 import {
   getMainTabTransitionDirection,
@@ -71,6 +72,12 @@ function renderPage(page: Page, onNavigate: NavigateHandler) {
     case 'research': return <ResearchPage />;
     case 'eggs': return <EggsPage />;
     case 'rocket': return <RocketPage />;
+    case 'pokefuta': return (
+      <PokefutaPage
+        prefectureSlug={getHashQueryParam(window.location.hash, 'pref')}
+        onNavigate={onNavigate}
+      />
+    );
     case 'favorites': return <FavoritesPage onNavigate={onNavigate} />;
     case 'terms': return <TermsPage />;
     case 'privacy': return <PrivacyPolicyPage />;

@@ -32,6 +32,9 @@ jobs:
       - name: Refresh Rocket dialogues
         continue-on-error: true
         run: npm run data:rocket-dialogues
+      - name: Refresh Poké Lids data
+        continue-on-error: true
+        run: npm run data:pokefuta
       - name: Generate compact Pokémon data
         continue-on-error: true
         run: npm run data:pokemon

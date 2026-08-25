@@ -115,6 +115,8 @@ describe('グローバル検索', () => {
     expect(searchGlobalData(source, 'raido').pages[0]?.page).toBe('raids');
     expect(searchGlobalData(source, '連絡').pages[0]?.page).toBe('contact');
     expect(searchGlobalData(source, '問い合わせ').pages[0]?.page).toBe('contact');
+    expect(searchGlobalData(source, 'マンホール').pages[0]?.page).toBe('pokefuta');
+    expect(searchGlobalData(source, 'ポケモンマンホール').pages[0]?.page).toBe('pokefuta');
   });
 
   it('該当なしでは全カテゴリが0件になる', () => {
@@ -132,6 +134,7 @@ describe('グローバル検索', () => {
       'raids',
       'iv',
       'pvp-rankings',
+      'pokefuta',
     ]);
   });
 });

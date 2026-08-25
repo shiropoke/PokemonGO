@@ -94,6 +94,14 @@ export const SITE_PAGES: readonly SitePageDefinition[] = [
     keywords: ['ロケット団', 'したっぱ', 'リーダー', 'サカキ'],
   },
   {
+    page: 'pokefuta',
+    label: 'ポケふた',
+    group: 'other',
+    primary: false,
+    popularSearch: true,
+    keywords: ['ポケふた', 'ポケモンマンホール', 'マンホール', 'ご当地', '都道府県', '設置場所'],
+  },
+  {
     page: 'favorites',
     label: 'お気に入り',
     group: 'other',

@@ -39,6 +39,13 @@ describe('hash navigation', () => {
     expect(getPageTitle('contact')).toBe('お問い合わせ | GO Scope');
   });
 
+  it('ポケふたのhash・query・titleを生成・解析する', () => {
+    expect(getPageHash('pokefuta')).toBe('#/pokefuta');
+    expect(getPageHash('pokefuta', { pref: 'osaka' })).toBe('#/pokefuta?pref=osaka');
+    expect(getPageFromHash('#/pokefuta?pref=osaka')).toBe('pokefuta');
+    expect(getPageTitle('pokefuta')).toBe('ポケふた | GO Scope');
+  });
+
   it('空または未知のhashはホームへ戻す', () => {
     expect(getPageFromHash('')).toBe('home');
     expect(getPageFromHash('#/unknown')).toBe('home');
