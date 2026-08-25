@@ -100,6 +100,13 @@ export const SITE_PAGES: readonly SitePageDefinition[] = [
     primary: false,
     keywords: ['ウォッチリスト', '保存'],
   },
+  {
+    page: 'contact',
+    label: 'お問い合わせ',
+    group: 'other',
+    primary: false,
+    keywords: ['問い合わせ', 'お問い合わせ', '連絡', '不具合報告', '要望'],
+  },
 ] as const;
 
 function navigationLinks(
@@ -111,4 +118,3 @@ function navigationLinks(
 export const PRIMARY_LINKS = navigationLinks(({ primary }) => primary);
 export const TOOL_LINKS = navigationLinks(({ group }) => group === 'tools');
 export const OTHER_LINKS = navigationLinks(({ group }) => group === 'other');
-

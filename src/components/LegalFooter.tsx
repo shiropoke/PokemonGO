@@ -11,6 +11,8 @@ export function LegalFooter({ onNavigate }: LegalFooterProps) {
       <InternalLink page="terms" onNavigate={onNavigate}>利用規約</InternalLink>
       <span aria-hidden="true">｜</span>
       <InternalLink page="privacy" onNavigate={onNavigate}>プライバシーポリシー</InternalLink>
+      <span aria-hidden="true">｜</span>
+      <InternalLink page="contact" onNavigate={onNavigate}>お問い合わせ</InternalLink>
     </nav>
   );
 }

@@ -33,6 +33,12 @@ describe('hash navigation', () => {
     );
   });
 
+  it('お問い合わせのhashとtitleを生成・解析する', () => {
+    expect(getPageHash('contact')).toBe('#/contact');
+    expect(getPageFromHash('#/contact')).toBe('contact');
+    expect(getPageTitle('contact')).toBe('お問い合わせ | GO Scope');
+  });
+
   it('空または未知のhashはホームへ戻す', () => {
     expect(getPageFromHash('')).toBe('home');
     expect(getPageFromHash('#/unknown')).toBe('home');

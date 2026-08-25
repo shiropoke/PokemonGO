@@ -51,6 +51,7 @@ export function TermsPage() {
             本サイトでは、ScrapedDuck、Leek Duck、PvPoke、PokeMiners、PokeAPI、GitHub等が提供する
             データ、画像またはリンクを利用する場合があります。外部サイトへ移動した後は、
             各外部サービスの利用規約およびプライバシーポリシーが適用されます。
+            また、お問い合わせ機能の処理にはGoogle Apps Script等のGoogleサービスを利用します。
           </p>
         </section>
 

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react
 import { PrimaryNavigation, SideDrawer, SiteHeader } from './components/AppNavigation';
 import { GlobalSearchDialog } from './components/GlobalSearchDialog';
 import { LegalFooter } from './components/LegalFooter';
+import { ContactPage } from './pages/ContactPage';
 import { EventsPage } from './pages/EventsPage';
 import { EggsPage } from './pages/EggsPage';
 import { EvolutionCpPage } from './pages/EvolutionCpPage';
@@ -73,6 +74,7 @@ function renderPage(page: Page, onNavigate: NavigateHandler) {
     case 'favorites': return <FavoritesPage onNavigate={onNavigate} />;
     case 'terms': return <TermsPage />;
     case 'privacy': return <PrivacyPolicyPage />;
+    case 'contact': return <ContactPage onNavigate={onNavigate} />;
   }
 }
 

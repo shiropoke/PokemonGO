@@ -113,6 +113,8 @@ describe('グローバル検索', () => {
   it('サイト内ページの別名を検索できる', () => {
     expect(searchGlobalData(source, '強化').pages[0]?.page).toBe('power-up');
     expect(searchGlobalData(source, 'raido').pages[0]?.page).toBe('raids');
+    expect(searchGlobalData(source, '連絡').pages[0]?.page).toBe('contact');
+    expect(searchGlobalData(source, '問い合わせ').pages[0]?.page).toBe('contact');
   });
 
   it('該当なしでは全カテゴリが0件になる', () => {

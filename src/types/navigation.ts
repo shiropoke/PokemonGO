@@ -12,7 +12,8 @@ export type Page =
   | 'rocket'
   | 'favorites'
   | 'terms'
-  | 'privacy';
+  | 'privacy'
+  | 'contact';
 
 export const PAGE_PATHS: Record<Page, string> = {
   home: 'home',
@@ -29,6 +30,7 @@ export const PAGE_PATHS: Record<Page, string> = {
   favorites: 'favorites',
   terms: 'terms',
   privacy: 'privacy',
+  contact: 'contact',
 };
 
 export type NavigationQuery = Record<
@@ -77,6 +79,7 @@ const PAGE_TITLES: Record<Page, string> = {
   favorites: 'お気に入り | GO Scope',
   terms: '利用規約 | GO Scope',
   privacy: 'プライバシーポリシー | GO Scope',
+  contact: 'お問い合わせ | GO Scope',
 };
 
 export function getPageTitle(page: Page): string {
