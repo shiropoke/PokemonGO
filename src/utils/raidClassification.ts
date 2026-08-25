@@ -8,7 +8,7 @@ export interface RaidTierGroup {
   raids: RaidBoss[];
 }
 
-export type RaidFilter = 'all' | 'five' | 'mega' | 'three' | 'one';
+export type RaidFilter = 'all' | 'five' | 'mega' | 'three' | 'one' | 'shadow';
 
 interface RaidTierDefinition {
   key: string;
@@ -95,9 +95,15 @@ export function filterRaidTierGroups(
   groups: readonly RaidTierGroup[],
   filter: RaidFilter,
 ): RaidTierGroup[] {
-  return filter === 'all'
-    ? [...groups]
-    : groups.filter((group) => group.key === filter);
+  if (filter === 'all') return [...groups];
+  if (filter !== 'shadow') return groups.filter((group) => group.key === filter);
+
+  return groups
+    .map((group) => ({
+      ...group,
+      raids: group.raids.filter((raid) => raid.isShadow),
+    }))
+    .filter((group) => group.raids.length > 0);
 }
 
 export function resolveRaidFilterForTarget(

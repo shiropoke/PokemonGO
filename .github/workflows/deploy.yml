@@ -4,6 +4,8 @@ on:
   push:
     branches: [main, master]
   workflow_dispatch:
+  schedule:
+    - cron: '17 */6 * * *'
 
 permissions:
   contents: read
@@ -27,6 +29,9 @@ jobs:
           cache: npm
       - name: Install dependencies
         run: npm ci
+      - name: Refresh Rocket dialogues
+        continue-on-error: true
+        run: npm run data:rocket-dialogues
       - name: Generate compact Pokémon data
         continue-on-error: true
         run: npm run data:pokemon

@@ -32,6 +32,7 @@ interface PokemonSelectorProps {
   error?: string | null;
   onSelect: (pokemon: Pokemon) => void;
   onRetry: () => void;
+  idleHint?: string | null;
 }
 
 function SearchIcon() {
@@ -66,6 +67,7 @@ export function PokemonSelector({
   error,
   onSelect,
   onRetry,
+  idleHint = '名前で検索できます',
 }: PokemonSelectorProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState('');
@@ -189,9 +191,11 @@ export function PokemonSelector({
               図鑑No. {selectedPokemon.dex || '—'}
               {selectedPokemon.isShadow ? ' ・ シャドウ' : ''}
             </small>
-          ) : (
-            <small>{loading ? 'データを読み込んでいます' : '名前で検索できます'}</small>
-          )}
+          ) : loading ? (
+            <small>データを読み込んでいます</small>
+          ) : idleHint ? (
+            <small>{idleHint}</small>
+          ) : null}
         </span>
         <ChevronIcon />
       </button>

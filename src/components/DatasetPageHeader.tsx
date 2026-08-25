@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { formatLastUpdated } from '../utils/date';
 
 interface DatasetPageHeaderProps {
-  eyebrow: string;
+  eyebrow?: string;
   title: string;
   fetchedAt?: number;
   refreshing?: boolean;
@@ -21,7 +21,7 @@ export function DatasetPageHeader({
   return (
     <header className="page-heading dataset-page__heading">
       <div>
-        <p className="page-heading__eyebrow">{eyebrow}</p>
+        {eyebrow ? <p className="page-heading__eyebrow">{eyebrow}</p> : null}
         <h1>{title}</h1>
       </div>
       {fetchedAt !== undefined ? (

@@ -169,7 +169,7 @@ function localizeResearchObject(value: string): string {
     return '種類が異なるポケモン';
   }
   if (/^Pok[eé]mon with Weather Boost$/i.test(normalized)) {
-    return '天候ブースト中のポケモン';
+    return '天候ブーストを受けているポケモン';
   }
 
   const typeMatch = /^(.+)-type Pok[eé]mon$/i.exec(normalized);
@@ -180,36 +180,91 @@ function localizeResearchObject(value: string): string {
   return localizeExternalPokemonName(normalized);
 }
 
-/** 現行データで確認できた定型タスクのみ翻訳し、未知文は英語へ戻します。 */
+/** PokeMinersの同一quest localization keyで確認できた定型だけを日本語化します。 */
 export function localizeResearchText(value: string): string {
   const text = stripExternalMarkup(value);
   if (!text) return 'タスク内容不明';
 
+  const differentSpeciesMatch = /^Catch (\d+) different species of Pok[eé]mon$/i.exec(text);
+  if (differentSpeciesMatch?.[1]) {
+    // quest_catch_plural_unique
+    return `ポケモンを${differentSpeciesMatch[1]}種類捕まえる`;
+  }
+
   const catchMatch = /^Catch (\d+) (.+?)( while in a Party)?$/i.exec(text);
   if (catchMatch?.[1] && catchMatch[2]) {
     const party = catchMatch[3] ? '（パーティープレイ中）' : '';
-    return `${localizeResearchObject(catchMatch[2])}を${catchMatch[1]}匹つかまえる${party}`;
+    return `${localizeResearchObject(catchMatch[2])}を${catchMatch[1]}匹捕まえる${party}`;
   }
 
-  const throwMatch = /^Make (\d+) (Nice|Great|Excellent) Throws?( in a row)?$/i.exec(text);
-  if (throwMatch?.[1] && throwMatch[2]) {
-    const quality = { Nice: 'ナイス', Great: 'グレート', Excellent: 'エクセレント' }[
-      throwMatch[2] as 'Nice' | 'Great' | 'Excellent'
-    ];
-    return `${quality}スローを${throwMatch[1]}回${throwMatch[3] ? '連続で' : ''}投げる`;
+  const catchSingularMatch = /^Catch (?:a|an) (.+?)( while in a Party)?$/i.exec(text);
+  if (catchSingularMatch?.[1]) {
+    const party = catchSingularMatch[2] ? '（パーティープレイ中）' : '';
+    return `${localizeResearchObject(catchSingularMatch[1])}を1匹捕まえる${party}`;
+  }
+
+  const throwMatch = /^Make (\d+) (?:(Nice|Great|Excellent) )?(Curveball )?Throws?( in a row)?$/i.exec(text);
+  if (throwMatch?.[1]) {
+    const qualityKey = throwMatch[2]?.toLowerCase() as 'nice' | 'great' | 'excellent' | undefined;
+    const quality = qualityKey ? {
+      nice: 'ナイス',
+      great: 'グレート',
+      excellent: 'エクセレント',
+    }[qualityKey] : '';
+    const throwName = throwMatch[3]
+      ? quality ? `カーブボールの${quality}スロー` : 'カーブボール'
+      : `${quality}スロー`;
+    return `${throwName}を${throwMatch[1]}回${throwMatch[4] ? '連続で' : ''}投げる`;
   }
 
   const exploreMatch = /^Explore (\d+(?:\.\d+)?) km$/i.exec(text);
-  if (exploreMatch?.[1]) return `${exploreMatch[1]} km探索する`;
+  if (exploreMatch?.[1]) return `${exploreMatch[1]}km 探索する`;
 
   const walkMatch = /^Walk (\d+(?:\.\d+)?) km$/i.exec(text);
-  if (walkMatch?.[1]) return `${walkMatch[1]} km歩く`;
+  if (walkMatch?.[1]) return `${walkMatch[1]}km歩く`;
+
+  const spinMatch = /^Spin (\d+) Pok[eé]Stops or Gyms$/i.exec(text);
+  if (spinMatch?.[1]) return `ポケストップ・ジム${spinMatch[1]}個を回す`;
+
+  if (/^Win a three-star raid or higher$/i.test(text)) {
+    return 'レベル3以上のレイドに1回勝つ';
+  }
+  if (/^Win a raid$/i.test(text)) return 'レイドバトルで1回勝つ';
+  const winRaidsMatch = /^Win (\d+) raids$/i.exec(text);
+  if (winRaidsMatch?.[1]) return `レイドバトルで${winRaidsMatch[1]}回勝つ`;
+
+  if (/^Hatch (?:an|a) Egg$/i.test(text)) return 'タマゴを1個かえす';
+  const hatchMatch = /^Hatch (\d+) Eggs$/i.exec(text);
+  if (hatchMatch?.[1]) return `タマゴを${hatchMatch[1]}個かえす`;
+
+  if (/^Take a snapshot of a wild Pok[eé]mon$/i.test(text)) {
+    return '野生ポケモンのGOスナップショット写真を撮る';
+  }
+  if (/^Evolve a Pok[eé]mon$/i.test(text)) return 'ポケモンを1匹進化させる';
+
+  const powerUpMatch = /^Power up Pok[eé]mon (\d+) times$/i.exec(text);
+  if (powerUpMatch?.[1]) return `ポケモンを${powerUpMatch[1]}回強化する`;
+
+  const buddyCandyMatch = /^Earn (\d+) Candies walking with your buddy$/i.exec(text);
+  if (buddyCandyMatch?.[1]) return `相棒と歩いてアメを${buddyCandyMatch[1]}個もらう`;
+
+  const giftStickerMatch = /^Send (\d+) Gifts and add a sticker to each$/i.exec(text);
+  if (giftStickerMatch?.[1]) return `ステッカー付きのギフトを${giftStickerMatch[1]}個贈る`;
+
+  if (/^Trade a Pok[eé]mon$/i.test(text)) return 'ポケモンを交換する';
 
   if (/^Defeat a Team GO Rocket Grunt$/i.test(text)) {
-    return 'GOロケット団のしたっぱに1回勝つ';
+    return 'GOロケット団したっぱとのバトルで1回勝つ';
   }
 
   return replacePokemonNamesInText(text);
+}
+
+export function isLikelyUntranslatedResearchText(value: string): boolean {
+  const localized = localizeResearchText(value)
+    .replace(/Pok[eé]mon GO Plus \+|Pok[eé]mon GO|GOロケット団|GOスナップショット|km|CP|AR/gi, ' ');
+  const englishWords = localized.match(/\b[A-Za-z][A-Za-z'’-]{2,}\b/g) ?? [];
+  return englishWords.length >= 2;
 }
 
 export function getTypeLabelJa(type: string): string {

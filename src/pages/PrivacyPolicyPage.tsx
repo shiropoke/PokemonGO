@@ -2,7 +2,6 @@ export function PrivacyPolicyPage() {
   return (
     <article className="legal-page">
       <header className="legal-page__heading">
-        <span>サイトポリシー</span>
         <h1>プライバシーポリシー</h1>
       </header>
 

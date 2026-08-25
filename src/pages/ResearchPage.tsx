@@ -1,6 +1,7 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { DatasetImage } from '../components/DatasetImage';
 import { FavoriteButton } from '../components/FavoriteButton';
+import { FilterChips } from '../components/FilterChips';
 import { RefreshButton } from '../components/RefreshButton';
 import {
   DatasetError,
@@ -12,10 +13,15 @@ import {
 import { useCachedDataset } from '../hooks/useCachedDataset';
 import { loadResearch } from '../services/scrapedDuck';
 import type { FieldResearchTask } from '../types/scrapedDuck';
+import {
+  buildResearchFilterOptions,
+  filterResearchTasks,
+  RESEARCH_FILTER_ALL,
+  resolveResearchFilter,
+  type ResearchFilter,
+} from '../utils/researchFilters';
 import { getResearchTypeLabel, resolveExternalPokemonSpeciesId } from '../utils/scrapedDuckLocalization';
 import '../styles/data-pages.css';
-
-type ResearchFilter = 'all' | 'pokemon' | 'event';
 
 function ResearchCard({ task }: { task: FieldResearchTask }) {
   return (
@@ -55,19 +61,24 @@ function ResearchCard({ task }: { task: FieldResearchTask }) {
 
 export function ResearchPage() {
   const state = useCachedDataset(loadResearch);
-  const [filter, setFilter] = useState<ResearchFilter>('all');
-  const hasEventTasks = state.result?.data.some((task) => task.type === 'event') ?? false;
-  const tasks = useMemo(() => {
-    const all = state.result?.data ?? [];
-    if (filter === 'pokemon') return all.filter((task) => task.rewards.length > 0);
-    if (filter === 'event') return all.filter((task) => task.type === 'event');
-    return all;
-  }, [filter, state.result]);
+  const [filter, setFilter] = useState<ResearchFilter>(RESEARCH_FILTER_ALL);
+  const filterOptions = useMemo(
+    () => buildResearchFilterOptions(state.result?.data ?? []),
+    [state.result],
+  );
+  const resolvedFilter = resolveResearchFilter(filter, filterOptions);
+  const tasks = useMemo(
+    () => filterResearchTasks(state.result?.data ?? [], resolvedFilter),
+    [resolvedFilter, state.result],
+  );
+
+  useEffect(() => {
+    if (filter !== resolvedFilter) setFilter(resolvedFilter);
+  }, [filter, resolvedFilter]);
 
   return (
     <div className="dataset-page research-page">
       <DatasetPageHeader
-        eyebrow="現在のタスクと報酬"
         title="フィールドリサーチ"
         fetchedAt={state.result?.fetchedAt}
         action={<RefreshButton />}
@@ -79,13 +90,13 @@ export function ResearchPage() {
 
       {state.result ? (
         <>
-          <div className="dataset-filters" aria-label="報酬で絞り込み">
-            <button type="button" className={filter === 'all' ? 'is-active' : ''} onClick={() => setFilter('all')}>すべて</button>
-            <button type="button" className={filter === 'pokemon' ? 'is-active' : ''} onClick={() => setFilter('pokemon')}>ポケモン</button>
-            {hasEventTasks ? (
-              <button type="button" className={filter === 'event' ? 'is-active' : ''} onClick={() => setFilter('event')}>イベント限定</button>
-            ) : null}
-          </div>
+          <FilterChips<ResearchFilter>
+            ariaLabel="リサーチ種類フィルター"
+            className="research-filters"
+            options={filterOptions}
+            selected={resolvedFilter}
+            onChange={setFilter}
+          />
           <div className="research-list" aria-busy={state.refreshing}>
             {tasks.length > 0 ? tasks.map((task) => <ResearchCard task={task} key={task.id} />) : (
               <p className="dataset-empty">条件に合うリサーチはありません。</p>
@@ -93,10 +104,6 @@ export function ResearchPage() {
           </div>
         </>
       ) : null}
-
-      <p className="dataset-page__scope-note">
-        現行データの報酬はポケモン形式のみです。ほしのすな・アイテムは判別可能なデータがないため分類していません。
-      </p>
       <ScrapedDuckCredit />
     </div>
   );

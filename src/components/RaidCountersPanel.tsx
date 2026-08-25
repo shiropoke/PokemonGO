@@ -12,6 +12,9 @@ interface RaidCountersPanelProps {
   bossTypes: string[];
 }
 
+export const DEFAULT_RAID_COUNTER_LEVEL = 50 as const;
+export const RAID_COUNTER_LEVELS = [40, 50] as const;
+
 function moveLabel(move: { name: string; elite: boolean }): string {
   return `${move.name}${move.elite ? '（エリート技）' : ''}`;
 }
@@ -22,7 +25,7 @@ export function RaidCountersPanel({
   bossTypes,
 }: RaidCountersPanelProps) {
   const [open, setOpen] = useState(false);
-  const [level, setLevel] = useState<40 | 50>(40);
+  const [level, setLevel] = useState<40 | 50>(DEFAULT_RAID_COUNTER_LEVEL);
   const [includeMega, setIncludeMega] = useState(true);
   const [includeShadow, setIncludeShadow] = useState(true);
   const [requestVersion, setRequestVersion] = useState(0);
@@ -94,8 +97,16 @@ export function RaidCountersPanel({
           <div className="raid-counter-controls">
             <fieldset>
               <legend>強化レベル</legend>
-              <button type="button" className={level === 40 ? 'is-active' : ''} onClick={() => setLevel(40)}>PL40</button>
-              <button type="button" className={level === 50 ? 'is-active' : ''} onClick={() => setLevel(50)}>PL50</button>
+              {RAID_COUNTER_LEVELS.map((candidateLevel) => (
+                <button
+                  key={candidateLevel}
+                  type="button"
+                  className={level === candidateLevel ? 'is-active' : ''}
+                  onClick={() => setLevel(candidateLevel)}
+                >
+                  PL{candidateLevel}
+                </button>
+              ))}
             </fieldset>
             <label><input type="checkbox" checked={includeMega} onChange={(event) => setIncludeMega(event.target.checked)} />メガ・ゲンシを含む</label>
             <label><input type="checkbox" checked={includeShadow} onChange={(event) => setIncludeShadow(event.target.checked)} />シャドウを含む</label>

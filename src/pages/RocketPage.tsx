@@ -1,5 +1,6 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { DatasetImage } from '../components/DatasetImage';
+import { FilterChips } from '../components/FilterChips';
 import {
   DatasetError,
   DatasetPageHeader,
@@ -12,8 +13,15 @@ import { TypeBadge } from '../components/TypeBadge';
 import { useCachedDataset } from '../hooks/useCachedDataset';
 import { loadRocketLineups } from '../services/scrapedDuck';
 import type { RocketLineup, RocketPokemon } from '../types/scrapedDuck';
-import { getTypeLabelJa } from '../utils/scrapedDuckLocalization';
-import { matchesSearchQuery } from '../utils/search';
+import {
+  buildRocketDialogueOptions,
+  buildRocketTypeOptions,
+  filterRocketLineups,
+  ROCKET_DIALOGUE_ALL,
+  ROCKET_TYPE_ALL,
+  type RocketDialogueFilter,
+  type RocketTypeFilter,
+} from '../utils/rocketFilters';
 import { rankCounterTypes } from '../utils/typeEffectiveness';
 import '../styles/data-pages.css';
 
@@ -46,7 +54,7 @@ function RocketSlot({ number, pokemon }: { number: number; pokemon: RocketPokemo
   );
 }
 
-function RocketCard({ lineup }: { lineup: RocketLineup }) {
+export function RocketCard({ lineup }: { lineup: RocketLineup }) {
   const allPokemon = [
     ...lineup.firstPokemon,
     ...lineup.secondPokemon,
@@ -63,6 +71,16 @@ function RocketCard({ lineup }: { lineup: RocketLineup }) {
         </div>
         {lineup.type ? <TypeBadge type={lineup.type} variant="compact" /> : null}
       </header>
+      {lineup.dialogues.length > 0 ? (
+        <section className="rocket-card__dialogues" aria-label={`${lineup.displayName}のセリフ`}>
+          <strong>セリフ</strong>
+          <div>
+            {lineup.dialogues.map((dialogue) => (
+              <blockquote key={dialogue}><q>{dialogue}</q></blockquote>
+            ))}
+          </div>
+        </section>
+      ) : null}
       {counterTypes.length > 0 ? (
         <div className="rocket-card__counter-types">
           <strong>おすすめ対策タイプ</strong>
@@ -81,29 +99,21 @@ function RocketCard({ lineup }: { lineup: RocketLineup }) {
   );
 }
 
-export function lineupMatches(lineup: RocketLineup, query: string): boolean {
-  const pokemon = [
-    ...lineup.firstPokemon,
-    ...lineup.secondPokemon,
-    ...lineup.thirdPokemon,
-  ];
-  return matchesSearchQuery(query, [
-    lineup.name,
-    lineup.displayName,
-    lineup.title,
-    lineup.titleLabel,
-    lineup.type ?? '',
-    lineup.type ? getTypeLabelJa(lineup.type) : '',
-    ...pokemon.flatMap((candidate) => [candidate.name, candidate.displayName]),
-  ]);
-}
-
 export function RocketPage() {
   const state = useCachedDataset(loadRocketLineups);
   const [query, setQuery] = useState('');
+  const [typeFilter, setTypeFilter] = useState<RocketTypeFilter>(ROCKET_TYPE_ALL);
+  const [dialogueFilter, setDialogueFilter] = useState<RocketDialogueFilter>(ROCKET_DIALOGUE_ALL);
+  const allLineups = state.result?.data ?? [];
+  const typeOptions = useMemo(() => buildRocketTypeOptions(allLineups), [allLineups]);
+  const dialogueOptions = useMemo(() => buildRocketDialogueOptions(allLineups), [allLineups]);
   const lineups = useMemo(
-    () => (state.result?.data ?? []).filter((lineup) => lineupMatches(lineup, query)),
-    [query, state.result],
+    () => filterRocketLineups(allLineups, {
+      query,
+      type: typeFilter,
+      dialogue: dialogueFilter,
+    }),
+    [allLineups, dialogueFilter, query, typeFilter],
   );
   const sections = useMemo(() => {
     const knownTitles = new Set(ROCKET_GROUPS.map(([title]) => title));
@@ -118,10 +128,30 @@ export function RocketPage() {
       : known;
   }, [lineups]);
 
+  useEffect(() => {
+    if (!typeOptions.some((option) => option.value === typeFilter)) {
+      setTypeFilter(ROCKET_TYPE_ALL);
+    }
+  }, [typeFilter, typeOptions]);
+
+  useEffect(() => {
+    if (dialogueFilter !== ROCKET_DIALOGUE_ALL && !dialogueOptions.includes(dialogueFilter)) {
+      setDialogueFilter(ROCKET_DIALOGUE_ALL);
+    }
+  }, [dialogueFilter, dialogueOptions]);
+
+  const hasFilters = query.length > 0
+    || typeFilter !== ROCKET_TYPE_ALL
+    || dialogueFilter !== ROCKET_DIALOGUE_ALL;
+  const resetFilters = () => {
+    setQuery('');
+    setTypeFilter(ROCKET_TYPE_ALL);
+    setDialogueFilter(ROCKET_DIALOGUE_ALL);
+  };
+
   return (
     <div className="dataset-page rocket-page">
       <DatasetPageHeader
-        eyebrow="現在のバトルラインナップ"
         title="GOロケット団"
         fetchedAt={state.result?.fetchedAt}
         action={<RefreshButton />}
@@ -139,12 +169,35 @@ export function RocketPage() {
               type="search"
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              placeholder="タイプ・役職・ポケモン名"
+              placeholder="タイプ・役職・ポケモン名・セリフ"
             />
           </label>
-          <p className="dataset-page__scope-note">
-            ScrapedDuckの現行データにはしたっぱのセリフが含まれないため、タイプ・役職・ポケモン名で検索できます。
-          </p>
+          <div className="rocket-page__filters">
+            <FilterChips<RocketTypeFilter>
+              ariaLabel="GOロケット団タイプフィルター"
+              className="rocket-type-filters"
+              options={typeOptions}
+              selected={typeFilter}
+              onChange={setTypeFilter}
+            />
+            <label className="rocket-dialogue-filter">
+              <span>セリフで絞り込み</span>
+              <select
+                value={dialogueFilter}
+                onChange={(event) => setDialogueFilter(event.target.value)}
+              >
+                <option value={ROCKET_DIALOGUE_ALL}>すべてのセリフ</option>
+                {dialogueOptions.map((dialogue) => (
+                  <option value={dialogue} key={dialogue}>{dialogue}</option>
+                ))}
+              </select>
+            </label>
+            {hasFilters ? (
+              <button className="dataset-filter-reset" type="button" onClick={resetFilters}>
+                絞り込みを解除
+              </button>
+            ) : null}
+          </div>
           <div className="dataset-sections" aria-busy={state.refreshing}>
             {sections.map((section) => section.entries.length > 0 ? (
               <section className="dataset-section" key={section.title}>

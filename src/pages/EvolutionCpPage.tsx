@@ -127,7 +127,6 @@ export function EvolutionCpPage() {
     <div className="tool-page evolution-tool-page">
       <header className="page-heading">
         <div>
-          <span className="page-kicker">CPシミュレーション</span>
           <h1>進化後CP</h1>
           <p>進化前と同じPL・個体値を使い、進化後のCPを計算します。</p>
         </div>

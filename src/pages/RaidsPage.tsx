@@ -74,7 +74,6 @@ export function RaidsPage() {
   return (
     <div className="dataset-page raids-page">
       <DatasetPageHeader
-        eyebrow="現在のラインナップ"
         title="レイド"
         fetchedAt={state.result?.fetchedAt}
         action={<RefreshButton />}

@@ -100,7 +100,6 @@ export function PvpRankingsPage() {
     <div className="pvp-rankings-page">
       <header className="page-heading">
         <div>
-          <span className="page-kicker">PvPoke オープンリーグ</span>
           <h1>PvP ポケモンランキング</h1>
           <p>対戦シミュレーションに基づくポケモン種ごとの総合評価です。個体値順位とは異なります。</p>
         </div>

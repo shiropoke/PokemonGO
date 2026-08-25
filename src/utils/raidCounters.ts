@@ -1,4 +1,5 @@
 import { getCpMultiplier } from './cp';
+import { SHADOW_ATTACK_MULTIPLIER } from './shadow';
 import { getTypeEffectiveness } from './typeEffectiveness';
 
 export interface RaidCounterMove {
@@ -134,7 +135,7 @@ export function rankRaidCounters(
     const effectiveAttack =
       (attacker.baseStats.atk + 15) *
       multiplier *
-      (attacker.isShadow ? 1.2 : 1);
+      (attacker.isShadow ? SHADOW_ATTACK_MULTIPLIER : 1);
     let best: Omit<RaidCounterResult, 'relativeScore'> | null = null;
 
     for (const fastMove of attacker.fastMoves) {

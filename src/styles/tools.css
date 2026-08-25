@@ -95,6 +95,12 @@
   color: var(--danger, #a7372b);
 }
 
+.shadow-move-notice {
+  margin-top: 16px;
+  border-color: rgba(111, 63, 156, 0.28);
+  background: rgba(125, 75, 170, 0.08);
+}
+
 .tool-data-status {
   display: flex;
   min-height: 52px;
@@ -440,6 +446,21 @@
   font-variant-numeric: tabular-nums;
   justify-self: end;
   text-align: right;
+}
+
+.move-metrics .move-metric--shadow dt,
+.move-metrics .move-metric--shadow dd {
+  color: #7141a5;
+}
+
+[data-theme='dark'] .shadow-move-notice {
+  border-color: rgba(202, 155, 244, 0.34);
+  background: rgba(132, 78, 182, 0.14);
+}
+
+[data-theme='dark'] .move-metrics .move-metric--shadow dt,
+[data-theme='dark'] .move-metrics .move-metric--shadow dd {
+  color: #d7adfa;
 }
 
 .tool-credit {

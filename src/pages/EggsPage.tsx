@@ -1,6 +1,7 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { DatasetImage } from '../components/DatasetImage';
 import { FavoriteButton } from '../components/FavoriteButton';
+import { FilterChips } from '../components/FilterChips';
 import { RefreshButton } from '../components/RefreshButton';
 import {
   DatasetError,
@@ -12,6 +13,14 @@ import {
 import { useCachedDataset } from '../hooks/useCachedDataset';
 import { loadEggs } from '../services/scrapedDuck';
 import type { EggHatch } from '../types/scrapedDuck';
+import {
+  buildEggFilterOptions,
+  EGG_FILTER_ALL,
+  filterEggs,
+  groupEggsForDisplay,
+  resolveEggFilter,
+  type EggFilter,
+} from '../utils/eggFilters';
 import { resolveExternalPokemonSpeciesId } from '../utils/scrapedDuckLocalization';
 import '../styles/data-pages.css';
 
@@ -40,23 +49,25 @@ function EggCard({ egg }: { egg: EggHatch }) {
 
 export function EggsPage() {
   const state = useCachedDataset(loadEggs);
+  const [filter, setFilter] = useState<EggFilter>(EGG_FILTER_ALL);
+  const filterOptions = useMemo(
+    () => buildEggFilterOptions(state.result?.data ?? []),
+    [state.result],
+  );
+  const resolvedFilter = resolveEggFilter(filter, filterOptions);
+
+  useEffect(() => {
+    if (filter !== resolvedFilter) setFilter(resolvedFilter);
+  }, [filter, resolvedFilter]);
+
   const groups = useMemo(() => {
-    const regular = new Map<string, EggHatch[]>();
-    const adventureSync: EggHatch[] = [];
-    for (const egg of state.result?.data ?? []) {
-      if (egg.isAdventureSync) adventureSync.push(egg);
-      else regular.set(egg.eggType, [...(regular.get(egg.eggType) ?? []), egg]);
-    }
-    const distanceGroups = [...regular.entries()].sort(
-      ([left], [right]) => (Number.parseFloat(left) || 99) - (Number.parseFloat(right) || 99),
-    );
-    return { distanceGroups, adventureSync };
-  }, [state.result]);
+    const eggs = filterEggs(state.result?.data ?? [], resolvedFilter);
+    return groupEggsForDisplay(eggs);
+  }, [resolvedFilter, state.result]);
 
   return (
     <div className="dataset-page eggs-page">
       <DatasetPageHeader
-        eyebrow="現在の孵化ラインナップ"
         title="タマゴ"
         fetchedAt={state.result?.fetchedAt}
         action={<RefreshButton />}
@@ -67,23 +78,36 @@ export function EggsPage() {
       {state.error && !state.result ? <DatasetError action={<RefreshButton />} /> : null}
 
       {state.result ? (
-        <div className="dataset-sections" aria-busy={state.refreshing}>
-          {groups.distanceGroups.map(([eggType, eggs]) => (
-            <section className="dataset-section" key={eggType}>
-              <div className="dataset-section__heading"><h2>{eggType}タマゴ</h2><span>{eggs.length}匹</span></div>
-              <div className="egg-grid">{eggs.map((egg) => <EggCard egg={egg} key={egg.id} />)}</div>
-            </section>
-          ))}
-          {groups.adventureSync.length > 0 ? (
-            <section className="dataset-section">
-              <div className="dataset-section__heading"><h2>いつでも冒険モード</h2><span>{groups.adventureSync.length}匹</span></div>
-              <div className="egg-grid">{groups.adventureSync.map((egg) => <EggCard egg={egg} key={egg.id} />)}</div>
-            </section>
-          ) : null}
-          {groups.distanceGroups.length === 0 && groups.adventureSync.length === 0 ? (
-            <p className="dataset-empty">現在表示できるタマゴ情報はありません。</p>
-          ) : null}
-        </div>
+        <>
+          <FilterChips<EggFilter>
+            ariaLabel="タマゴ種類フィルター"
+            className="egg-filters"
+            options={filterOptions}
+            selected={resolvedFilter}
+            onChange={setFilter}
+          />
+          <div className="dataset-sections" aria-busy={state.refreshing}>
+            {groups.distanceGroups.map(([eggType, eggs]) => (
+              <section className="dataset-section" key={eggType}>
+                <div className="dataset-section__heading"><h2>{eggType}タマゴ</h2><span>{eggs.length}匹</span></div>
+                <div className="egg-grid">{eggs.map((egg) => <EggCard egg={egg} key={egg.id} />)}</div>
+              </section>
+            ))}
+            {groups.adventureSync.length > 0 ? (
+              <section className="dataset-section">
+                <div className="dataset-section__heading"><h2>いつでも冒険モード</h2><span>{groups.adventureSync.length}匹</span></div>
+                <div className="egg-grid">{groups.adventureSync.map((egg) => <EggCard egg={egg} key={egg.id} />)}</div>
+              </section>
+            ) : null}
+            {groups.distanceGroups.length === 0 && groups.adventureSync.length === 0 ? (
+              <p className="dataset-empty">
+                {resolvedFilter === EGG_FILTER_ALL
+                  ? '現在表示できるタマゴ情報はありません。'
+                  : 'この種類のタマゴ情報は現在ありません。'}
+              </p>
+            ) : null}
+          </div>
+        </>
       ) : null}
       <ScrapedDuckCredit />
     </div>

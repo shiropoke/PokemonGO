@@ -79,7 +79,7 @@ describe('ScrapedDuckデータの防御的パース', () => {
         combatPower: { min: 442, max: 477 },
       }],
     }]);
-    expect(research?.[0]?.displayText).toBe('フシギダネを3匹つかまえる');
+    expect(research?.[0]?.displayText).toBe('フシギダネを3匹捕まえる');
 
     const eggs = normalizeEggs([{
       name: 'Galarian Meowth',

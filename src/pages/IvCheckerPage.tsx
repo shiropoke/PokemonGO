@@ -4,6 +4,7 @@ import { IvResults } from '../components/IvResults';
 import { FavoriteButton } from '../components/FavoriteButton';
 import { EvolutionPvpResults } from '../components/EvolutionPvpResults';
 import { PokemonSelector } from '../components/PokemonSelector';
+import { ShadowBadge } from '../components/ShadowBadge';
 import { fetchGameData } from '../services/gameData';
 import { fetchPokemonData } from '../services/pokemonData';
 import { IV_CHECKER_STORAGE_KEY } from '../services/appStorage';
@@ -31,7 +32,6 @@ interface CheckerSettings {
 
 interface PokemonLoadState {
   pokemon: Pokemon[];
-  fetchedAt: number | null;
   source: PokemonDataSource | null;
   loading: boolean;
   error: string | null;
@@ -100,22 +100,12 @@ function getLinkedSpeciesId(): string | null {
   return /^[a-z0-9_-]+$/i.test(speciesId) ? speciesId.toLowerCase() : null;
 }
 
-function formatDataTime(timestamp: number): string {
-  return new Intl.DateTimeFormat('ja-JP', {
-    month: 'numeric',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  }).format(new Date(timestamp));
-}
-
 export function IvCheckerPage() {
   const [settings, setSettings] = useState<CheckerSettings>(loadSettings);
   const [cp, setCp] = useState('');
   const [requestVersion, setRequestVersion] = useState(0);
   const [dataState, setDataState] = useState<PokemonLoadState>({
     pokemon: [],
-    fetchedAt: null,
     source: null,
     loading: true,
     error: null,
@@ -153,7 +143,6 @@ export function IvCheckerPage() {
         if (ignore) return;
         setDataState({
           pokemon: result.pokemon,
-          fetchedAt: result.fetchedAt,
           source: result.source,
           loading: false,
           error: null,
@@ -294,7 +283,6 @@ export function IvCheckerPage() {
     <div className="iv-checker-page">
       <header className="page-heading">
         <div>
-          <span className="page-kicker">個体値・PvP計算</span>
           <h1>個体値チェッカー</h1>
         </div>
       </header>
@@ -310,7 +298,15 @@ export function IvCheckerPage() {
               setSettings((current) => ({ ...current, speciesId: entry.speciesId }));
             }}
             onRetry={() => setRequestVersion((version) => version + 1)}
+            idleHint={null}
           />
+
+          {selectedPokemon?.isShadow ? (
+            <div className="shadow-status" role="status">
+              <ShadowBadge />
+              <p>シャドウボーナスはバトル時のダメージに適用されます。CP・個体値順位は通常と同じ基準で計算しています。</p>
+            </div>
+          ) : null}
 
           {selectedPokemon ? (
             <div className="selected-pokemon-actions">
@@ -321,10 +317,9 @@ export function IvCheckerPage() {
             </div>
           ) : null}
 
-          {dataState.fetchedAt ? (
+          {dataState.source === 'stale-cache' ? (
             <p className="pokemon-data-meta">
-              データ更新 {formatDataTime(dataState.fetchedAt)}
-              {dataState.source === 'stale-cache' ? '（保存済みデータ）' : ''}
+              保存済みデータを使用しています
             </p>
           ) : null}
 

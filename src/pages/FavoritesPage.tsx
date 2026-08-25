@@ -78,7 +78,6 @@ export function FavoritesPage({
     <div className="favorites-page">
       <header className="page-heading">
         <div>
-          <span className="page-kicker">Watchlist</span>
           <h1>お気に入り</h1>
           <p>端末内に保存したポケモンと、現在関連する情報をまとめて確認できます。</p>
         </div>

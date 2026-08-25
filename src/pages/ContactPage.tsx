@@ -123,7 +123,6 @@ export function ContactPage({ onNavigate }: ContactPageProps) {
   return (
     <section className="contact-page" aria-labelledby="contact-page-title">
       <header className="contact-page__heading">
-        <span>サポート</span>
         <h1 id="contact-page-title">お問い合わせ</h1>
         <p>GO Scopeに関する不具合、機能の要望、情報の誤りなどを送信できます。</p>
       </header>

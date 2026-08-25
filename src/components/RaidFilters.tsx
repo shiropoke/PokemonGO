@@ -7,6 +7,7 @@ const RAID_FILTER_OPTIONS: readonly FilterChipOption<RaidFilter>[] = [
   { value: 'mega', label: 'メガレイド' },
   { value: 'three', label: '★3レイド' },
   { value: 'one', label: '★1レイド' },
+  { value: 'shadow', label: 'シャドウレイド' },
 ];
 
 interface RaidFiltersProps {

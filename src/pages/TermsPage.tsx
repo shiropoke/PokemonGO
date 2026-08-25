@@ -2,7 +2,6 @@ export function TermsPage() {
   return (
     <article className="legal-page">
       <header className="legal-page__heading">
-        <span>サイトポリシー</span>
         <h1>利用規約</h1>
       </header>
 

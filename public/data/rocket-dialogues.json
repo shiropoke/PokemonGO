@@ -1,0 +1,708 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-08-25T13:16:26.206Z",
+  "source": "https://leekduck.com/rocket-lineups/",
+  "supplementalSources": [
+    "https://www.serebii.net/pokemongo/teamgorocket.shtml"
+  ],
+  "localizationSources": [
+    "https://raw.githubusercontent.com/PokeMiners/pogo_assets/master/Texts/Latest%20Remote/English.txt",
+    "https://raw.githubusercontent.com/PokeMiners/pogo_assets/master/Texts/Latest%20Remote/Japanese.txt",
+    "https://raw.githubusercontent.com/PokeMiners/pogo_assets/master/Texts/Latest%20APK/English.txt",
+    "https://raw.githubusercontent.com/PokeMiners/pogo_assets/master/Texts/Latest%20APK/Japanese.txt"
+  ],
+  "entries": [
+    {
+      "identity": "team go rocket boss::giovanni::",
+      "trainerName": "Giovanni",
+      "title": "Team GO Rocket Boss",
+      "type": null,
+      "dialogues": [
+        "思い知らせてやる。わたしに歯向かうことの愚かさを。",
+        "邪魔されて、黙っているわけにはいかない。",
+        "誰もわたしを止めることはできない．．．止めようという　その無謀さは、面白いと思うが。",
+        "あの博士には、無理だったな。　師事しているトレーナーを鍛えあげることなど。",
+        "ここまでやって来たのだ。どれほどのトレーナーなのか、見せてもらおうじゃないか。",
+        "GOロケット団には勝てないだろう。"
+      ],
+      "localizations": [
+        {
+          "localizationKey": "combat_giovanni_quote__male_speaker",
+          "english": "I’ll remind you and your Pokémon of your place.",
+          "japanese": "思い知らせてやる。わたしに歯向かうことの愚かさを。",
+          "source": "Latest APK"
+        },
+        {
+          "localizationKey": "combat_giovanni_quote#1",
+          "english": "I will not tolerate your interference.",
+          "japanese": "邪魔されて、黙っているわけにはいかない。",
+          "source": "Latest APK"
+        },
+        {
+          "localizationKey": "combat_giovanni_quote#2",
+          "english": "You cannot stop me...but I’m amused by your attempt.",
+          "japanese": "誰もわたしを止めることはできない．．．止めようという　その無謀さは、面白いと思うが。",
+          "source": "Latest APK"
+        },
+        {
+          "localizationKey": "combat_giovanni_quote#3",
+          "english": "Your professor has not prepared you for what is to come.",
+          "japanese": "あの博士には、無理だったな。　師事しているトレーナーを鍛えあげることなど。",
+          "source": "Latest APK"
+        },
+        {
+          "localizationKey": "combat_giovanni_quote#4",
+          "english": "You’ve made it this far. Let me see just how strong you are.",
+          "japanese": "ここまでやって来たのだ。どれほどのトレーナーなのか、見せてもらおうじゃないか。",
+          "source": "Latest APK"
+        },
+        {
+          "localizationKey": "combat_giovanni_quote#5",
+          "english": "You will never defeat Team GO Rocket.",
+          "japanese": "GOロケット団には勝てないだろう。",
+          "source": "Latest APK"
+        }
+      ],
+      "unresolvedDialogues": []
+    },
+    {
+      "identity": "team go rocket leader::cliff::",
+      "trainerName": "Cliff",
+      "title": "Team GO Rocket Leader",
+      "type": null,
+      "dialogues": [
+        "確実におまえは負ける！",
+        "GOロケット団への忠誠心が、俺に力をくれる。",
+        "GOロケット団のためなら、この身も捧ぐ．．．！",
+        "ボスに拾ってもらった身だからな、こうやって恩返しするんだ！",
+        "GOロケット団がなければ、いまごろ俺は．．．返しきれないほどの恩だ！",
+        "弱点のところに、俺の名前を書きなよ。"
+      ],
+      "localizations": [
+        {
+          "localizationKey": "combat_cliff_quote__male_speaker",
+          "english": "Too bad you’ll be losing this battle!",
+          "japanese": "確実におまえは負ける！",
+          "source": "Latest APK"
+        },
+        {
+          "localizationKey": "combat_cliff_quote#1",
+          "english": "My strength comes from my loyalty to Team GO Rocket.",
+          "japanese": "GOロケット団への忠誠心が、俺に力をくれる。",
+          "source": "Latest APK"
+        },
+        {
+          "localizationKey": "combat_cliff_quote#2",
+          "english": "I will do anything and everything for Team GO Rocket.",
+          "japanese": "GOロケット団のためなら、この身も捧ぐ．．．！",
+          "source": "Latest APK"
+        },
+        {
+          "localizationKey": "combat_cliff_quote#3",
+          "english": "I owe the boss my life. I’d do anything for him.",
+          "japanese": "ボスに拾ってもらった身だからな、こうやって恩返しするんだ！",
+          "source": "Latest APK"
+        },
+        {
+          "localizationKey": "combat_cliff_quote#4",
+          "english": "Team GO Rocket saved me. It’s time to return the favor!",
+          "japanese": "GOロケット団がなければ、いまごろ俺は．．．返しきれないほどの恩だ！",
+          "source": "Latest APK"
+        },
+        {
+          "localizationKey": "combat_cliff_quote#5",
+          "english": "Add my name to your list of weaknesses.",
+          "japanese": "弱点のところに、俺の名前を書きなよ。",
+          "source": "Latest APK"
+        }
+      ],
+      "unresolvedDialogues": []
+    },
+    {
+      "identity": "team go rocket leader::arlo::",
+      "trainerName": "Arlo",
+      "title": "Team GO Rocket Leader",
+      "type": null,
+      "dialogues": [
+        "おごった考え方が引き起こすのは、敗北です。",
+        "思い知るがいい　今日こそ。",
+        "負けるわけがない。",
+        "悔しさを　味わっていただきます。",
+        "ボクには、キミの　敗北が　すぐそこに　見えます。"
+      ],
+      "localizations": [
+        {
+          "localizationKey": "combat_arlo_quote__male_speaker",
+          "english": "Arrogance leads to failure.",
+          "japanese": "おごった考え方が引き起こすのは、敗北です。",
+          "source": "Latest APK"
+        },
+        {
+          "localizationKey": "combat_arlo_quote#1",
+          "english": "It’s time to learn your place in the world.",
+          "japanese": "思い知るがいい　今日こそ。",
+          "source": "Latest APK"
+        },
+        {
+          "localizationKey": "combat_arlo_quote#2",
+          "english": "I never lose.",
+          "japanese": "負けるわけがない。",
+          "source": "Latest APK"
+        },
+        {
+          "localizationKey": "combat_arlo_quote#3",
+          "english": "Prepare yourself for a world of hurt.",
+          "japanese": "悔しさを　味わっていただきます。",
+          "source": "Latest APK"
+        },
+        {
+          "localizationKey": "combat_arlo_quote#5",
+          "english": "Your defeat comes on swift wings.",
+          "japanese": "ボクには、キミの　敗北が　すぐそこに　見えます。",
+          "source": "Latest APK"
+        }
+      ],
+      "unresolvedDialogues": []
+    },
+    {
+      "identity": "team go rocket leader::sierra::",
+      "trainerName": "Sierra",
+      "title": "Team GO Rocket Leader",
+      "type": null,
+      "dialogues": [
+        "わたしに挑戦したいのね？",
+        "わたしとバトルできるなんて．．．幸せなことなのよ？",
+        "忘れられない　バトルになりそうね！",
+        "気付いていると思うけど、わたしに、勝てるはずがないわ。",
+        "わたしの実力は、遥か上なのよ。",
+        "敗北を　噛みしめたい、というなら　お好きにどうぞ。"
+      ],
+      "localizations": [
+        {
+          "localizationKey": "combat_sierra_quote__female_speaker",
+          "english": "Fancy a battle?",
+          "japanese": "わたしに挑戦したいのね？",
+          "source": "Latest APK"
+        },
+        {
+          "localizationKey": "combat_sierra_quote#1",
+          "english": "I envy you—you get to battle me!",
+          "japanese": "わたしとバトルできるなんて．．．幸せなことなのよ？",
+          "source": "Latest APK"
+        },
+        {
+          "localizationKey": "combat_sierra_quote#2",
+          "english": "This will be a battle I’m sure you’ll never forget.",
+          "japanese": "忘れられない　バトルになりそうね！",
+          "source": "Latest APK"
+        },
+        {
+          "localizationKey": "combat_sierra_quote#3",
+          "english": "You already know this, but you don’t stand a chance.",
+          "japanese": "気付いていると思うけど、わたしに、勝てるはずがないわ。",
+          "source": "Latest APK"
+        },
+        {
+          "localizationKey": "combat_sierra_quote#4",
+          "english": "You can’t possibly match my skill, dear.",
+          "japanese": "わたしの実力は、遥か上なのよ。",
+          "source": "Latest APK"
+        },
+        {
+          "localizationKey": "combat_sierra_quote#5",
+          "english": "I do hope you like the taste of failure!",
+          "japanese": "敗北を　噛みしめたい、というなら　お好きにどうぞ。",
+          "source": "Latest APK"
+        }
+      ],
+      "unresolvedDialogues": []
+    },
+    {
+      "identity": "team go rocket grunt::normal-type male grunt::normal",
+      "trainerName": "Normal-type Male Grunt",
+      "title": "Team GO Rocket Grunt",
+      "type": "normal",
+      "dialogues": [
+        "ノーマルタイプが弱いって思ってるのか？　本当の強さを見せてやるっ！"
+      ],
+      "localizations": [
+        {
+          "localizationKey": "combat_grunt_quote_normal__male_speaker",
+          "english": "Normal does not mean weak.",
+          "japanese": "ノーマルタイプが弱いって思ってるのか？　本当の強さを見せてやるっ！",
+          "source": "Latest APK"
+        }
+      ],
+      "unresolvedDialogues": []
+    },
+    {
+      "identity": "team go rocket grunt::fire-type female grunt::fire",
+      "trainerName": "Fire-type Female Grunt",
+      "title": "Team GO Rocket Grunt",
+      "type": "fire",
+      "dialogues": [
+        "ポケモンが吐く炎、どれだけ熱いか知ってる？　覚悟なさい！"
+      ],
+      "localizations": [
+        {
+          "localizationKey": "combat_grunt_quote_fire__female_speaker",
+          "english": "Do you know how hot Pokémon fire breath can get?",
+          "japanese": "ポケモンが吐く炎、どれだけ熱いか知ってる？　覚悟なさい！",
+          "source": "Latest APK"
+        }
+      ],
+      "unresolvedDialogues": []
+    },
+    {
+      "identity": "team go rocket grunt::water-type female grunt::water",
+      "trainerName": "Water-type Female Grunt",
+      "title": "Team GO Rocket Grunt",
+      "type": "water",
+      "dialogues": [
+        "潮風とか、水とか、浴びたい頃なんじゃない？"
+      ],
+      "localizations": [
+        {
+          "localizationKey": "combat_grunt_quote_water__female_speaker",
+          "english": "These waters are treacherous!",
+          "japanese": "潮風とか、水とか、浴びたい頃なんじゃない？",
+          "source": "Latest APK"
+        }
+      ],
+      "unresolvedDialogues": []
+    },
+    {
+      "identity": "team go rocket grunt::water-type male grunt::water",
+      "trainerName": "Water-type Male Grunt",
+      "title": "Team GO Rocket Grunt",
+      "type": "water",
+      "dialogues": [
+        "潮風とか、水とか、浴びたい頃だろ？"
+      ],
+      "localizations": [
+        {
+          "localizationKey": "combat_grunt_quote_water__male_speaker",
+          "english": "These waters are treacherous!",
+          "japanese": "潮風とか、水とか、浴びたい頃だろ？",
+          "source": "Latest APK"
+        }
+      ],
+      "unresolvedDialogues": []
+    },
+    {
+      "identity": "team go rocket grunt::electric-type female grunt::electric",
+      "trainerName": "Electric-type Female Grunt",
+      "title": "Team GO Rocket Grunt",
+      "type": "electric",
+      "dialogues": [
+        "ビリビリ、ってするわよ！　ビリビリ！"
+      ],
+      "localizations": [
+        {
+          "localizationKey": "combat_grunt_quote_electric__female_speaker",
+          "english": "Get ready to be shocked!",
+          "japanese": "ビリビリ、ってするわよ！　ビリビリ！",
+          "source": "Latest APK"
+        }
+      ],
+      "unresolvedDialogues": []
+    },
+    {
+      "identity": "team go rocket grunt::grass-type male grunt::grass",
+      "trainerName": "Grass-type Male Grunt",
+      "title": "Team GO Rocket Grunt",
+      "type": "grass",
+      "dialogues": [
+        "おれ達にツタのように絡むとロクなことにならないぜ！"
+      ],
+      "localizations": [
+        {
+          "localizationKey": "combat_grunt_quote_grass__male_speaker",
+          "english": "Don’t tangle with us!",
+          "japanese": "おれ達にツタのように絡むとロクなことにならないぜ！",
+          "source": "Latest APK"
+        }
+      ],
+      "unresolvedDialogues": []
+    },
+    {
+      "identity": "team go rocket grunt::ice-type female grunt::ice",
+      "trainerName": "Ice-type Female Grunt",
+      "title": "Team GO Rocket Grunt",
+      "type": "ice",
+      "dialogues": [
+        "向かって来るそばから凍らせちゃうから！　かかってきなさい！"
+      ],
+      "localizations": [
+        {
+          "localizationKey": "combat_grunt_quote_ice__female_speaker",
+          "english": "You’re gonna be frozen in your tracks.",
+          "japanese": "向かって来るそばから凍らせちゃうから！　かかってきなさい！",
+          "source": "Latest APK"
+        }
+      ],
+      "unresolvedDialogues": []
+    },
+    {
+      "identity": "team go rocket grunt::fighting-type female grunt::fighting",
+      "trainerName": "Fighting-type Female Grunt",
+      "title": "Team GO Rocket Grunt",
+      "type": "fighting",
+      "dialogues": [
+        "このムキムキ筋肉は、ダテじゃなーいーっ！　勝負よ！"
+      ],
+      "localizations": [
+        {
+          "localizationKey": "combat_grunt_quote_fighting__female_speaker",
+          "english": "This buff physique isn’t just for show!",
+          "japanese": "このムキムキ筋肉は、ダテじゃなーいーっ！　勝負よ！",
+          "source": "Latest APK"
+        }
+      ],
+      "unresolvedDialogues": []
+    },
+    {
+      "identity": "team go rocket grunt::poison-type female grunt::poison",
+      "trainerName": "Poison-type Female Grunt",
+      "title": "Team GO Rocket Grunt",
+      "type": "poison",
+      "dialogues": [
+        "毒をたっぷり浴びせてあげるわ！"
+      ],
+      "localizations": [
+        {
+          "localizationKey": "combat_grunt_quote_poison__female_speaker",
+          "english": "Coiled and ready to strike!",
+          "japanese": "毒をたっぷり浴びせてあげるわ！",
+          "source": "Latest APK"
+        }
+      ],
+      "unresolvedDialogues": []
+    },
+    {
+      "identity": "team go rocket grunt::ground-type male grunt::ground",
+      "trainerName": "Ground-type Male Grunt",
+      "title": "Team GO Rocket Grunt",
+      "type": "ground",
+      "dialogues": [
+        "地面に叩き落としてやるぜ！"
+      ],
+      "localizations": [
+        {
+          "localizationKey": "combat_grunt_quote_ground__male_speaker",
+          "english": "You’ll be defeated into the ground!",
+          "japanese": "地面に叩き落としてやるぜ！",
+          "source": "Latest APK"
+        }
+      ],
+      "unresolvedDialogues": []
+    },
+    {
+      "identity": "team go rocket grunt::flying-type female grunt::flying",
+      "trainerName": "Flying-type Female Grunt",
+      "title": "Team GO Rocket Grunt",
+      "type": "flying",
+      "dialogues": [
+        "あたしのポケモンが華麗に舞ってみせるわ！"
+      ],
+      "localizations": [
+        {
+          "localizationKey": "combat_grunt_quote_flying__female_speaker",
+          "english": "Battle against my Flying-type Pokémon!",
+          "japanese": "あたしのポケモンが華麗に舞ってみせるわ！",
+          "source": "Latest APK"
+        }
+      ],
+      "unresolvedDialogues": []
+    },
+    {
+      "identity": "team go rocket grunt::psychic-type male grunt::psychic",
+      "trainerName": "Psychic-type Male Grunt",
+      "title": "Team GO Rocket Grunt",
+      "type": "psychic",
+      "dialogues": [
+        "見えないちからを使うエスパータイプを怖いと思うか・・・！？"
+      ],
+      "localizations": [
+        {
+          "localizationKey": "combat_grunt_quote_psychic__male_speaker",
+          "english": "Are you scared of psychics that use unseen power?",
+          "japanese": "見えないちからを使うエスパータイプを怖いと思うか・・・！？",
+          "source": "Latest APK"
+        }
+      ],
+      "unresolvedDialogues": []
+    },
+    {
+      "identity": "team go rocket grunt::bug-type male grunt::bug",
+      "trainerName": "Bug-type Male Grunt",
+      "title": "Team GO Rocket Grunt",
+      "type": "bug",
+      "dialogues": [
+        "おれの可愛いむしポケ！　それいけーっ！"
+      ],
+      "localizations": [
+        {
+          "localizationKey": "combat_grunt_quote_bug__male_speaker",
+          "english": "Go, my super bug Pokémon!",
+          "japanese": "おれの可愛いむしポケ！　それいけーっ！",
+          "source": "Latest APK"
+        }
+      ],
+      "unresolvedDialogues": []
+    },
+    {
+      "identity": "team go rocket grunt::rock-type male grunt::rock",
+      "trainerName": "Rock-type Male Grunt",
+      "title": "Team GO Rocket Grunt",
+      "type": "rock",
+      "dialogues": [
+        "ロック魂の叫びを聞けーっ！"
+      ],
+      "localizations": [
+        {
+          "localizationKey": "combat_grunt_quote_rock__male_speaker",
+          "english": "Let’s rock and roll!",
+          "japanese": "ロック魂の叫びを聞けーっ！",
+          "source": "Latest APK"
+        }
+      ],
+      "unresolvedDialogues": []
+    },
+    {
+      "identity": "team go rocket grunt::ghost-type male grunt::ghost",
+      "trainerName": "Ghost-type Male Grunt",
+      "title": "Team GO Rocket Grunt",
+      "type": "ghost",
+      "dialogues": [
+        "ヒ、ヒヒ．．．ヒヒッ！　こわいぞう～っ！"
+      ],
+      "localizations": [
+        {
+          "localizationKey": "combat_grunt_quote_ghost__male_speaker",
+          "english": "Ke...ke...ke...ke...ke...ke!",
+          "japanese": "ヒ、ヒヒ．．．ヒヒッ！　こわいぞう～っ！",
+          "source": "Latest APK"
+        }
+      ],
+      "unresolvedDialogues": []
+    },
+    {
+      "identity": "team go rocket grunt::dragon-type female grunt::dragon",
+      "trainerName": "Dragon-type Female Grunt",
+      "title": "Team GO Rocket Grunt",
+      "type": "dragon",
+      "dialogues": [
+        "ガオォォオッ！　ドラゴンの雄叫び！　どう、びっくりした？"
+      ],
+      "localizations": [
+        {
+          "localizationKey": "combat_grunt_quote_dragon__female_speaker",
+          "english": "ROAR! ...How’d that sound?",
+          "japanese": "ガオォォオッ！　ドラゴンの雄叫び！　どう、びっくりした？",
+          "source": "Latest APK"
+        }
+      ],
+      "unresolvedDialogues": []
+    },
+    {
+      "identity": "team go rocket grunt::dark-type female grunt::dark",
+      "trainerName": "Dark-type Female Grunt",
+      "title": "Team GO Rocket Grunt",
+      "type": "dark",
+      "dialogues": [
+        "光があるところ、影ありっ！　行くわよ！"
+      ],
+      "localizations": [
+        {
+          "localizationKey": "combat_grunt_quote_dark__female_speaker",
+          "english": "Wherever there is light, there is also shadow.",
+          "japanese": "光があるところ、影ありっ！　行くわよ！",
+          "source": "Latest APK"
+        }
+      ],
+      "unresolvedDialogues": []
+    },
+    {
+      "identity": "team go rocket grunt::steel-type male grunt::steel",
+      "trainerName": "Steel-type Male Grunt",
+      "title": "Team GO Rocket Grunt",
+      "type": "steel",
+      "dialogues": [
+        "テッペキのはがねを食らいな！　勝負！"
+      ],
+      "localizations": [
+        {
+          "localizationKey": "combat_grunt_quote_steel__male_speaker",
+          "english": "You’re no match for my iron will!",
+          "japanese": "テッペキのはがねを食らいな！　勝負！",
+          "source": "Latest APK"
+        }
+      ],
+      "unresolvedDialogues": []
+    },
+    {
+      "identity": "team go rocket grunt::fairy-type female grunt::fairy",
+      "trainerName": "Fairy-type Female Grunt",
+      "title": "Team GO Rocket Grunt",
+      "type": "fairy",
+      "dialogues": [
+        "あたしのキュートなフェアリーたち、ご覧あれ！"
+      ],
+      "localizations": [
+        {
+          "localizationKey": "combat_grunt_quote_fairy__female_speaker",
+          "english": "Check out my cute Pokémon!",
+          "japanese": "あたしのキュートなフェアリーたち、ご覧あれ！",
+          "source": "Latest APK"
+        }
+      ],
+      "unresolvedDialogues": []
+    },
+    {
+      "identity": "team go rocket grunt::male grunt::",
+      "trainerName": "Male Grunt",
+      "title": "Team GO Rocket Grunt",
+      "type": null,
+      "dialogues": [
+        "勝者のみが勝利できるのだ。",
+        "いちおう戦ってみるかー。",
+        "覚悟しろ！"
+      ],
+      "localizations": [
+        {
+          "localizationKey": "combat_grunt_quote#1__male_speaker",
+          "english": "Winning is for winners.",
+          "japanese": "勝者のみが勝利できるのだ。",
+          "source": "Latest APK"
+        },
+        {
+          "localizationKey": "combat_grunt_quote#2__male_speaker",
+          "english": "Don’t bother—I’ve already won.",
+          "japanese": "いちおう戦ってみるかー。",
+          "source": "Latest APK"
+        },
+        {
+          "localizationKey": "combat_grunt_quote#3__male_speaker",
+          "english": "Get ready to be defeated!",
+          "japanese": "覚悟しろ！",
+          "source": "Latest APK"
+        }
+      ],
+      "unresolvedDialogues": []
+    },
+    {
+      "identity": "team go rocket grunt::female grunt::",
+      "trainerName": "Female Grunt",
+      "title": "Team GO Rocket Grunt",
+      "type": null,
+      "dialogues": [
+        "勝者のみが勝利できるのよ。",
+        "いちおう戦ってみようかなー？",
+        "覚悟しなさい！"
+      ],
+      "localizations": [
+        {
+          "localizationKey": "combat_grunt_quote#1__female_speaker",
+          "english": "Winning is for winners.",
+          "japanese": "勝者のみが勝利できるのよ。",
+          "source": "Latest APK"
+        },
+        {
+          "localizationKey": "combat_grunt_quote#2__female_speaker",
+          "english": "Don’t bother—I’ve already won.",
+          "japanese": "いちおう戦ってみようかなー？",
+          "source": "Latest APK"
+        },
+        {
+          "localizationKey": "combat_grunt_quote#3__female_speaker",
+          "english": "Get ready to be defeated!",
+          "japanese": "覚悟しなさい！",
+          "source": "Latest APK"
+        }
+      ],
+      "unresolvedDialogues": []
+    },
+    {
+      "identity": "team go rocket grunt::decoy female grunt::",
+      "trainerName": "Decoy Female Grunt",
+      "title": "Team GO Rocket Grunt",
+      "type": null,
+      "dialogues": [
+        "まんまと、だまされたな。",
+        "まんまと引っかかったな！",
+        "ボスの名にかけて、ひねりつぶす！",
+        "ボスを簡単に探せると思ったか？",
+        "残念だったな！",
+        "ボスにたどり着きたいんだろうが、そう簡単にはいかない！",
+        "ボスに、指一本触れさせない！",
+        "だまされたんだよ、まんまと。",
+        "失せろ！　ボスがそう簡単に見つかってたまるか。",
+        "は？　ボスが簡単に見つかるとでも思ったのか？"
+      ],
+      "localizations": [
+        {
+          "localizationKey": "combat_grunt_decoy_quote#1",
+          "english": "Fooled ya, twerp.",
+          "japanese": "まんまと、だまされたな。",
+          "source": "Latest APK"
+        },
+        {
+          "localizationKey": "combat_grunt_decoy_quote#2",
+          "english": "I can’t believe you fell for it!",
+          "japanese": "まんまと引っかかったな！",
+          "source": "Latest APK"
+        },
+        {
+          "localizationKey": "combat_grunt_decoy_quote#3",
+          "english": "In the name of the boss, I’ll destroy you!",
+          "japanese": "ボスの名にかけて、ひねりつぶす！",
+          "source": "Latest APK"
+        },
+        {
+          "localizationKey": "combat_grunt_decoy_quote#4",
+          "english": "You’ll never get to him!",
+          "japanese": "ボスを簡単に探せると思ったか？",
+          "source": "Latest APK"
+        },
+        {
+          "localizationKey": "combat_grunt_decoy_quote#5",
+          "english": "It feels good to see you disappointed.",
+          "japanese": "残念だったな！",
+          "source": "Latest APK"
+        },
+        {
+          "localizationKey": "combat_grunt_decoy_quote#6",
+          "english": "Wanna get to the boss, do ya? You’ll have to defeat me!",
+          "japanese": "ボスにたどり着きたいんだろうが、そう簡単にはいかない！",
+          "source": "Latest APK"
+        },
+        {
+          "localizationKey": "combat_grunt_decoy_quote#7",
+          "english": "I’ll do anything to protect the boss!",
+          "japanese": "ボスに、指一本触れさせない！",
+          "source": "Latest APK"
+        },
+        {
+          "localizationKey": "combat_grunt_decoy_quote#8",
+          "english": "You’ve been bamboozled, punk!",
+          "japanese": "だまされたんだよ、まんまと。",
+          "source": "Latest APK"
+        },
+        {
+          "localizationKey": "combat_grunt_decoy_quote#9",
+          "english": "Get lost! You’ll never find him.",
+          "japanese": "失せろ！　ボスがそう簡単に見つかってたまるか。",
+          "source": "Latest APK"
+        },
+        {
+          "localizationKey": "combat_grunt_decoy_quote#10",
+          "english": "What, did you think finding the boss was going to be that easy?",
+          "japanese": "は？　ボスが簡単に見つかるとでも思ったのか？",
+          "source": "Latest APK"
+        }
+      ],
+      "unresolvedDialogues": []
+    }
+  ]
+}

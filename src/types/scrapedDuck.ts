@@ -85,6 +85,7 @@ export interface RocketLineup {
   title: string;
   titleLabel: string;
   type: string | null;
+  dialogues: string[];
   firstPokemon: RocketPokemon[];
   secondPokemon: RocketPokemon[];
   thirdPokemon: RocketPokemon[];

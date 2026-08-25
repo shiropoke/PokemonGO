@@ -508,6 +508,35 @@
   margin-top: 12px;
 }
 
+.shadow-status {
+  display: flex;
+  min-width: 0;
+  margin-top: 12px;
+  padding: 10px 12px;
+  align-items: flex-start;
+  gap: 9px;
+  border: 1px solid rgba(111, 63, 156, 0.28);
+  border-radius: 10px;
+  background: rgba(125, 75, 170, 0.08);
+}
+
+.shadow-status .shadow-badge {
+  flex: 0 0 auto;
+}
+
+.shadow-status p {
+  min-width: 0;
+  margin: 0;
+  color: var(--gray-600);
+  font-size: 0.78rem;
+  line-height: 1.55;
+}
+
+[data-theme='dark'] .shadow-status {
+  border-color: rgba(202, 155, 244, 0.34);
+  background: rgba(132, 78, 182, 0.14);
+}
+
 .checker-result-column {
   display: grid;
   min-width: 0;

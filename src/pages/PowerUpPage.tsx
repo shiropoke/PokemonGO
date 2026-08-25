@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { PokemonSelector } from '../components/PokemonSelector';
 import { ToolDataStatus } from '../components/ToolDataStatus';
 import { useToolData } from '../hooks/useToolData';
@@ -8,6 +8,10 @@ import {
   calculatePowerUpCost,
   resolvePowerUpCostData,
 } from '../utils/powerUp';
+import {
+  getPowerUpSelectablePokemon,
+  resolvePowerUpSpeciesId,
+} from '../utils/powerUpPokemon';
 import '../styles/tools.css';
 
 function initialSpeciesId(): string | null {
@@ -32,12 +36,28 @@ export function PowerUpPage() {
   const [shadow, setShadow] = useState(false);
   const [purified, setPurified] = useState(false);
 
-  const selectedPokemon = useMemo(
-    () => toolData.pokemon.find((entry) => entry.speciesId === speciesId) ?? null,
+  const selectablePokemon = useMemo(
+    () => getPowerUpSelectablePokemon(toolData.pokemon),
+    [toolData.pokemon],
+  );
+  const resolvedSpeciesId = useMemo(
+    () => toolData.pokemon.length > 0
+      ? resolvePowerUpSpeciesId(speciesId, toolData.pokemon)
+      : speciesId,
     [speciesId, toolData.pokemon],
   );
+  const selectedPokemon = useMemo(
+    () => selectablePokemon.find((entry) => entry.speciesId === resolvedSpeciesId) ?? null,
+    [resolvedSpeciesId, selectablePokemon],
+  );
+
+  useEffect(() => {
+    if (toolData.pokemon.length === 0 || speciesId === resolvedSpeciesId) return;
+    setSpeciesId(resolvedSpeciesId);
+  }, [resolvedSpeciesId, speciesId, toolData.pokemon.length]);
+
   const resolvedCostData = toolData.gameData
-    ? resolvePowerUpCostData(toolData.gameData.powerUp, speciesId)
+    ? resolvePowerUpCostData(toolData.gameData.powerUp, resolvedSpeciesId)
     : null;
   const result = useMemo(() => {
     if (!resolvedCostData) return { result: null, error: null };
@@ -58,14 +78,13 @@ export function PowerUpPage() {
     }
   }, [currentLevel, lucky, purified, resolvedCostData, shadow, targetLevel]);
   const usesSpeciesOverride = Boolean(
-    speciesId && toolData.gameData?.powerUp.overrides[speciesId],
+    resolvedSpeciesId && toolData.gameData?.powerUp.overrides[resolvedSpeciesId],
   );
 
   return (
     <div className="tool-page power-up-page">
       <header className="page-heading">
         <div>
-          <span className="page-kicker">育成計画</span>
           <h1>強化コスト</h1>
           <p>現在PLから目標PLまでの、ほしのすなとアメを積算します。</p>
         </div>
@@ -75,7 +94,7 @@ export function PowerUpPage() {
       <div className="tool-layout">
         <section className="tool-card tool-controls" aria-label="強化条件">
           <PokemonSelector
-            pokemon={toolData.pokemon}
+            pokemon={selectablePokemon}
             selectedPokemon={selectedPokemon}
             loading={toolData.loading}
             error={toolData.error}
@@ -158,7 +177,7 @@ export function PowerUpPage() {
               <p>強化 {result.result.powerUps}回（1回につきPL0.5）</p>
             </div>
           ) : null}
-          {!speciesId ? (
+          {!resolvedSpeciesId ? (
             <p className="tool-notice">ポケモン未選択時は通常の強化コストを表示しています。</p>
           ) : null}
         </section>

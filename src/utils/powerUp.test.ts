@@ -69,4 +69,15 @@ describe('power-up costs', () => {
     expect(resolved.candyCostByLevel[0]).toBe(30);
     expect(resolved.modifiers).toBe(POWER_UP_DATA.modifiers);
   });
+
+  it('ShadowチェックだけでGame MasterのShadowコスト補正を適用する', () => {
+    const normal = calculatePowerUpCost(POWER_UP_DATA, 39, 40, NORMAL);
+    const shadow = calculatePowerUpCost(POWER_UP_DATA, 39, 40, {
+      ...NORMAL,
+      shadow: true,
+    });
+
+    expect(shadow.stardust).toBe(Math.ceil(normal.stardust * 1.2));
+    expect(shadow.candy).toBe(Math.ceil(normal.candy * 1.2));
+  });
 });

@@ -116,8 +116,35 @@ describe('レイドtier分類', () => {
       .toEqual(groups.map((group) => group.key));
   });
 
+  it('shadowでは各tier内のシャドウだけを残し、空グループを除く', () => {
+    const groups = groupRaidsByTier([
+      raid('normal-five', '5-Star Raids', false),
+      raid('shadow-five', '5-Star Raids', true),
+      raid('shadow-three', '3-Star Raids', true),
+      raid('normal-one', '1-Star Raids', false),
+    ]);
+
+    const filtered = filterRaidTierGroups(groups, 'shadow');
+    expect(filtered.map((group) => group.key)).toEqual(['five', 'three']);
+    expect(filtered.flatMap((group) => group.raids).map((entry) => entry.id))
+      .toEqual(['shadow-five', 'shadow-three']);
+    expect(filtered.every((group) => group.raids.every((entry) => entry.isShadow))).toBe(true);
+  });
+
+  it('tierフィルターでは通常とシャドウの両方を維持する', () => {
+    const groups = groupRaidsByTier([
+      raid('normal-five', '5-Star Raids', false),
+      raid('shadow-five', '5-Star Raids', true),
+      raid('shadow-three', '3-Star Raids', true),
+    ]);
+
+    expect(filterRaidTierGroups(groups, 'five')[0]?.raids.map((entry) => entry.id))
+      .toEqual(['normal-five', 'shadow-five']);
+  });
+
   it('targetRaidIdがあれば選択中フィルターをallへ戻す', () => {
     expect(resolveRaidFilterForTarget('five', 'target-raid')).toBe('all');
+    expect(resolveRaidFilterForTarget('shadow', 'target-raid')).toBe('all');
     expect(resolveRaidFilterForTarget('mega', null)).toBe('mega');
   });
 });

@@ -7,6 +7,7 @@
     "data:pokemon": "node scripts/generate-pokemon-data.mjs",
     "data:game": "node scripts/generate-game-data.mjs",
     "data:pvp": "node scripts/generate-pvp-rankings.mjs",
+    "data:rocket-dialogues": "node scripts/generate-rocket-dialogues.mjs",
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
@@ -20,9 +21,10 @@
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
-    "@vitejs/plugin-react": "^6.0.5",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^6.0.5",
+    "cheerio": "^1.2.0",
     "typescript": "^7.0.2",
     "vite": "^8.2.1",
     "vitest": "^4.1.10"

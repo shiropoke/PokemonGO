@@ -11,6 +11,7 @@ import type {
   ScrapedDuckDataset,
 } from '../types/scrapedDuck';
 import { SCRAPED_DUCK_CACHE_KEYS } from './appStorage';
+import { loadRocketDialogueEntries } from './rocketDialogues';
 import {
   getRocketTitleLabel,
   getRocketTrainerName,
@@ -19,6 +20,7 @@ import {
   resolveExternalPokemonSpeciesId,
   stripExternalMarkup,
 } from '../utils/scrapedDuckLocalization';
+import { joinRocketDialogues } from '../utils/rocketDialogues';
 
 export const SCRAPED_DUCK_DATA_URLS = {
   raids: 'https://raw.githubusercontent.com/bigfoott/ScrapedDuck/data/raids.json',
@@ -271,6 +273,7 @@ function normalizeRocketLineup(item: unknown, index: number): RocketLineup | nul
     title,
     titleLabel: getRocketTitleLabel(title),
     type,
+    dialogues: [],
     firstPokemon: readRocketSlot(item.firstPokemon, index, 1),
     secondPokemon: readRocketSlot(item.secondPokemon, index, 2),
     thirdPokemon: readRocketSlot(item.thirdPokemon, index, 3),
@@ -399,5 +402,13 @@ export const loadResearch = (options?: DatasetLoadOptions) =>
   loadDataset(DATASETS.research, options);
 export const loadEggs = (options?: DatasetLoadOptions) =>
   loadDataset(DATASETS.eggs, options);
-export const loadRocketLineups = (options?: DatasetLoadOptions) =>
-  loadDataset(DATASETS.rocket, options);
+export const loadRocketLineups = async (options: DatasetLoadOptions = {}) => {
+  const result = await loadDataset(DATASETS.rocket, options);
+  try {
+    const dialogues = await loadRocketDialogueEntries(options);
+    return { ...result, data: joinRocketDialogues(result.data, dialogues) };
+  } catch (error) {
+    if (options.signal?.aborted) throw error;
+    return result;
+  }
+};
