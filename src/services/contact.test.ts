@@ -2,6 +2,9 @@ import { describe, expect, it } from 'vitest';
 import {
   CONTACT_FORM_ENDPOINT,
   CONTACT_SUBMIT_TIMEOUT_MS,
+  createContactSubmissionGate,
+  isAllowedContactResponseOrigin,
+  parseAllowedContactResponseMessage,
   parseContactResponseMessage,
   validateContactForm,
 } from './contact';
@@ -45,6 +48,83 @@ describe('contact response message', () => {
     expect(parseContactResponseMessage({ source: 'go-scope-contact', status: 'unknown' }))
       .toBeNull();
     expect(parseContactResponseMessage('ok')).toBeNull();
+  });
+
+  it('Google Apps Script系のHTTPS originだけを許可する', () => {
+    expect(isAllowedContactResponseOrigin('https://script.google.com')).toBe(true);
+    expect(isAllowedContactResponseOrigin('https://script.googleusercontent.com')).toBe(true);
+    expect(isAllowedContactResponseOrigin('https://example-script.googleusercontent.com'))
+      .toBe(true);
+    expect(isAllowedContactResponseOrigin('https://example.com')).toBe(false);
+    expect(isAllowedContactResponseOrigin('https://script.google.com.example.com')).toBe(false);
+    expect(isAllowedContactResponseOrigin('http://script.google.com')).toBe(false);
+    expect(isAllowedContactResponseOrigin('not-an-origin')).toBe(false);
+  });
+
+  it('正常なGoogle originとok/error payloadを組み合わせて受理する', () => {
+    expect(parseAllowedContactResponseMessage(
+      { source: 'go-scope-contact', status: 'ok' },
+      'https://script.google.com',
+    )).toEqual({ source: 'go-scope-contact', status: 'ok' });
+    expect(parseAllowedContactResponseMessage(
+      { source: 'go-scope-contact', status: 'error' },
+      'https://example-script.googleusercontent.com',
+    )).toEqual({ source: 'go-scope-contact', status: 'error' });
+  });
+
+  it('無関係なoriginや不正payloadを組み合わせ段階でも無視する', () => {
+    expect(parseAllowedContactResponseMessage(
+      { source: 'go-scope-contact', status: 'ok' },
+      'https://example.com',
+    )).toBeNull();
+    expect(parseAllowedContactResponseMessage(
+      { source: 'other', status: 'ok' },
+      'https://script.google.com',
+    )).toBeNull();
+    expect(parseAllowedContactResponseMessage(
+      { source: 'go-scope-contact', status: 'unknown' },
+      'https://script.google.com',
+    )).toBeNull();
+  });
+});
+
+describe('contact submission gate', () => {
+  it('ok/error相当のsettle後はtimeoutを発火させない', () => {
+    let scheduledCallback: (() => void) | null = null;
+    let cancelCount = 0;
+    let timeoutCount = 0;
+    const gate = createContactSubmissionGate(
+      (callback) => {
+        scheduledCallback = callback;
+        return 1;
+      },
+      () => { cancelCount += 1; },
+    );
+
+    expect(gate.begin(() => { timeoutCount += 1; })).toBe(true);
+    expect(gate.settle()).toBe(true);
+    expect(gate.isPending()).toBe(false);
+    expect(cancelCount).toBe(1);
+    (scheduledCallback as (() => void) | null)?.();
+    expect(timeoutCount).toBe(0);
+  });
+
+  it('15秒応答がなければtimeoutし、送信中の二重開始を拒否する', () => {
+    let scheduledCallback: (() => void) | null = null;
+    let scheduledDelay = 0;
+    let timeoutCount = 0;
+    const gate = createContactSubmissionGate((callback, delay) => {
+      scheduledCallback = callback;
+      scheduledDelay = delay;
+      return 1;
+    });
+
+    expect(gate.begin(() => { timeoutCount += 1; })).toBe(true);
+    expect(gate.begin(() => { timeoutCount += 1; })).toBe(false);
+    expect(scheduledDelay).toBe(15_000);
+    (scheduledCallback as (() => void) | null)?.();
+    expect(timeoutCount).toBe(1);
+    expect(gate.isPending()).toBe(false);
   });
 });
 

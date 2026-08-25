@@ -19,7 +19,7 @@ describe('RefreshButton', () => {
     expect(markup).not.toContain('更新確認');
   });
 
-  it('押下処理で現在のページをリロードする', () => {
+  it('viewportをズーム禁止へ変更せず現在のページをリロードする', () => {
     const reload = vi.fn();
     const blur = vi.fn();
     const setAttribute = vi.fn();
@@ -36,10 +36,7 @@ describe('RefreshButton', () => {
     reloadCurrentPage();
 
     expect(blur).toHaveBeenCalledTimes(1);
-    expect(setAttribute).toHaveBeenCalledWith(
-      'content',
-      'width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover',
-    );
+    expect(setAttribute).not.toHaveBeenCalled();
     expect(requestAnimationFrame).toHaveBeenCalledTimes(1);
     expect(reload).toHaveBeenCalledTimes(1);
   });

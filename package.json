@@ -12,7 +12,7 @@
     "preview": "vite preview",
     "test:assets": "node scripts/verify-type-assets.mjs",
     "test:icons": "node scripts/verify-icon-assets.mjs",
-    "test": "node scripts/verify-icon-assets.mjs && vitest run",
+    "test": "node scripts/verify-icon-assets.mjs && node scripts/verify-viewport.mjs && vitest run",
     "test:watch": "vitest"
   },
   "dependencies": {

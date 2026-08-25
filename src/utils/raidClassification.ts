@@ -8,6 +8,8 @@ export interface RaidTierGroup {
   raids: RaidBoss[];
 }
 
+export type RaidFilter = 'all' | 'five' | 'mega' | 'three' | 'one';
+
 interface RaidTierDefinition {
   key: string;
   title: string;
@@ -87,4 +89,20 @@ export function groupRaidsByTier(raids: readonly RaidBoss[]): RaidTierGroup[] {
       const order = left.order - right.order;
       return order !== 0 ? order : left.key.localeCompare(right.key);
     });
+}
+
+export function filterRaidTierGroups(
+  groups: readonly RaidTierGroup[],
+  filter: RaidFilter,
+): RaidTierGroup[] {
+  return filter === 'all'
+    ? [...groups]
+    : groups.filter((group) => group.key === filter);
+}
+
+export function resolveRaidFilterForTarget(
+  currentFilter: RaidFilter,
+  targetRaidId: string | null,
+): RaidFilter {
+  return targetRaidId ? 'all' : currentFilter;
 }

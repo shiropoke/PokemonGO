@@ -13,8 +13,8 @@ import {
   CONTACT_IFRAME_NAME,
   CONTACT_MESSAGE_MAX_LENGTH,
   CONTACT_MESSAGE_MIN_LENGTH,
-  CONTACT_SUBMIT_TIMEOUT_MS,
-  parseContactResponseMessage,
+  createContactSubmissionGate,
+  parseAllowedContactResponseMessage,
   validateContactForm,
 } from '../services/contact';
 import type { NavigationQuery, Page } from '../types/navigation';
@@ -37,27 +37,15 @@ export function ContactPage({ onNavigate }: ContactPageProps) {
   const [errors, setErrors] = useState<ReturnType<typeof validateContactForm>>({});
   const [submitting, setSubmitting] = useState(false);
   const [feedback, setFeedback] = useState<SubmissionFeedback | null>(null);
-  const iframeRef = useRef<HTMLIFrameElement>(null);
-  const timeoutRef = useRef<number | null>(null);
-  const submittingRef = useRef(false);
-
-  const clearSubmissionTimeout = useCallback(() => {
-    if (timeoutRef.current !== null) {
-      window.clearTimeout(timeoutRef.current);
-      timeoutRef.current = null;
-    }
-  }, []);
-
-  const setSubmittingState = useCallback((value: boolean) => {
-    submittingRef.current = value;
-    setSubmitting(value);
-  }, []);
+  const submissionGateRef = useRef<ReturnType<typeof createContactSubmissionGate> | null>(null);
+  if (submissionGateRef.current === null) {
+    submissionGateRef.current = createContactSubmissionGate();
+  }
 
   const finishSubmission = useCallback((status: 'ok' | 'error') => {
-    if (!submittingRef.current) return;
+    if (!submissionGateRef.current?.settle()) return;
 
-    clearSubmissionTimeout();
-    setSubmittingState(false);
+    setSubmitting(false);
 
     if (status === 'ok') {
       setCategory('');
@@ -78,15 +66,15 @@ export function ContactPage({ onNavigate }: ContactPageProps) {
       title: 'お問い合わせを送信できませんでした。',
       description: '時間をおいてもう一度お試しください。',
     });
-  }, [clearSubmissionTimeout, setSubmittingState]);
+  }, []);
 
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
-      const response = parseContactResponseMessage(event.data);
-      if (!response || !submittingRef.current) return;
-
-      const iframeWindow = iframeRef.current?.contentWindow;
-      if (!iframeWindow || event.source !== iframeWindow) return;
+      const response = parseAllowedContactResponseMessage(event.data, event.origin);
+      if (
+        !response
+        || !submissionGateRef.current?.isPending()
+      ) return;
 
       finishSubmission(response.status);
     };
@@ -95,10 +83,10 @@ export function ContactPage({ onNavigate }: ContactPageProps) {
     return () => window.removeEventListener('message', handleMessage);
   }, [finishSubmission]);
 
-  useEffect(() => () => clearSubmissionTimeout(), [clearSubmissionTimeout]);
+  useEffect(() => () => submissionGateRef.current?.cancel(), []);
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-    if (submittingRef.current) {
+    if (submissionGateRef.current?.isPending()) {
       event.preventDefault();
       return;
     }
@@ -112,17 +100,21 @@ export function ContactPage({ onNavigate }: ContactPageProps) {
       return;
     }
 
-    setSubmittingState(true);
-    clearSubmissionTimeout();
-    timeoutRef.current = window.setTimeout(() => {
-      if (!submittingRef.current) return;
-      setSubmittingState(false);
+    const didBegin = submissionGateRef.current?.begin(() => {
+      setSubmitting(false);
       setFeedback({
         kind: 'error',
         title: '送信結果を確認できませんでした。',
         description: '通信状況を確認して、もう一度お試しください。',
       });
-    }, CONTACT_SUBMIT_TIMEOUT_MS);
+    });
+
+    if (!didBegin) {
+      event.preventDefault();
+      return;
+    }
+
+    setSubmitting(true);
   };
 
   const pageUrl = typeof window === 'undefined' ? '' : window.location.href;
@@ -271,7 +263,6 @@ export function ContactPage({ onNavigate }: ContactPageProps) {
       </div>
 
       <iframe
-        ref={iframeRef}
         name={CONTACT_IFRAME_NAME}
         title="お問い合わせ送信"
         hidden

@@ -4,6 +4,7 @@ import type { Page } from '../types/navigation';
 import {
   getMainTabSwipeTarget,
   isInsideScrollableHorizontalRegion,
+  isMultiTouchSwipeBlocked,
   isSwipeStartTargetExcluded,
   isWithinSwipeEdgeExclusion,
   resolveSwipeDirectionLock,
@@ -46,7 +47,7 @@ export function useMainTabSwipe({
     if (event.pointerType !== 'touch') return;
 
     activeTouchPointersRef.current.add(event.pointerId);
-    if (!event.isPrimary || activeTouchPointersRef.current.size > 1) {
+    if (isMultiTouchSwipeBlocked(event.isPrimary, activeTouchPointersRef.current.size)) {
       multiTouchBlockedRef.current = true;
       gestureRef.current = null;
       return;

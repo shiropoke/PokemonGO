@@ -233,7 +233,7 @@
 }
 
 .main-tab-swipe-surface {
-  touch-action: pan-y;
+  touch-action: pan-y pinch-zoom;
 }
 
 .page-transition-viewport.is-transitioning {

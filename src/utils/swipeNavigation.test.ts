@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   getMainTabSwipeTarget,
+  isMultiTouchSwipeBlocked,
   isSwipeStartTargetExcluded,
   isWithinSwipeEdgeExclusion,
   resolveSwipeDirectionLock,
@@ -78,7 +79,14 @@ describe('main tab swipe navigation', () => {
     expect(isSwipeStartTargetExcluded(targetMatching('input'))).toBe(true);
     expect(isSwipeStartTargetExcluded(targetMatching('[data-main-tab-swipe-ignore]'))).toBe(true);
     expect(isSwipeStartTargetExcluded(targetMatching('.week-calendar-scroll'))).toBe(true);
+    expect(isSwipeStartTargetExcluded(targetMatching('[data-horizontal-scroll]'))).toBe(true);
     expect(isSwipeStartTargetExcluded(targetMatching(null))).toBe(false);
+  });
+
+  it('1本指は許可し、2本指または非primary pointerではタブスワイプを止める', () => {
+    expect(isMultiTouchSwipeBlocked(true, 1)).toBe(false);
+    expect(isMultiTouchSwipeBlocked(true, 2)).toBe(true);
+    expect(isMultiTouchSwipeBlocked(false, 2)).toBe(true);
   });
 
   it('preserves iOS browser gestures at both viewport edges', () => {

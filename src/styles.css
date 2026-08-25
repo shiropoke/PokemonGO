@@ -333,14 +333,14 @@ dd {
   font-weight: 700;
 }
 
-.event-filters {
+.filter-chips {
   position: relative;
   margin: 0 -20px 28px;
   border-block: 1px solid var(--gray-200);
   background: var(--white);
 }
 
-.event-filters__scroller {
+.filter-chips__scroller {
   display: flex;
   gap: 7px;
   max-width: 1120px;
@@ -352,12 +352,12 @@ dd {
   -webkit-overflow-scrolling: touch;
 }
 
-.event-filters__scroller::-webkit-scrollbar {
+.filter-chips__scroller::-webkit-scrollbar {
   display: none;
 }
 
-.event-filters__button {
-  min-height: 38px;
+.filter-chips__button {
+  min-height: 44px;
   flex: 0 0 auto;
   padding: 0 14px;
   border: 1px solid var(--gray-300);
@@ -370,11 +370,11 @@ dd {
   cursor: pointer;
 }
 
-.event-filters__button:hover {
+.filter-chips__button:hover {
   border-color: #9ebed5;
 }
 
-.event-filters__button[data-active="true"] {
+.filter-chips__button[data-active="true"] {
   border-color: var(--blue-700);
   background: var(--blue-700);
   color: var(--white);
@@ -1488,12 +1488,12 @@ dd {
     font-size: 0.66rem;
   }
 
-  .event-filters {
+  .filter-chips {
     margin-right: -14px;
     margin-left: -14px;
   }
 
-  .event-filters__scroller {
+  .filter-chips__scroller {
     padding-right: 14px;
     padding-left: 14px;
   }
@@ -1657,12 +1657,12 @@ dd {
     padding-left: 10px;
   }
 
-  .event-filters {
+  .filter-chips {
     margin-right: -10px;
     margin-left: -10px;
   }
 
-  .event-filters__scroller {
+  .filter-chips__scroller {
     padding-right: 10px;
     padding-left: 10px;
   }

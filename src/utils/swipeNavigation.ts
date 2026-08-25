@@ -92,6 +92,13 @@ export function isWithinSwipeEdgeExclusion(
     || startX >= viewportWidth - SWIPE_EDGE_EXCLUSION;
 }
 
+export function isMultiTouchSwipeBlocked(
+  isPrimaryPointer: boolean,
+  activeTouchPointerCount: number,
+): boolean {
+  return !isPrimaryPointer || activeTouchPointerCount > 1;
+}
+
 interface MainTabSwipeTargetOptions {
   currentPage: Page;
   directionLock: SwipeDirectionLock;

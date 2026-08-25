@@ -2,7 +2,10 @@ import { describe, expect, it } from 'vitest';
 import type { RaidBoss } from '../types/scrapedDuck';
 import {
   compareRaidsByTierAndShadow,
+  filterRaidTierGroups,
+  getRaidTierDefinition,
   groupRaidsByTier,
+  resolveRaidFilterForTarget,
 } from './raidClassification';
 
 function raid(
@@ -27,6 +30,15 @@ function raid(
 }
 
 describe('レイドtier分類', () => {
+  it.each([
+    ['5-Star Raids', 'five', '★5レイド'],
+    ['Mega Raids', 'mega', 'メガレイド'],
+    ['3-Star Raids', 'three', '★3レイド'],
+    ['1-Star Raids', 'one', '★1レイド'],
+  ])('%sを既存tier定義の%sへ分類する', (tier, key, title) => {
+    expect(getRaidTierDefinition(raid(key, tier, false))).toMatchObject({ key, title });
+  });
+
   it('通常★5とシャドウ★5を同じtierへまとめ、通常を先にする', () => {
     const groups = groupRaidsByTier([
       raid('shadow-five', '5-Star Raids', true),
@@ -75,5 +87,37 @@ describe('レイドtier分類', () => {
       'three',
       'one',
     ]);
+  });
+
+  it.each(['five', 'mega', 'three', 'one'] as const)(
+    '%sフィルターでは該当グループだけを返す',
+    (filter) => {
+      const groups = groupRaidsByTier([
+        raid('five', '5-Star Raids', false),
+        raid('mega', 'Mega Raids', false),
+        raid('three', '3-Star Raids', false),
+        raid('one', '1-Star Raids', false),
+        raid('other', 'Unknown Tier', false),
+      ]);
+
+      expect(filterRaidTierGroups(groups, filter).map((group) => group.key))
+        .toEqual([filter]);
+    },
+  );
+
+  it('allではその他tierを含む既存グループと順序を維持する', () => {
+    const groups = groupRaidsByTier([
+      raid('other', 'Unknown Tier', false),
+      raid('one', '1-Star Raids', false),
+      raid('five', '5-Star Raids', false),
+    ]);
+
+    expect(filterRaidTierGroups(groups, 'all').map((group) => group.key))
+      .toEqual(groups.map((group) => group.key));
+  });
+
+  it('targetRaidIdがあれば選択中フィルターをallへ戻す', () => {
+    expect(resolveRaidFilterForTarget('five', 'target-raid')).toBe('all');
+    expect(resolveRaidFilterForTarget('mega', null)).toBe('mega');
   });
 });

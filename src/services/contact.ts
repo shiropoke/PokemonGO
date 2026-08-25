@@ -33,6 +33,15 @@ export interface ContactResponseMessage {
   status: 'ok' | 'error';
 }
 
+type ContactTimeoutHandle = ReturnType<typeof globalThis.setTimeout>;
+
+export interface ContactSubmissionGate {
+  begin(onTimeout: () => void): boolean;
+  settle(): boolean;
+  cancel(): void;
+  isPending(): boolean;
+}
+
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export function validateContactForm(values: ContactFormValues): ContactFormErrors {
@@ -71,5 +80,72 @@ export function parseContactResponseMessage(data: unknown): ContactResponseMessa
   return {
     source: 'go-scope-contact',
     status: candidate.status,
+  };
+}
+
+export function isAllowedContactResponseOrigin(origin: string): boolean {
+  try {
+    const url = new URL(origin);
+    if (url.protocol !== 'https:' || url.port) return false;
+
+    return url.hostname === 'script.google.com'
+      || url.hostname === 'script.googleusercontent.com'
+      || url.hostname.endsWith('.googleusercontent.com');
+  } catch {
+    return false;
+  }
+}
+
+export function parseAllowedContactResponseMessage(
+  data: unknown,
+  origin: string,
+): ContactResponseMessage | null {
+  const response = parseContactResponseMessage(data);
+  if (!response || !isAllowedContactResponseOrigin(origin)) return null;
+  return response;
+}
+
+export function createContactSubmissionGate(
+  schedule: (callback: () => void, delay: number) => ContactTimeoutHandle =
+    (callback, delay) => globalThis.setTimeout(callback, delay),
+  cancelScheduled: (handle: ContactTimeoutHandle) => void =
+    (handle) => globalThis.clearTimeout(handle),
+): ContactSubmissionGate {
+  let pending = false;
+  let timeoutHandle: ContactTimeoutHandle | null = null;
+
+  const cancelTimeout = () => {
+    if (timeoutHandle === null) return;
+    cancelScheduled(timeoutHandle);
+    timeoutHandle = null;
+  };
+
+  return {
+    begin(onTimeout) {
+      if (pending) return false;
+
+      pending = true;
+      cancelTimeout();
+      timeoutHandle = schedule(() => {
+        if (!pending) return;
+        pending = false;
+        timeoutHandle = null;
+        onTimeout();
+      }, CONTACT_SUBMIT_TIMEOUT_MS);
+      return true;
+    },
+    settle() {
+      if (!pending) return false;
+      pending = false;
+      cancelTimeout();
+      return true;
+    },
+    cancel() {
+      pending = false;
+      cancelTimeout();
+    },
+    isPending() {
+      return pending;
+    },
   };
 }
