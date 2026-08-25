@@ -81,7 +81,7 @@ export function ResearchPage() {
         <>
           <div className="dataset-filters" aria-label="報酬で絞り込み">
             <button type="button" className={filter === 'all' ? 'is-active' : ''} onClick={() => setFilter('all')}>すべて</button>
-            <button type="button" className={filter === 'pokemon' ? 'is-active' : ''} onClick={() => setFilter('pokemon')}>Pokémon</button>
+            <button type="button" className={filter === 'pokemon' ? 'is-active' : ''} onClick={() => setFilter('pokemon')}>ポケモン</button>
             {hasEventTasks ? (
               <button type="button" className={filter === 'event' ? 'is-active' : ''} onClick={() => setFilter('event')}>イベント限定</button>
             ) : null}
@@ -95,7 +95,7 @@ export function ResearchPage() {
       ) : null}
 
       <p className="dataset-page__scope-note">
-        現行データの報酬はPokémon形式のみです。ほしのすな・アイテムは判別可能なデータがないため分類していません。
+        現行データの報酬はポケモン形式のみです。ほしのすな・アイテムは判別可能なデータがないため分類していません。
       </p>
       <ScrapedDuckCredit />
     </div>

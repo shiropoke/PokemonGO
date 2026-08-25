@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { PrimaryNavigation, SideDrawer, SiteHeader } from './components/AppNavigation';
 import { GlobalSearchDialog } from './components/GlobalSearchDialog';
+import { LegalFooter } from './components/LegalFooter';
 import { EventsPage } from './pages/EventsPage';
 import { EggsPage } from './pages/EggsPage';
 import { EvolutionCpPage } from './pages/EvolutionCpPage';
@@ -10,9 +11,11 @@ import { IvCheckerPage } from './pages/IvCheckerPage';
 import { MoveCheckerPage } from './pages/MoveCheckerPage';
 import { PowerUpPage } from './pages/PowerUpPage';
 import { PvpRankingsPage } from './pages/PvpRankingsPage';
+import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage';
 import { RaidsPage } from './pages/RaidsPage';
 import { ResearchPage } from './pages/ResearchPage';
 import { RocketPage } from './pages/RocketPage';
+import { TermsPage } from './pages/TermsPage';
 import { useMainTabSwipe } from './hooks/useMainTabSwipe';
 import {
   resolveInitialTabPosition,
@@ -26,12 +29,13 @@ import {
   saveTheme,
 } from './services/theme';
 import type { Theme } from './services/theme';
-import { getPageFromHash, getPageHash } from './types/navigation';
+import { getPageFromHash, getPageHash, getPageTitle } from './types/navigation';
 import type { NavigationQuery, Page } from './types/navigation';
 import {
   getMainTabTransitionDirection,
   type MainTabTransitionDirection,
 } from './utils/mainTabTransition';
+import { scrollPageToTop, shouldResetPageScroll } from './utils/navigationScroll';
 
 const PAGE_TRANSITION_FALLBACK_MS = 360;
 
@@ -40,6 +44,7 @@ interface PageTransition {
   from: Page;
   to: Page;
   direction: MainTabTransitionDirection;
+  scrollOffset: number;
 }
 
 function getStorage(): Storage | null {
@@ -50,9 +55,11 @@ function getStorage(): Storage | null {
   }
 }
 
-function renderPage(page: Page) {
+type NavigateHandler = (page: Page, query?: NavigationQuery) => void;
+
+function renderPage(page: Page, onNavigate: NavigateHandler) {
   switch (page) {
-    case 'home': return <HomePage />;
+    case 'home': return <HomePage onNavigate={onNavigate} />;
     case 'events': return <EventsPage />;
     case 'raids': return <RaidsPage />;
     case 'iv': return <IvCheckerPage />;
@@ -63,8 +70,25 @@ function renderPage(page: Page) {
     case 'research': return <ResearchPage />;
     case 'eggs': return <EggsPage />;
     case 'rocket': return <RocketPage />;
-    case 'favorites': return <FavoritesPage />;
+    case 'favorites': return <FavoritesPage onNavigate={onNavigate} />;
+    case 'terms': return <TermsPage />;
+    case 'privacy': return <PrivacyPolicyPage />;
   }
+}
+
+function PageContent({
+  page,
+  onNavigate,
+}: {
+  page: Page;
+  onNavigate: NavigateHandler;
+}) {
+  return (
+    <div className="page-content-frame">
+      {renderPage(page, onNavigate)}
+      <LegalFooter onNavigate={onNavigate} />
+    </div>
+  );
 }
 
 export default function App() {
@@ -72,6 +96,7 @@ export default function App() {
   const [page, setPage] = useState<Page>(initialPage);
   const [visiblePage, setVisiblePage] = useState<Page>(initialPage);
   const [pageTransition, setPageTransition] = useState<PageTransition | null>(null);
+  const [navigationSequence, setNavigationSequence] = useState(0);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
@@ -81,6 +106,9 @@ export default function App() {
   const pageSwipeSurfaceRef = useRef<HTMLElement>(null);
   const transitionSequenceRef = useRef(0);
   const pageTransitionRef = useRef<PageTransition | null>(null);
+  const pendingScrollResetRef = useRef(
+    shouldResetPageScroll(initialPage, window.location.hash),
+  );
   const [theme, setTheme] = useState<Theme>(() =>
     resolveInitialTheme(
       getStorage(),
@@ -93,7 +121,13 @@ export default function App() {
 
   useEffect(() => {
     const onHashChange = () => {
-      setPage(getPageFromHash(window.location.hash));
+      const nextPage = getPageFromHash(window.location.hash);
+      pendingScrollResetRef.current = shouldResetPageScroll(
+        nextPage,
+        window.location.hash,
+      );
+      setPage(nextPage);
+      setNavigationSequence((sequence) => sequence + 1);
       setIsMenuOpen(false);
       setIsSearchOpen(false);
     };
@@ -117,6 +151,12 @@ export default function App() {
       from: visiblePage,
       to: page,
       direction,
+      scrollOffset: Math.max(
+        0,
+        window.scrollY,
+        document.documentElement.scrollTop,
+        document.body.scrollTop,
+      ),
     } satisfies PageTransition;
     pageTransitionRef.current = nextTransition;
     setPageTransition(nextTransition);
@@ -138,6 +178,22 @@ export default function App() {
     );
     return () => window.clearTimeout(fallbackTimer);
   }, [finishPageTransition, pageTransition]);
+
+  useLayoutEffect(() => {
+    if (
+      !pendingScrollResetRef.current
+      || (!pageTransition && page !== visiblePage)
+    ) {
+      return;
+    }
+
+    pendingScrollResetRef.current = false;
+    scrollPageToTop();
+  }, [navigationSequence, page, pageTransition, visiblePage]);
+
+  useEffect(() => {
+    document.title = getPageTitle(page);
+  }, [page]);
 
   useEffect(() => {
     applyTheme(theme);
@@ -161,12 +217,13 @@ export default function App() {
 
   const navigate = useCallback((nextPage: Page, query?: NavigationQuery) => {
     const nextHash = getPageHash(nextPage, query);
+    pendingScrollResetRef.current = shouldResetPageScroll(nextPage, nextHash);
     if (window.location.hash !== nextHash) {
       window.location.hash = nextHash;
     } else {
       setPage(nextPage);
+      setNavigationSequence((sequence) => sequence + 1);
     }
-    window.scrollTo({ top: 0, behavior: 'auto' });
   }, []);
 
   const changeTheme = (nextTheme: Theme) => {
@@ -229,7 +286,14 @@ export default function App() {
                 className={`page-transition-layer page-transition-layer--outgoing page-transition-layer--${pageTransition.direction}`}
                 aria-hidden="true"
               >
-                {renderPage(pageTransition.from)}
+                <div
+                  className="page-transition-scroll-preserver"
+                  style={{
+                    transform: `translate3d(0, -${pageTransition.scrollOffset}px, 0)`,
+                  }}
+                >
+                  <PageContent page={pageTransition.from} onNavigate={navigate} />
+                </div>
               </div>
             ) : null}
             <div
@@ -241,7 +305,7 @@ export default function App() {
                 }
               } : undefined}
             >
-              {renderPage(activeContentPage)}
+              <PageContent page={activeContentPage} onNavigate={navigate} />
             </div>
           </>
         </main>

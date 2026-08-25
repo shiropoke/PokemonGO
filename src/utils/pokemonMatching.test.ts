@@ -14,7 +14,7 @@ const mew: Pokemon = {
 };
 
 describe('pokemon matching', () => {
-  it('matches whole English Pokémon names in event titles', () => {
+  it('matches whole English Pokemon names in event titles', () => {
     expect(eventTitleMentionsPokemon('Mew Raid Day', mew)).toBe(true);
     expect(eventTitleMentionsPokemon('Mewtwo Raid Hour', mew)).toBe(false);
   });

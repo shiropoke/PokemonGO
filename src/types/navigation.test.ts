@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { getHashQueryParam, getPageFromHash, getPageHash } from './navigation';
+import {
+  getHashQueryParam,
+  getPageFromHash,
+  getPageHash,
+  getPageTitle,
+} from './navigation';
 
 describe('hash navigation', () => {
   it('GitHub Pagesで再読込可能なhashを生成・解析する', () => {
@@ -15,6 +20,17 @@ describe('hash navigation', () => {
     expect(hash).toBe('#/events?event=event+name%2F2026');
     expect(getHashQueryParam(hash, 'event')).toBe('event name/2026');
     expect(getHashQueryParam(hash, 'missing')).toBeNull();
+  });
+
+  it('利用規約とプライバシーポリシーのhashを生成・解析する', () => {
+    expect(getPageHash('terms')).toBe('#/terms');
+    expect(getPageFromHash('#/terms')).toBe('terms');
+    expect(getPageHash('privacy')).toBe('#/privacy');
+    expect(getPageFromHash('#/privacy')).toBe('privacy');
+    expect(getPageTitle('terms')).toBe('利用規約 | GO Scope');
+    expect(getPageTitle('privacy')).toBe(
+      'プライバシーポリシー | GO Scope',
+    );
   });
 
   it('空または未知のhashはホームへ戻す', () => {

@@ -1,4 +1,4 @@
-export const SITE_SHARE_TITLE = 'Pokémon GO Information';
+export const SITE_SHARE_TITLE = 'GO Scope';
 
 export type SiteShareResult = 'shared' | 'copied' | 'cancelled' | 'failed';
 

@@ -11,6 +11,8 @@ import './styles/type-badge.css';
 import './styles/refresh-button.css';
 import './styles/global-search.css';
 import './styles/evolution-pvp.css';
+import './styles/legal.css';
+import './styles/mobile-inputs.css';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>

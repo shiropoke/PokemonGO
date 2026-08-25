@@ -5,7 +5,7 @@ import {
   replacePokemonNamesInText,
 } from './pokemonLocalization';
 
-describe('Pokémon日本語名', () => {
+describe('ポケモン日本語名', () => {
   it('内部speciesIdを日本語の種族名へ変換する', () => {
     expect(getPokemonNameJa('bulbasaur')).toBe('フシギダネ');
     expect(getPokemonNameJa('pikachu')).toBe('ピカチュウ');

@@ -79,7 +79,7 @@ async function requestAttackers(force: boolean): Promise<RaidCounterAttacker[]> 
   });
 }
 
-/** 軽量Game Masterと既存日本語Pokémonデータを一度だけ結合します。 */
+/** 軽量Game Masterと既存日本語ポケモンデータを一度だけ結合します。 */
 export function fetchRaidCounterAttackers(
   options: { force?: boolean } = {},
 ): Promise<RaidCounterAttacker[]> {

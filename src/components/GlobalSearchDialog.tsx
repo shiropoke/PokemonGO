@@ -170,7 +170,7 @@ export function GlobalSearchDialog({
       ([pokemonResult, eventsResult, raidsResult]) => {
         loadingRef.current = false;
         const failed = [
-          pokemonResult.status === 'rejected' ? 'Pokémon' : null,
+          pokemonResult.status === 'rejected' ? 'ポケモン' : null,
           eventsResult.status === 'rejected' ? 'イベント' : null,
           raidsResult.status === 'rejected' ? 'レイド' : null,
         ].filter((label): label is string => label !== null);
@@ -393,7 +393,7 @@ export function GlobalSearchDialog({
             </div>
           ) : null}
 
-          <SearchResultGroup title="Pokémon" results={results.pokemon} onSelect={selectResult} />
+          <SearchResultGroup title="ポケモン" results={results.pokemon} onSelect={selectResult} />
           <SearchResultGroup title="イベント" results={results.events} onSelect={selectResult} />
           <SearchResultGroup title="レイド" results={results.raids} onSelect={selectResult} />
           <SearchResultGroup

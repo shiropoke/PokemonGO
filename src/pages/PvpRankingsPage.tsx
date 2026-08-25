@@ -7,6 +7,7 @@ import type { League } from '../types/calculations';
 import type { GameData } from '../types/gameData';
 import type { PvpRankingsData } from '../types/pvpRankings';
 import { getPokemonDisplayName } from '../utils/pokemonLocalization';
+import { matchesSearchQuery } from '../utils/search';
 import { formatMoveId, openIvCheckerForSpecies } from '../utils/toolNavigation';
 import '../styles/rankings.css';
 
@@ -17,20 +18,17 @@ const LEAGUES: readonly { id: League; label: string; cap: string }[] = [
   { id: 'master', label: 'マスターリーグ', cap: 'CP上限なし' },
 ];
 
-function normalize(value: string): string {
-  return value.normalize('NFKC').toLocaleLowerCase().replaceAll('_', ' ').trim();
+export function rankingMatchesQuery(
+  query: string,
+  entry: Pick<PvpSpeciesRankingView, 'displayName' | 'speciesName' | 'speciesId'>,
+): boolean {
+  return matchesSearchQuery(query, [entry.displayName, entry.speciesName, entry.speciesId]);
 }
 
-function formatGeneratedAt(value: string): string {
-  const date = new Date(value);
-  if (!Number.isFinite(date.getTime())) return '不明';
-  return new Intl.DateTimeFormat('ja-JP', {
-    year: 'numeric',
-    month: 'numeric',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  }).format(date);
+interface PvpSpeciesRankingView {
+  displayName: string;
+  speciesName: string;
+  speciesId: string;
 }
 
 export function PvpRankingsPage() {
@@ -77,7 +75,6 @@ export function PvpRankingsPage() {
 
   const rankings = useMemo(() => {
     const source = data?.leagues[league].rankings ?? [];
-    const normalizedQuery = normalize(query);
     return source
       .map((entry, index) => ({
         ...entry,
@@ -94,12 +91,7 @@ export function PvpRankingsPage() {
         ),
         types: gameData?.pokemon[entry.speciesId]?.types ?? [],
       }))
-      .filter((entry) => {
-        if (!normalizedQuery) return true;
-        return normalize(
-          `${entry.displayName} ${entry.speciesName} ${entry.speciesId}`,
-        ).includes(normalizedQuery);
-      });
+      .filter((entry) => rankingMatchesQuery(query, entry));
   }, [data, gameData, league, query]);
 
   const activeLeague = LEAGUES.find((entry) => entry.id === league) ?? LEAGUES[0]!;
@@ -109,8 +101,8 @@ export function PvpRankingsPage() {
       <header className="page-heading">
         <div>
           <span className="page-kicker">PvPoke オープンリーグ</span>
-          <h1>PvP Pokémonランキング</h1>
-          <p>対戦シミュレーションに基づくPokémon種ごとの総合評価です。個体値順位とは異なります。</p>
+          <h1>PvP ポケモンランキング</h1>
+          <p>対戦シミュレーションに基づくポケモン種ごとの総合評価です。個体値順位とは異なります。</p>
         </div>
       </header>
 
@@ -134,18 +126,15 @@ export function PvpRankingsPage() {
 
         <div className="ranking-toolbar">
           <label>
-            <span>Pokémonを検索</span>
+            <span>ポケモンを検索</span>
             <input
               type="search"
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              placeholder="日本語名・英語名・内部ID"
+              placeholder="名前・ひらがな・ローマ字・内部ID"
               autoComplete="off"
             />
           </label>
-          {data ? (
-            <small>データ生成 {formatGeneratedAt(data.generatedAt)}</small>
-          ) : null}
         </div>
 
         {error ? (
@@ -158,7 +147,7 @@ export function PvpRankingsPage() {
         ) : !data ? (
           <div className="ranking-state" aria-live="polite">ランキングを読み込んでいます</div>
         ) : rankings.length === 0 ? (
-          <div className="ranking-state">該当するPokémonが見つかりません</div>
+          <div className="ranking-state">該当するポケモンが見つかりません</div>
         ) : (
           <>
             <div className="ranking-summary">
@@ -212,7 +201,7 @@ export function PvpRankingsPage() {
                           className="ranking-tool-link"
                           onClick={() => openIvCheckerForSpecies(entry.speciesId)}
                         >
-                          このPokémonの個体値を調べる
+                          このポケモンの個体値を調べる
                         </button>
                       </details>
                     </div>

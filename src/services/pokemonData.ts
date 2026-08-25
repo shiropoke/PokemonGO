@@ -199,13 +199,13 @@ async function requestPokemonData(
       headers: { Accept: 'application/json' },
     });
     if (!response.ok) {
-      throw new Error(`Pokémon data request failed: ${response.status}`);
+      throw new Error(`Pokemon data request failed: ${response.status}`);
     }
 
     const payload: unknown = await response.json();
     const pokemon = extractPokemon(payload);
     if (pokemon.length === 0) {
-      throw new Error('PvPoke Game Master did not contain usable Pokémon data.');
+      throw new Error('PvPoke Game Master did not contain usable Pokemon data.');
     }
 
     const fetchedAt = Date.now();

@@ -72,93 +72,109 @@ export function EventCard({ event, status, now }: EventCardProps) {
     setExpanded(false);
   }, [event.eventID]);
 
+  const media = (
+    <div className="event-card__media">
+      {imageUrl && !imageFailed ? (
+        <img
+          className="event-card__image"
+          src={imageUrl}
+          alt=""
+          width="640"
+          height="360"
+          loading="lazy"
+          decoding="async"
+          onError={() => setImageFailed(true)}
+        />
+      ) : (
+        <div className="event-card__image-placeholder" aria-hidden="true">
+          画像なし
+        </div>
+      )}
+    </div>
+  );
+
   return (
     <article className="event-card" data-status={status}>
-      <div className="event-card__media">
-        {imageUrl && !imageFailed ? (
-          <img
-            className="event-card__image"
-            src={imageUrl}
-            alt=""
-            width="640"
-            height="360"
-            loading="lazy"
-            decoding="async"
-            onError={() => setImageFailed(true)}
-          />
-        ) : (
-          <div className="event-card__image-placeholder" aria-hidden="true">
-            画像なし
-          </div>
-        )}
-      </div>
+      {eventUrl ? (
+        <a
+          className="event-card__media-link"
+          href={eventUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={`${localizedTitle}を外部サイトで詳しく見る`}
+        >
+          {media}
+        </a>
+      ) : media}
 
       <div className="event-card__body">
-        <div className="event-card__meta">
-          <span className="event-card__status" data-status={status}>
-            {STATUS_LABELS[status]}
-          </span>
-          <span className="event-card__type">
-            {getEventTypeLabel(event.eventType)}
-          </span>
-        </div>
-
-        <h3 className="event-card__title">{localizedTitle}</h3>
-
-        <dl className="event-card__dates">
-          <div className="event-card__date-row">
-            <dt>開始</dt>
-            <dd>
-              {startDate ? (
-                <time dateTime={startDate.toISOString()}>
-                  {formatEventDate(startDate, new Date(now))}
-                </time>
-              ) : (
-                "未定"
-              )}
-            </dd>
+        <div className="event-card__main">
+          <div className="event-card__meta">
+            <span className="event-card__status" data-status={status}>
+              {STATUS_LABELS[status]}
+            </span>
+            <span className="event-card__type">
+              {getEventTypeLabel(event.eventType)}
+            </span>
           </div>
-          <div className="event-card__date-row">
-            <dt>終了</dt>
-            <dd>
-              {endDate ? (
-                <time dateTime={endDate.toISOString()}>
-                  {formatEventDate(endDate, new Date(now))}
-                </time>
-              ) : (
-                "未定"
-              )}
-            </dd>
-          </div>
-        </dl>
 
-        <div className="event-card__footer">
-          <p className="event-card__countdown">
-            {getEventCountdown(event, status, now)}
-          </p>
-          <button
-            className="event-card__details-toggle"
-            type="button"
-            aria-expanded={expanded}
-            aria-controls={panelId}
-            onClick={() => setExpanded((current) => !current)}
-          >
-            詳細
-            <svg
-              className="event-card__details-chevron"
-              viewBox="0 0 20 20"
-              aria-hidden="true"
+          <h3 className="event-card__title">{localizedTitle}</h3>
+
+          <dl className="event-card__dates">
+            <div className="event-card__date-row">
+              <dt>開始</dt>
+              <dd>
+                {startDate ? (
+                  <time dateTime={startDate.toISOString()}>
+                    {formatEventDate(startDate, new Date(now))}
+                  </time>
+                ) : (
+                  "未定"
+                )}
+              </dd>
+            </div>
+            <div className="event-card__date-row">
+              <dt>終了</dt>
+              <dd>
+                {endDate ? (
+                  <time dateTime={endDate.toISOString()}>
+                    {formatEventDate(endDate, new Date(now))}
+                  </time>
+                ) : (
+                  "未定"
+                )}
+              </dd>
+            </div>
+          </dl>
+
+          <div className="event-card__footer">
+            <p className="event-card__countdown">
+              {getEventCountdown(event, status, now)}
+            </p>
+            <button
+              className="event-card__details-toggle"
+              type="button"
+              aria-expanded={expanded}
+              aria-controls={panelId}
+              onClick={() => setExpanded((current) => !current)}
             >
-              <path
-                d="m5 7.5 5 5 5-5"
-                fill="none"
-                stroke="currentColor"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="1.7"
-              />
-            </svg>
-          </button>
+              詳細
+              <svg
+                className="event-card__details-chevron"
+                viewBox="0 0 20 20"
+                aria-hidden="true"
+              >
+                <path
+                  d="m5 7.5 5 5 5-5"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="1.7"
+                />
+              </svg>
+            </button>
+          </div>
         </div>
 
         <div

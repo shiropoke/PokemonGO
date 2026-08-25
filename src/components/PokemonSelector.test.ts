@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { resolvePickerViewportMetrics } from './PokemonSelector';
 
-describe('Pokémon選択モーダルの表示領域', () => {
+describe('ポケモン選択モーダルの表示領域', () => {
   it('VisualViewportはモーダル高ではなくキーボード下余白の算出に使う', () => {
     expect(
       resolvePickerViewportMetrics({ height: 412.5, offsetTop: 86 }, 844),

@@ -71,7 +71,7 @@ const source = {
   raids: [raid],
 };
 
-describe('共通Pokémon検索', () => {
+describe('共通ポケモン検索', () => {
   it('完全一致をフォーム違いの部分一致より先にする', () => {
     expect(searchPokemon(source.pokemon, 'ピカチュウ').map(({ pokemon }) => pokemon.speciesId))
       .toEqual(['pikachu', 'pikachu_flying_5th_anniv']);
@@ -103,7 +103,7 @@ describe('共通Pokémon検索', () => {
 });
 
 describe('グローバル検索', () => {
-  it('Pokémon・イベント・レイドを横断検索する', () => {
+  it('ポケモン・イベント・レイドを横断検索する', () => {
     const result = searchGlobalData(source, 'ピカ');
     expect(result.pokemon[0]?.speciesId).toBe('pikachu');
     expect(result.events[0]?.eventID).toBe('pikachu-hour');

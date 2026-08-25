@@ -93,8 +93,7 @@ function Brand({ compact = false }: { compact?: boolean }) {
         aria-hidden="true"
       />
       <span className="shell-brand__title">
-        <strong>Pokémon GO</strong>
-        <small>Information</small>
+        <strong>GO Scope</strong>
       </span>
     </span>
   );
@@ -137,7 +136,7 @@ export function SiteHeader({
         <a
           className="shell-header__brand-link"
           href={getPageHash('home')}
-          aria-label="Pokémon GO Information ホーム"
+          aria-label="GO Scope ホーム"
           aria-current={current === 'home' ? 'page' : undefined}
           onClick={(event) => {
             event.preventDefault();

@@ -184,6 +184,14 @@ export function getSearchMatchRank(
     : null;
 }
 
+/** ページ固有の一覧順を変えず、共通のかな・ローマ字検索で包含判定だけを行う。 */
+export function matchesSearchQuery(
+  query: string,
+  candidates: readonly string[],
+): boolean {
+  return !normalizeSearchText(query) || getSearchMatchRank(query, candidates) !== null;
+}
+
 function pokemonCandidates(pokemon: Pokemon): string[] {
   return [
     pokemon.displayName,
@@ -199,7 +207,7 @@ export interface PokemonSearchMatch {
   rank: SearchMatchRank;
 }
 
-/** PokémonSelectorとグローバル検索で共通利用する検索・順位付けです。 */
+/** PokemonSelectorとグローバル検索で共通利用する検索・順位付けです。 */
 export function searchPokemon(
   pokemon: readonly Pokemon[],
   query: string,

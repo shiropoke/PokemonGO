@@ -1,0 +1,135 @@
+.page-content-frame {
+  display: flex;
+  min-width: 0;
+  min-height: inherit;
+  flex-direction: column;
+}
+
+.legal-footer {
+  display: flex;
+  width: min(100%, 860px);
+  min-width: 0;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  margin: auto auto 0;
+  padding: 26px 12px 4px;
+  border-top: 1px solid var(--border);
+  color: var(--text-secondary);
+  font-size: 0.76rem;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.legal-footer a {
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: color 140ms ease;
+}
+
+.legal-footer a:hover,
+.legal-footer a:focus-visible {
+  color: var(--accent);
+}
+
+.legal-page {
+  width: min(100%, 860px);
+  min-width: 0;
+  margin-inline: auto;
+}
+
+.legal-page__heading {
+  margin-bottom: 20px;
+}
+
+.legal-page__heading span {
+  color: var(--accent);
+  font-size: 0.74rem;
+  font-weight: 750;
+  letter-spacing: 0.08em;
+}
+
+.legal-page__heading h1 {
+  margin: 6px 0 0;
+  color: var(--text);
+  font-size: clamp(1.65rem, 5vw, 2.35rem);
+  line-height: 1.25;
+}
+
+.legal-document {
+  padding: clamp(18px, 4vw, 30px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--card-shadow);
+  color: var(--text-secondary);
+  font-size: 0.92rem;
+  line-height: 1.85;
+  overflow-wrap: anywhere;
+}
+
+.legal-document > p:first-child {
+  color: var(--text);
+}
+
+.legal-document section {
+  margin-top: 28px;
+}
+
+.legal-document h2 {
+  margin: 0 0 9px;
+  color: var(--text);
+  font-size: 1.02rem;
+  line-height: 1.5;
+}
+
+.legal-document p {
+  margin-bottom: 12px;
+}
+
+.legal-document p:last-child {
+  margin-bottom: 0;
+}
+
+.legal-document ul {
+  margin: 0;
+  padding-left: 1.4em;
+}
+
+.legal-document a {
+  color: var(--accent);
+}
+
+.legal-document__dates {
+  display: grid;
+  gap: 4px;
+  justify-items: end;
+  margin-top: 34px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+  color: var(--text-secondary);
+  font-size: 0.78rem;
+}
+
+@media (max-width: 430px) {
+  .legal-footer {
+    padding-inline: 4px;
+    font-size: 0.72rem;
+  }
+
+  .legal-document {
+    padding: 17px 15px;
+    font-size: 0.88rem;
+    line-height: 1.78;
+  }
+
+  .legal-document section {
+    margin-top: 24px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .legal-footer a {
+    transition: none;
+  }
+}

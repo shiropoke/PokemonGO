@@ -105,7 +105,7 @@ export function PowerUpPage() {
             <legend>コスト補正</legend>
             <label>
               <input type="checkbox" checked={lucky} onChange={(event) => setLucky(event.target.checked)} />
-              <span>キラPokémon</span>
+              <span>キラポケモン</span>
             </label>
             <label>
               <input
@@ -116,7 +116,7 @@ export function PowerUpPage() {
                   if (event.target.checked) setPurified(false);
                 }}
               />
-              <span>シャドウPokémon</span>
+              <span>シャドウポケモン</span>
             </label>
             <label>
               <input
@@ -127,7 +127,7 @@ export function PowerUpPage() {
                   if (event.target.checked) setShadow(false);
                 }}
               />
-              <span>ライトPokémon</span>
+              <span>ライトポケモン</span>
             </label>
           </fieldset>
         </section>

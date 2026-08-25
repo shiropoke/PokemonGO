@@ -97,7 +97,7 @@ function prepareTextReplacement(): {
   };
 }
 
-/** 英語タイトル内のPokémon名だけを、日本語の静的辞書で置換します。 */
+/** 英語タイトル内のポケモン名だけを、日本語の静的辞書で置換します。 */
 export function replacePokemonNamesInText(text: string): string {
   if (!text) return text;
 

@@ -1,6 +1,6 @@
-# Pokémon GO Information
+# GO Scope
 
-Pokémon GO の「今日やること」、イベント、レイド、各種データと計算ツールをまとめて確認できる、スマートフォン向けの静的 Web アプリです。バックエンド、データベース、API キー、有料サービスは使用しません。
+ポケモン GO の「今日やること」、イベント、レイド、各種データと計算ツールをまとめて確認できる、スマートフォン向けの静的 Web アプリです。バックエンド、データベース、API キー、有料サービスは使用しません。
 
 GitHub Pages の公開 URL は次の形式です。
 
@@ -50,12 +50,12 @@ https://<GitHubユーザー名>.github.io/PokemonGO/
 - 同じPL・IVを使う進化後CPとPL40 / 50 / 51比較
 - Game Master由来の強化コスト（ほしのすな、アメ、アメXL）とキラ・シャドウ・ライト補正
 - PvE / PvPの通常技・ゲージ技性能と、Game Masterで確認できるエリート技表示
-- PvPoke Overallデータによるスーパー・ハイパー・マスターのPokémon種ランキング
+- PvPoke Overallデータによるスーパー・ハイパー・マスターのポケモン種ランキング
 - ランキングから既存個体値チェッカーへ`speciesId`を引き継ぎ
 
 ### お気に入りと表示設定
 
-- Pokémonのお気に入りを`pokemon-go:favorites`へ保存し、レイド・イベント・タマゴ・リサーチを横断表示
+- ポケモンのお気に入りを`pokemon-go:favorites`へ保存し、レイド・イベント・タマゴ・リサーチを横断表示
 - ライト / ダークテーマを`pokemon-go:theme`へ保存
 - 未設定時は`prefers-color-scheme`へ追従
 - PCは分類メニュー、スマートフォンは「ホーム / イベント / レイド / ツール / その他」の5項目ナビゲーション
@@ -110,7 +110,7 @@ npm run preview
 `.github/workflows/deploy.yml` が、`main` または `master` ブランチへの push 時に次を実行します。
 
 1. `npm ci`
-2. `npm run data:pokemon` で軽量Pokémonデータを更新
+2. `npm run data:pokemon` で軽量ポケモンデータを更新
 3. `npm run data:game` と `npm run data:pvp` で静的データを更新（取得失敗時はコミット済みデータを維持）
 4. `npm run build`
 5. `dist/` を GitHub Pages へデプロイ
@@ -149,7 +149,7 @@ Data provided by [Leek Duck](https://leekduck.com/) / [ScrapedDuck](https://gith
 
 `npm run data:game` が最新Game Masterと日本語テキストから、タイプ、進化先、技性能、強化コスト、タイプ相性だけを`public/data/game-data.json`へ抽出します。ブラウザは約500KBの静的ファイルだけを読み込み、巨大なGame Masterを直接取得しません。
 
-### PvPoke Pokémonランキング
+### PvPoke ポケモンランキング
 
 - [PvPoke open league rankings](https://github.com/pvpoke/pvpoke/tree/master/src/data/rankings/all/overall)
 
@@ -172,7 +172,7 @@ npm run data:game
 npm run data:pvp
 ```
 
-CP・PvP 順位のコードは Pokémon GO の公開されている計算式と CPM テーブルに基づく独自実装で、PvPoke のソースコードをコピーしていません。照合用に PvPoke の既知結果をテストしています。PvPoke は [MIT License](https://github.com/pvpoke/pvpoke/blob/master/LICENSE) で公開されています。詳細は [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) を参照してください。
+CP・PvP 順位のコードはポケモン GO の公開されている計算式と CPM テーブルに基づく独自実装で、PvPoke のソースコードをコピーしていません。照合用に PvPoke の既知結果をテストしています。PvPoke は [MIT License](https://github.com/pvpoke/pvpoke/blob/master/LICENSE) で公開されています。詳細は [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) を参照してください。
 
 ## 主な構成
 
@@ -196,8 +196,8 @@ scripts/            軽量データ生成スクリプト
 
 - ポケモン名は PokeAPI に日本語種族名・フォルム名がない場合、イベント固有名は確認済みの定型表現で日本語化できない場合に英語で表示します。
 - イベント内容・基礎ステータス・リリース状態は各外部データソースの更新に依存します。
-- 現行ScrapedDuckレイドデータには出現期間、ロケット団データにはしたっぱのセリフが含まれません。リサーチ報酬は現在分類可能なPokémon報酬だけを表示します。
+- 現行ScrapedDuckレイドデータには出現期間、ロケット団データにはしたっぱのセリフが含まれません。リサーチ報酬は現在分類可能なポケモン報酬だけを表示します。
 - レイド対策は攻撃種族値、技サイクル、STAB、タイプ相性、シャドウ補正による参考順位です。ボス技、回避、天候、フレンド・メガブースト、耐久による退場時間は含みません。
-- Game Masterと既存Pokémon基礎データを一意に対応できないフォームは、推測で統合せずツール対象外として扱います。
+- Game Masterと既存ポケモン基礎データを一意に対応できないフォームは、推測で統合せずツール対象外として扱います。
 - PvP 順位は各 IV の 0〜15 全組み合わせを比較します。スーパー・ハイパーは同じ CP 上限と最大 PL 条件、マスターは同じ最大 PL 条件を使用し、捕獲方法ごとの IV 下限は順位母集団に適用しません。
-- Pokémon および Pokémon GO は The Pokémon Company、Nintendo、Creatures、GAME FREAK、Niantic の商標です。本プロジェクトは各社の公式サービスではありません。
+- ポケモンおよびポケモン GOはThe Pokémon Company、Nintendo、Creatures、GAME FREAK、Nianticの商標です。本プロジェクトは各社の公式サービスではありません。

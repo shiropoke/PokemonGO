@@ -141,7 +141,7 @@ export function MoveCheckerPage() {
       </p>
       <p className="data-credit tool-credit">
         Data provided by <a href="https://github.com/PokeMiners/game_masters" target="_blank" rel="noreferrer">PokeMiners Game Master</a>
-        {' / '}<a href="https://github.com/PokeMiners/pogo_assets" target="_blank" rel="noreferrer">PokeMiners Pokémon GO Assets</a>
+        {' / '}<a href="https://github.com/PokeMiners/pogo_assets" target="_blank" rel="noreferrer">PokeMiners ポケモン GO Assets</a>
       </p>
     </div>
   );

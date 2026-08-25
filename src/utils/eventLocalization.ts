@@ -22,7 +22,7 @@ const EVENT_TYPE_LABELS: Readonly<Record<string, string>> = {
   "max-mondays": "マックスマンデー",
   "max-battles": "マックスバトル",
   "choose-your-path": "選べるタイムチャレンジ",
-  "pokemon-go-fest": "Pokémon GO Fest",
+  "pokemon-go-fest": "ポケモン GO Fest",
   "go-pass": "GOパス",
   season: "シーズン",
 };
@@ -39,13 +39,13 @@ const EVENT_CATEGORY_LABELS: Record<EventCategory, string> = {
 };
 
 /**
- * Pokémon GO 日本語公式サイトで表記を確認できた固有タイトルです。
+ * ポケモン GO 日本語公式サイトで表記を確認できた固有タイトルです。
  * 確認できない固有名は追加せず、下の定型句変換か英語原文へフォールバックします。
  */
 const VERIFIED_EVENT_TITLES: Readonly<Record<string, string>> = {
   "Choose Your Path: Venom and Vines": "選べるタイムチャレンジ：どく＆くさ",
   "Ultra Unlock: Water Festival": "ウルトラアンロック：ウォーターフェスティバル",
-  "Pokémon GO Fest 2026: Mega Finale": "Pokémon GO Fest 2026：メガフィナーレ",
+  "Pokémon GO Fest 2026: Mega Finale": "ポケモン GO Fest 2026：メガフィナーレ",
   "Forever Forward": "新たな歩み",
   "GO Pass: August": "GOパス：8月",
 };

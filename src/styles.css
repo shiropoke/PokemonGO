@@ -456,6 +456,25 @@ dd {
   background: var(--gray-100);
 }
 
+.event-card__media-link {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+}
+
+.event-card__media-link .event-card__image {
+  transition: filter 160ms ease;
+}
+
+.event-card__media-link:hover .event-card__image {
+  filter: brightness(0.94);
+}
+
+.event-card__media-link:focus-visible {
+  outline: 2px solid var(--blue-600);
+  outline-offset: -3px;
+}
+
 .event-card__image {
   width: 100%;
   height: 100%;
@@ -479,6 +498,13 @@ dd {
   min-height: 224px;
   flex-direction: column;
   padding: 17px;
+}
+
+.event-card__main {
+  display: flex;
+  min-height: 190px;
+  flex: 1 0 auto;
+  flex-direction: column;
 }
 
 .event-card__meta {
@@ -1486,6 +1512,10 @@ dd {
   .event-card__body {
     min-height: 212px;
     padding: 15px;
+  }
+
+  .event-card__main {
+    min-height: 182px;
   }
 
   .event-card__footer {

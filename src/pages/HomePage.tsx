@@ -7,6 +7,8 @@ import type { ScrapedDuckEvent } from '../types/events';
 import type { Pokemon } from '../types/pokemon';
 import type { EggHatch, FieldResearchTask, RaidBoss } from '../types/scrapedDuck';
 import { WeeklyEvents } from '../components/WeeklyEvents';
+import { InternalLink } from '../components/InternalLink';
+import type { NavigationQuery, Page } from '../types/navigation';
 import {
   formatCountdown,
   formatEventDate,
@@ -41,6 +43,8 @@ interface HomeDataState {
   error: boolean;
 }
 
+type NavigateHandler = (page: Page, query?: NavigationQuery) => void;
+
 function isSameLocalDay(date: Date | null, now: Date): boolean {
   return Boolean(
     date &&
@@ -65,11 +69,13 @@ function HomeEventList({
   now,
   empty,
   limit = 3,
+  onNavigate,
 }: {
   events: readonly ScrapedDuckEvent[];
   now: number;
   empty: string;
   limit?: number;
+  onNavigate: NavigateHandler;
 }) {
   if (events.length === 0) return <p className="dashboard-empty">{empty}</p>;
 
@@ -79,14 +85,8 @@ function HomeEventList({
         const start = parseEventDate(event.start);
         const future = start !== null && start.getTime() > now;
         const eventUrl = safeExternalUrl(event.link);
-        return (
-          <a
-            className="dashboard-event"
-            href={eventUrl ?? '#/events'}
-            target={eventUrl ? '_blank' : undefined}
-            rel={eventUrl ? 'noreferrer' : undefined}
-            key={event.eventID}
-          >
+        const content = (
+          <>
             <span className="dashboard-event__type">
               {getEventTypeLabel(event.eventType)}
             </span>
@@ -96,7 +96,27 @@ function HomeEventList({
                 ? formatCountdown(start.getTime(), now, '開始まで')
                 : `${formatEventDate(event.start)}〜${formatEventDate(event.end)}`}
             </span>
+          </>
+        );
+        return eventUrl ? (
+          <a
+            className="dashboard-event"
+            href={eventUrl}
+            target="_blank"
+            rel="noreferrer"
+            key={event.eventID}
+          >
+            {content}
           </a>
+        ) : (
+          <InternalLink
+            className="dashboard-event"
+            page="events"
+            onNavigate={onNavigate}
+            key={event.eventID}
+          >
+            {content}
+          </InternalLink>
         );
       })}
     </div>
@@ -106,9 +126,11 @@ function HomeEventList({
 function FeaturedEvent({
   event,
   now,
+  onNavigate,
 }: {
   event: ScrapedDuckEvent | null;
   now: number;
+  onNavigate: NavigateHandler;
 }) {
   const [imageFailed, setImageFailed] = useState(false);
 
@@ -130,13 +152,8 @@ function FeaturedEvent({
         ? formatCountdown(end, now, '終了まで')
         : `${formatEventDate(event.start)}〜${formatEventDate(event.end)}`;
 
-  return (
-    <a
-      className="home-featured-event"
-      href={eventUrl ?? '#/events'}
-      target={eventUrl ? '_blank' : undefined}
-      rel={eventUrl ? 'noreferrer' : undefined}
-    >
+  const content = (
+    <>
       {event.image && !imageFailed ? (
         <img
           src={event.image}
@@ -153,11 +170,30 @@ function FeaturedEvent({
         <strong>{localizeEventTitle(event.name)}</strong>
         <small>{countdown}</small>
       </span>
+    </>
+  );
+
+  return eventUrl ? (
+    <a
+      className="home-featured-event"
+      href={eventUrl}
+      target="_blank"
+      rel="noreferrer"
+    >
+      {content}
     </a>
+  ) : (
+    <InternalLink
+      className="home-featured-event"
+      page="events"
+      onNavigate={onNavigate}
+    >
+      {content}
+    </InternalLink>
   );
 }
 
-export function HomePage() {
+export function HomePage({ onNavigate }: { onNavigate: NavigateHandler }) {
   const { favorites } = useFavorites();
   const [now, setNow] = useState(() => Date.now());
   const [reloadKey, setReloadKey] = useState(0);
@@ -309,18 +345,18 @@ export function HomePage() {
     const favoritePokemon = state.pokemon.filter((pokemon) =>
       favorites.includes(pokemon.speciesId),
     );
-    const insights: { key: string; name: string; detail: string; href: string }[] = [];
+    const insights: { key: string; name: string; detail: string; page: Page }[] = [];
     for (const pokemon of favoritePokemon) {
       const raid = state.raids.find(
         (entry) => externalPokemonMatches(entry.name, entry.speciesId, pokemon),
       );
-      if (raid) insights.push({ key: `${pokemon.speciesId}-raid`, name: pokemon.displayName, detail: `${getRaidTierLabel(raid.tier)}に出現中`, href: '#/raids' });
+      if (raid) insights.push({ key: `${pokemon.speciesId}-raid`, name: pokemon.displayName, detail: `${getRaidTierLabel(raid.tier)}に出現中`, page: 'raids' });
       const egg = state.eggs.find((entry) => externalPokemonMatches(entry.name, null, pokemon));
-      if (egg) insights.push({ key: `${pokemon.speciesId}-egg`, name: pokemon.displayName, detail: `${egg.eggType}タマゴから孵化`, href: '#/eggs' });
+      if (egg) insights.push({ key: `${pokemon.speciesId}-egg`, name: pokemon.displayName, detail: `${egg.eggType}タマゴから孵化`, page: 'eggs' });
       const research = state.research.find((task) =>
         task.rewards.some((reward) => externalPokemonMatches(reward.name, null, pokemon)),
       );
-      if (research) insights.push({ key: `${pokemon.speciesId}-research`, name: pokemon.displayName, detail: 'フィールドリサーチ報酬', href: '#/research' });
+      if (research) insights.push({ key: `${pokemon.speciesId}-research`, name: pokemon.displayName, detail: 'フィールドリサーチ報酬', page: 'research' });
     }
     return insights.slice(0, 6);
   }, [favorites, state.eggs, state.pokemon, state.raids, state.research]);
@@ -378,22 +414,22 @@ export function HomePage() {
           <section className="dashboard-card dashboard-card--wide">
             <div className="section-heading-row">
               <h2>注目イベント</h2>
-              <a href="#/events">すべて見る</a>
+              <InternalLink page="events" onNavigate={onNavigate}>すべて見る</InternalLink>
             </div>
-            <FeaturedEvent key={featuredEvent?.eventID ?? 'empty'} event={featuredEvent} now={now} />
+            <FeaturedEvent key={featuredEvent?.eventID ?? 'empty'} event={featuredEvent} now={now} onNavigate={onNavigate} />
           </section>
 
           <section className="dashboard-card dashboard-card--wide">
             <h2>今日の時間限定イベント</h2>
-            <HomeEventList events={limitedToday} now={now} empty="今日の時間限定イベントはありません。" />
+            <HomeEventList events={limitedToday} now={now} empty="今日の時間限定イベントはありません。" onNavigate={onNavigate} />
             <div className="home-today-details">
               <details>
                 <summary>今日開始するイベント <span>{startsToday.length}件</span></summary>
-                <HomeEventList events={startsToday} now={now} empty="今日開始するイベントはありません。" />
+                <HomeEventList events={startsToday} now={now} empty="今日開始するイベントはありません。" onNavigate={onNavigate} />
               </details>
               <details>
                 <summary>今日終了するイベント <span>{endsToday.length}件</span></summary>
-                <HomeEventList events={endsToday} now={now} empty="今日終了するイベントはありません。" />
+                <HomeEventList events={endsToday} now={now} empty="今日終了するイベントはありません。" onNavigate={onNavigate} />
               </details>
             </div>
           </section>
@@ -401,15 +437,15 @@ export function HomePage() {
           <section className="dashboard-card dashboard-card--wide">
             <div className="section-heading-row">
               <h2>開催中のイベント</h2>
-              <a href="#/events">すべて見る</a>
+              <InternalLink page="events" onNavigate={onNavigate}>すべて見る</InternalLink>
             </div>
-            <HomeEventList events={groups.ongoing} now={now} empty="現在開催中のイベントはありません。" limit={4} />
+            <HomeEventList events={groups.ongoing} now={now} empty="現在開催中のイベントはありません。" limit={4} onNavigate={onNavigate} />
           </section>
 
           <section className="dashboard-card dashboard-card--wide">
             <div className="section-heading-row">
               <h2>今週のイベント</h2>
-              <a href="#/events">イベント一覧</a>
+              <InternalLink page="events" onNavigate={onNavigate}>イベント一覧</InternalLink>
             </div>
             <WeeklyEvents events={weeklyEvents} now={now} />
           </section>
@@ -417,14 +453,14 @@ export function HomePage() {
           <section className="dashboard-card dashboard-card--wide">
             <div className="section-heading-row">
               <h2>現在のレイド</h2>
-              <a href="#/raids">すべて見る</a>
+              <InternalLink page="raids" onNavigate={onNavigate}>すべて見る</InternalLink>
             </div>
             {state.raids.length === 0 ? (
               <p className="dashboard-empty">現在のレイド情報を取得できませんでした。</p>
             ) : (
               <div className="dashboard-raid-list">
                 {featuredRaids.map((raid) => (
-                  <a href="#/raids" className="dashboard-raid" key={raid.id}>
+                  <InternalLink page="raids" onNavigate={onNavigate} className="dashboard-raid" key={raid.id}>
                     {raid.image ? <img src={raid.image} alt="" loading="lazy" /> : <span className="dashboard-raid__placeholder" aria-hidden="true" />}
                     <span>
                       <strong>{raid.displayName}</strong>
@@ -433,7 +469,7 @@ export function HomePage() {
                         {raid.isShadow ? <span className="dashboard-raid__shadow">シャドウ</span> : null}
                       </small>
                     </span>
-                  </a>
+                  </InternalLink>
                 ))}
               </div>
             )}
@@ -442,21 +478,21 @@ export function HomePage() {
           <section className="dashboard-card dashboard-card--wide">
             <div className="section-heading-row">
               <h2>お気に入り情報</h2>
-              <a href="#/favorites">お気に入りを管理</a>
+              <InternalLink page="favorites" onNavigate={onNavigate}>お気に入りを管理</InternalLink>
             </div>
             {favorites.length === 0 ? (
-              <p className="dashboard-empty">Pokémonをお気に入りに追加すると、開催中情報をここで確認できます。</p>
+              <p className="dashboard-empty">ポケモンをお気に入りに追加すると、開催中情報をここで確認できます。</p>
             ) : (
               <>
                 {favoriteInsights.length > 0 ? (
                   <div className="favorite-insight-list">
                     {favoriteInsights.map((insight) => (
-                      <a href={insight.href} key={insight.key}><strong>{insight.name}</strong><span>{insight.detail}</span></a>
+                      <InternalLink page={insight.page} onNavigate={onNavigate} key={insight.key}><strong>{insight.name}</strong><span>{insight.detail}</span></InternalLink>
                     ))}
                   </div>
                 ) : null}
                 {favoriteEventMatches.length > 0 || favoriteInsights.length === 0 ? (
-                  <HomeEventList events={favoriteEventMatches} now={now} empty="現在のレイド・イベント・タマゴ・リサーチに一致するお気に入りはありません。" />
+                  <HomeEventList events={favoriteEventMatches} now={now} empty="現在のレイド・イベント・タマゴ・リサーチに一致するお気に入りはありません。" onNavigate={onNavigate} />
                 ) : null}
               </>
             )}

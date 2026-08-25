@@ -8,7 +8,7 @@ import {
 } from './typeEffectiveness';
 
 describe('type effectiveness compatibility helpers', () => {
-  it('単弱点と二重弱点をPokémon GO倍率で計算する', () => {
+  it('単弱点と二重弱点をポケモン GO倍率で計算する', () => {
     expect(getTypeEffectiveness('fire', ['grass'])).toBe(1.6);
     expect(getTypeEffectiveness('grass', ['water', 'ground'])).toBeCloseTo(2.56);
   });

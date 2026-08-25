@@ -47,6 +47,6 @@ export interface IvSummary {
   gradeLabel: '0★' | '1★' | '2★' | '3★' | '4★ / PERFECT';
 }
 
-// Short aliases are useful at call sites that already use Pokémon GO terminology.
+// Short aliases are useful at call sites that already use Pokemon GO terminology.
 export type IVs = IndividualValues;
 export type PokemonBaseStats = BaseStats;

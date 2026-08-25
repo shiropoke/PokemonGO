@@ -68,7 +68,7 @@ const IMMUNE: Readonly<Partial<Record<PokemonType, readonly PokemonType[]>>> = {
   dragon: ['fairy'],
 };
 
-/** 同期表示用のPokémon GO標準タイプ倍率。Game Masterのチャートと同じ値です。 */
+/** 同期表示用のポケモン GO標準タイプ倍率。Game Masterのチャートと同じ値です。 */
 export function getTypeEffectiveness(
   attackType: PokemonType | string,
   defenderTypes: readonly string[],

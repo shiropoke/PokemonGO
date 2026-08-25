@@ -40,7 +40,7 @@ export function getEvolutionDescendants(
         });
       }
 
-      // Pokémon基礎データが欠けていても、その先の進化は探索する。
+      // ポケモン基礎データが欠けていても、その先の進化は探索する。
       visit(nextSpeciesId, depth + 1);
     }
   };

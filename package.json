@@ -11,7 +11,8 @@
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "test:assets": "node scripts/verify-type-assets.mjs",
-    "test": "vitest run",
+    "test:icons": "node scripts/verify-icon-assets.mjs",
+    "test": "node scripts/verify-icon-assets.mjs && vitest run",
     "test:watch": "vitest"
   },
   "dependencies": {

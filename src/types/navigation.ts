@@ -10,7 +10,9 @@ export type Page =
   | 'research'
   | 'eggs'
   | 'rocket'
-  | 'favorites';
+  | 'favorites'
+  | 'terms'
+  | 'privacy';
 
 export const PAGE_PATHS: Record<Page, string> = {
   home: 'home',
@@ -25,6 +27,8 @@ export const PAGE_PATHS: Record<Page, string> = {
   eggs: 'eggs',
   rocket: 'rocket',
   favorites: 'favorites',
+  terms: 'terms',
+  privacy: 'privacy',
 };
 
 export type NavigationQuery = Record<
@@ -56,4 +60,25 @@ export function getPageHash(page: Page, query?: NavigationQuery): string {
   }
   const serialized = params.toString();
   return `#/${PAGE_PATHS[page]}${serialized ? `?${serialized}` : ''}`;
+}
+
+const PAGE_TITLES: Record<Page, string> = {
+  home: 'GO Scope',
+  events: 'イベント | GO Scope',
+  raids: 'レイド | GO Scope',
+  iv: '個体値チェッカー | GO Scope',
+  evolution: '進化後CP | GO Scope',
+  'power-up': '強化コスト | GO Scope',
+  moves: 'わざ性能 | GO Scope',
+  'pvp-rankings': 'PvPランキング | GO Scope',
+  research: 'フィールドリサーチ | GO Scope',
+  eggs: 'タマゴ | GO Scope',
+  rocket: 'GOロケット団 | GO Scope',
+  favorites: 'お気に入り | GO Scope',
+  terms: '利用規約 | GO Scope',
+  privacy: 'プライバシーポリシー | GO Scope',
+};
+
+export function getPageTitle(page: Page): string {
+  return PAGE_TITLES[page];
 }

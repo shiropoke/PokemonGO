@@ -4,6 +4,10 @@ import { shareCurrentSite, SITE_SHARE_TITLE } from './siteShare';
 describe('site sharing', () => {
   const url = 'https://shiropoke.github.io/PokemonGO/#/raids';
 
+  it('正式サイト名を共有タイトルに使う', () => {
+    expect(SITE_SHARE_TITLE).toBe('GO Scope');
+  });
+
   it('Web Share APIが利用できる場合は現在URLを共有する', async () => {
     const share = vi.fn(async () => undefined);
 

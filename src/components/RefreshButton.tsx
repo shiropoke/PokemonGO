@@ -2,8 +2,26 @@ interface RefreshButtonProps {
   className?: string;
 }
 
+const TEMPORARY_VIEWPORT_CONTENT =
+  'width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover';
+
 export function reloadCurrentPage(): void {
-  window.location.reload();
+  if (typeof window === 'undefined') return;
+
+  if (typeof document !== 'undefined') {
+    const activeElement = document.activeElement as { blur?: () => void } | null;
+    activeElement?.blur?.();
+
+    const viewportMeta = document.querySelector<HTMLMetaElement>('meta[name="viewport"]');
+    viewportMeta?.setAttribute('content', TEMPORARY_VIEWPORT_CONTENT);
+  }
+
+  const reload = () => window.location.reload();
+  if (typeof window.requestAnimationFrame === 'function') {
+    window.requestAnimationFrame(reload);
+  } else {
+    reload();
+  }
 }
 
 export function RefreshButton({ className }: RefreshButtonProps) {

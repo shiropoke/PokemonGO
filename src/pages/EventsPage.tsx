@@ -172,7 +172,7 @@ export function EventsPage() {
     <div className="events-page">
       <header className="page-heading events-page__heading">
         <div>
-          <p className="page-heading__eyebrow">Pokémon GO</p>
+          <p className="page-heading__eyebrow">ポケモン GO</p>
           <h1>イベント</h1>
         </div>
         {result ? (

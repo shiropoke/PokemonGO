@@ -1,0 +1,8 @@
+/* iOS Safariのfocus時自動拡大を防ぎつつ、通常のピンチズームは維持する。 */
+@media (max-width: 768px) {
+  input,
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+}

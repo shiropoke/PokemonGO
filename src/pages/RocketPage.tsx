@@ -13,6 +13,7 @@ import { useCachedDataset } from '../hooks/useCachedDataset';
 import { loadRocketLineups } from '../services/scrapedDuck';
 import type { RocketLineup, RocketPokemon } from '../types/scrapedDuck';
 import { getTypeLabelJa } from '../utils/scrapedDuckLocalization';
+import { matchesSearchQuery } from '../utils/search';
 import { rankCounterTypes } from '../utils/typeEffectiveness';
 import '../styles/data-pages.css';
 
@@ -80,15 +81,13 @@ function RocketCard({ lineup }: { lineup: RocketLineup }) {
   );
 }
 
-function lineupMatches(lineup: RocketLineup, query: string): boolean {
-  const normalized = query.trim().toLocaleLowerCase('ja-JP');
-  if (!normalized) return true;
+export function lineupMatches(lineup: RocketLineup, query: string): boolean {
   const pokemon = [
     ...lineup.firstPokemon,
     ...lineup.secondPokemon,
     ...lineup.thirdPokemon,
   ];
-  return [
+  return matchesSearchQuery(query, [
     lineup.name,
     lineup.displayName,
     lineup.title,
@@ -96,7 +95,7 @@ function lineupMatches(lineup: RocketLineup, query: string): boolean {
     lineup.type ?? '',
     lineup.type ? getTypeLabelJa(lineup.type) : '',
     ...pokemon.flatMap((candidate) => [candidate.name, candidate.displayName]),
-  ].some((value) => value.toLocaleLowerCase('ja-JP').includes(normalized));
+  ]);
 }
 
 export function RocketPage() {
@@ -140,11 +139,11 @@ export function RocketPage() {
               type="search"
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              placeholder="タイプ・役職・Pokémon名"
+              placeholder="タイプ・役職・ポケモン名"
             />
           </label>
           <p className="dataset-page__scope-note">
-            ScrapedDuckの現行データにはしたっぱのセリフが含まれないため、タイプ・役職・Pokémon名で検索できます。
+            ScrapedDuckの現行データにはしたっぱのセリフが含まれないため、タイプ・役職・ポケモン名で検索できます。
           </p>
           <div className="dataset-sections" aria-busy={state.refreshing}>
             {sections.map((section) => section.entries.length > 0 ? (

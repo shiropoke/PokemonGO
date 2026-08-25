@@ -48,7 +48,7 @@ describe("event title localization", () => {
       "ウルトラアンロック：ウォーターフェスティバル",
     );
     expect(localizeEventTitle("Pokémon GO Fest 2026: Mega Finale")).toBe(
-      "Pokémon GO Fest 2026：メガフィナーレ",
+      "ポケモン GO Fest 2026：メガフィナーレ",
     );
   });
 
