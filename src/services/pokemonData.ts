@@ -5,12 +5,12 @@ import type {
   PokemonDataSource,
 } from '../types/pokemon';
 import { getPokemonDisplayName } from '../utils/pokemonLocalization';
+import { POKEMON_DATA_CACHE_KEY } from './appStorage';
 
 export const PVPokeGameMasterUrl =
   'https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/gamemaster.json';
 export const POKEMON_DATA_URL = `${import.meta.env.BASE_URL}data/pokemon.json`;
 
-const CACHE_KEY = 'pokemon-go-information:pokemon-data:v2';
 const CACHE_VERSION = 2;
 export const POKEMON_CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 
@@ -144,7 +144,7 @@ function restoreCachedPokemon(value: unknown): Pokemon[] {
 
 function readCache(): StoredPokemonCache | null {
   try {
-    const raw = window.localStorage.getItem(CACHE_KEY);
+    const raw = window.localStorage.getItem(POKEMON_DATA_CACHE_KEY);
     if (!raw) return null;
 
     const parsed: unknown = JSON.parse(raw);
@@ -171,7 +171,7 @@ function writeCache(data: Pokemon[], fetchedAt: number): void {
       fetchedAt,
       data,
     };
-    window.localStorage.setItem(CACHE_KEY, JSON.stringify(cache));
+    window.localStorage.setItem(POKEMON_DATA_CACHE_KEY, JSON.stringify(cache));
   } catch {
     // Safari のプライベートブラウズや容量制限時も、取得したデータはメモリ上で利用する。
   }

@@ -1,4 +1,6 @@
-export const FAVORITES_STORAGE_KEY = 'pokemon-go:favorites';
+import { FAVORITES_STORAGE_KEY } from './appStorage';
+
+export { FAVORITES_STORAGE_KEY };
 export const FAVORITES_CHANGED_EVENT = 'pokemon-go:favorites-changed';
 
 export interface FavoritesStorage {

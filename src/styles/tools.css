@@ -414,8 +414,7 @@
 
 .move-metrics dl {
   display: grid;
-  width: fit-content;
-  max-width: 100%;
+  width: 100%;
   margin: 0;
   gap: 4px;
 }
@@ -423,10 +422,9 @@
 .move-metrics dl > div {
   display: grid;
   min-width: 0;
-  grid-template-columns: minmax(7.5rem, max-content) minmax(3.75rem, max-content);
-  column-gap: 14px;
+  grid-template-columns: minmax(0, 1fr) max-content;
+  column-gap: 12px;
   align-items: baseline;
-  justify-content: start;
   font-size: 0.78rem;
 }
 
@@ -440,6 +438,7 @@
   color: var(--text, #202934);
   font-weight: 750;
   font-variant-numeric: tabular-nums;
+  justify-self: end;
   text-align: right;
 }
 

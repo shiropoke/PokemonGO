@@ -6,6 +6,7 @@ import { EvolutionPvpResults } from '../components/EvolutionPvpResults';
 import { PokemonSelector } from '../components/PokemonSelector';
 import { fetchGameData } from '../services/gameData';
 import { fetchPokemonData } from '../services/pokemonData';
+import { IV_CHECKER_STORAGE_KEY } from '../services/appStorage';
 import type {
   IndividualValues,
   League,
@@ -20,8 +21,6 @@ import { calculateIvSummary } from '../utils/iv';
 import { getPvpRankResult } from '../utils/pvp';
 import { getEvolutionDescendants } from '../utils/evolutionChain';
 import { calculateEvolutionPvpResults } from '../utils/evolutionPvp';
-
-const SETTINGS_KEY = 'pokemon-go-information:iv-checker:v1';
 
 interface CheckerSettings {
   speciesId: string | null;
@@ -65,7 +64,7 @@ function readIv(value: unknown, fallback: number): number {
 
 function loadSettings(): CheckerSettings {
   try {
-    const stored = window.localStorage.getItem(SETTINGS_KEY);
+    const stored = window.localStorage.getItem(IV_CHECKER_STORAGE_KEY);
     if (!stored) return DEFAULT_SETTINGS;
 
     const value: unknown = JSON.parse(stored);
@@ -90,7 +89,7 @@ function loadSettings(): CheckerSettings {
 
 function saveSettings(settings: CheckerSettings): void {
   try {
-    window.localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+    window.localStorage.setItem(IV_CHECKER_STORAGE_KEY, JSON.stringify(settings));
   } catch {
     // localStorage が利用できない環境でもチェッカー自体は継続して使える。
   }

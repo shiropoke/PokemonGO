@@ -1,6 +1,5 @@
 import { getPageHash } from '../types/navigation';
-
-const IV_SETTINGS_KEY = 'pokemon-go-information:iv-checker:v1';
+import { IV_CHECKER_STORAGE_KEY } from '../services/appStorage';
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -9,11 +8,11 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 /** 既存のPL・相棒・IV設定を保ったまま、個体値チェッカーへ種族IDを引き継ぎます。 */
 export function openIvCheckerForSpecies(speciesId: string): void {
   try {
-    const raw = window.localStorage.getItem(IV_SETTINGS_KEY);
+    const raw = window.localStorage.getItem(IV_CHECKER_STORAGE_KEY);
     const parsed: unknown = raw ? JSON.parse(raw) : null;
     const current = isRecord(parsed) ? parsed : {};
     window.localStorage.setItem(
-      IV_SETTINGS_KEY,
+      IV_CHECKER_STORAGE_KEY,
       JSON.stringify({
         ...current,
         speciesId,

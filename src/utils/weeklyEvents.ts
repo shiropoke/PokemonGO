@@ -1,9 +1,10 @@
 import type { ScrapedDuckEvent } from '../types/events';
+import { WEEKLY_EVENT_VIEW_STORAGE_KEY } from '../services/appStorage';
 import { parseEventDate } from './date';
 
 export type WeeklyEventView = 'list' | 'calendar';
 
-export const WEEKLY_EVENT_VIEW_STORAGE_KEY = 'pokemon-go:weekly-event-view';
+export { WEEKLY_EVENT_VIEW_STORAGE_KEY };
 
 export interface WeekRange {
   start: Date;

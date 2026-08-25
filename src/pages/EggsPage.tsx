@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { DatasetImage } from '../components/DatasetImage';
 import { FavoriteButton } from '../components/FavoriteButton';
+import { RefreshButton } from '../components/RefreshButton';
 import {
   DatasetError,
   DatasetPageHeader,
@@ -58,13 +59,12 @@ export function EggsPage() {
         eyebrow="現在の孵化ラインナップ"
         title="タマゴ"
         fetchedAt={state.result?.fetchedAt}
-        refreshing={state.refreshing}
-        onReload={() => void state.reload()}
+        action={<RefreshButton />}
       />
 
       {state.result?.stale ? <StaleDataNotice /> : null}
       {state.loading && !state.result ? <DatasetSkeleton /> : null}
-      {state.error && !state.result ? <DatasetError onRetry={() => void state.reload()} /> : null}
+      {state.error && !state.result ? <DatasetError action={<RefreshButton />} /> : null}
 
       {state.result ? (
         <div className="dataset-sections" aria-busy={state.refreshing}>

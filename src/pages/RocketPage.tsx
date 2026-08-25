@@ -7,6 +7,7 @@ import {
   ScrapedDuckCredit,
   StaleDataNotice,
 } from '../components/DatasetPageHeader';
+import { RefreshButton } from '../components/RefreshButton';
 import { TypeBadge } from '../components/TypeBadge';
 import { useCachedDataset } from '../hooks/useCachedDataset';
 import { loadRocketLineups } from '../services/scrapedDuck';
@@ -124,13 +125,12 @@ export function RocketPage() {
         eyebrow="現在のバトルラインナップ"
         title="GOロケット団"
         fetchedAt={state.result?.fetchedAt}
-        refreshing={state.refreshing}
-        onReload={() => void state.reload()}
+        action={<RefreshButton />}
       />
 
       {state.result?.stale ? <StaleDataNotice /> : null}
       {state.loading && !state.result ? <DatasetSkeleton /> : null}
-      {state.error && !state.result ? <DatasetError onRetry={() => void state.reload()} /> : null}
+      {state.error && !state.result ? <DatasetError action={<RefreshButton />} /> : null}
 
       {state.result ? (
         <>

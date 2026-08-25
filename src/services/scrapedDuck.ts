@@ -10,6 +10,7 @@ import type {
   RocketPokemon,
   ScrapedDuckDataset,
 } from '../types/scrapedDuck';
+import { SCRAPED_DUCK_CACHE_KEYS } from './appStorage';
 import {
   getRocketTitleLabel,
   getRocketTrainerName,
@@ -30,7 +31,6 @@ export const SCRAPED_DUCK_DATA_URLS = {
 export const SCRAPED_DUCK_CACHE_TTL_MS = 5 * 60 * 1000;
 
 const CACHE_VERSION = 1;
-const CACHE_PREFIX = 'pokemon-go-information:scraped-duck';
 const inFlightRequests = new Map<ScrapedDuckDataset, Promise<unknown>>();
 
 interface CacheEnvelope {
@@ -297,7 +297,7 @@ function getStorage(): Storage | null {
 }
 
 function getCacheKey(dataset: ScrapedDuckDataset): string {
-  return `${CACHE_PREFIX}:${dataset}:v${CACHE_VERSION}`;
+  return SCRAPED_DUCK_CACHE_KEYS[dataset];
 }
 
 function readCache<T>(definition: DatasetDefinition<T>): {

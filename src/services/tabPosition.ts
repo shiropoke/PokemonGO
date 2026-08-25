@@ -1,6 +1,8 @@
+import { TAB_POSITION_STORAGE_KEY } from './appStorage';
+
 export type TabPosition = 'top' | 'bottom';
 
-export const TAB_POSITION_STORAGE_KEY = 'pokemon-go:tab-position';
+export { TAB_POSITION_STORAGE_KEY };
 
 export interface TabPositionStorage {
   getItem(key: string): string | null;

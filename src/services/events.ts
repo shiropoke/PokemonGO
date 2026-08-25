@@ -1,10 +1,10 @@
 import type { EventsFetchResult, ScrapedDuckEvent } from "../types/events";
+import { EVENTS_CACHE_KEY } from './appStorage';
 
 export const SCRAPED_DUCK_EVENTS_URL =
   "https://raw.githubusercontent.com/bigfoott/ScrapedDuck/data/events.json";
 export const EVENTS_CACHE_TTL_MS = 5 * 60 * 1000;
 
-const EVENTS_CACHE_KEY = "pokemon-go-information:events:v1";
 const CACHE_VERSION = 1;
 let inFlightRequest: Promise<EventsFetchResult> | null = null;
 

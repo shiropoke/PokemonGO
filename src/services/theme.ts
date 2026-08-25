@@ -1,6 +1,8 @@
+import { THEME_STORAGE_KEY } from './appStorage';
+
 export type Theme = 'light' | 'dark';
 
-export const THEME_STORAGE_KEY = 'pokemon-go:theme';
+export { THEME_STORAGE_KEY };
 
 export interface ThemeStorage {
   getItem(key: string): string | null;
