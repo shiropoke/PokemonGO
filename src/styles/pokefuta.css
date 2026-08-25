@@ -328,8 +328,8 @@
 
 .pokefuta-grid {
   display: grid;
-  gap: 14px;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+  gap: 10px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .pokefuta-card {
@@ -419,6 +419,13 @@
   line-height: 1.6;
 }
 
+@media (min-width: 720px) {
+  .pokefuta-grid {
+    gap: 14px;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  }
+}
+
 @media (max-width: 680px) {
   .pokefuta-controls {
     grid-template-columns: minmax(0, 1fr);
@@ -439,6 +446,50 @@
   .pokefuta-export__actions {
     grid-template-columns: minmax(0, 1fr);
   }
+
+  .pokefuta-card {
+    gap: 9px;
+    padding: 10px;
+  }
+
+  .pokefuta-card__body {
+    gap: 6px;
+  }
+
+  .pokefuta-card .data-chip-list {
+    gap: 4px;
+  }
+
+  .pokefuta-card .data-chip {
+    padding: 3px 6px;
+    font-size: 0.65rem;
+    white-space: nowrap;
+  }
+
+  .pokefuta-card__body h2 {
+    font-size: 0.9rem;
+    line-height: 1.4;
+  }
+
+  .pokefuta-card__location {
+    font-size: 0.76rem;
+  }
+
+  .pokefuta-card__address {
+    font-size: 0.7rem;
+    line-height: 1.5;
+  }
+
+  .pokefuta-card__actions {
+    display: grid;
+    gap: 6px;
+  }
+
+  .pokefuta-card__actions a {
+    min-height: 42px;
+    padding: 7px 6px;
+    font-size: 0.7rem;
+  }
 }
 
 @media (max-width: 390px) {
@@ -449,10 +500,6 @@
   .pokefuta-prefecture-card {
     min-height: 104px;
     padding: 12px;
-  }
-
-  .pokefuta-card__actions {
-    display: grid;
   }
 
   .pokefuta-detail-actions,

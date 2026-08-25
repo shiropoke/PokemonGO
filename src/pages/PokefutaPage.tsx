@@ -89,10 +89,11 @@ export function PokefutaPage({ prefectureSlug, onNavigate }: PokefutaPageProps) 
     () => filterPokefuta(dataset?.lids ?? [], {
       query,
       region,
-      prefectureSlug: selectedPrefecture?.slug ?? null,
+      prefectureSlug: null,
     }),
-    [dataset, query, region, selectedPrefecture],
+    [dataset, query, region],
   );
+  const displayedLids = selectedPrefecture ? prefectureLids : matchingLids;
   const showLids = hasQuery || selectedPrefecture !== null;
 
   const selectPrefecture = (slug: string) => {
@@ -120,47 +121,51 @@ export function PokefutaPage({ prefectureSlug, onNavigate }: PokefutaPageProps) 
 
       {dataset ? (
         <>
-          <dl className="pokefuta-summary" aria-label="ポケふた設置状況">
-            <div><dt>全国</dt><dd>{dataset.summary.total}枚</dd></div>
-            <div><dt>設置</dt><dd>{dataset.summary.installedPrefectures}都道府県</dd></div>
-            <div><dt>未設置</dt><dd>{dataset.summary.uninstalledPrefectures}県</dd></div>
-          </dl>
+          {!selectedPrefecture ? (
+            <>
+              <dl className="pokefuta-summary" aria-label="ポケふた設置状況">
+                <div><dt>全国</dt><dd>{dataset.summary.total}枚</dd></div>
+                <div><dt>設置</dt><dd>{dataset.summary.installedPrefectures}都道府県</dd></div>
+                <div><dt>未設置</dt><dd>{dataset.summary.uninstalledPrefectures}県</dd></div>
+              </dl>
 
-          <div className="pokefuta-controls">
-            <label className="dataset-search pokefuta-search" htmlFor="pokefuta-search">
-              ポケふたを検索
-              <input
-                id="pokefuta-search"
-                type="search"
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-                placeholder="ポケモン名・都道府県・市区町村・住所"
+              <div className="pokefuta-controls">
+                <label className="dataset-search pokefuta-search" htmlFor="pokefuta-search">
+                  ポケふたを検索
+                  <input
+                    id="pokefuta-search"
+                    type="search"
+                    value={query}
+                    onChange={(event) => setQuery(event.target.value)}
+                    placeholder="ポケモン名・都道府県・市区町村・住所"
+                  />
+                </label>
+                <label className="pokefuta-prefecture-select" htmlFor="pokefuta-prefecture">
+                  都道府県
+                  <select
+                    id="pokefuta-prefecture"
+                    value=""
+                    onChange={(event) => selectPrefecture(event.target.value)}
+                  >
+                    <option value="">すべての都道府県</option>
+                    {dataset.prefectures.map((prefecture) => (
+                      <option value={prefecture.slug} key={prefecture.slug}>
+                        {prefecture.name}（{prefecture.count}枚）
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              </div>
+
+              <FilterChips<PokefutaRegionFilter>
+                ariaLabel="地方フィルター"
+                className="pokefuta-region-filters"
+                options={REGION_OPTIONS}
+                selected={region}
+                onChange={setRegion}
               />
-            </label>
-            <label className="pokefuta-prefecture-select" htmlFor="pokefuta-prefecture">
-              都道府県
-              <select
-                id="pokefuta-prefecture"
-                value={selectedPrefecture?.slug ?? ''}
-                onChange={(event) => selectPrefecture(event.target.value)}
-              >
-                <option value="">すべての都道府県</option>
-                {dataset.prefectures.map((prefecture) => (
-                  <option value={prefecture.slug} key={prefecture.slug}>
-                    {prefecture.name}（{prefecture.count}枚）
-                  </option>
-                ))}
-              </select>
-            </label>
-          </div>
-
-          <FilterChips<PokefutaRegionFilter>
-            ariaLabel="地方フィルター"
-            className="pokefuta-region-filters"
-            options={REGION_OPTIONS}
-            selected={region}
-            onChange={setRegion}
-          />
+            </>
+          ) : null}
 
           {showLids ? (
             <section className="pokefuta-results" aria-live="polite">
@@ -196,12 +201,12 @@ export function PokefutaPage({ prefectureSlug, onNavigate }: PokefutaPageProps) 
               {selectedPrefecture && prefectureLids.length > 0 ? (
                 <div className="dataset-section__heading pokefuta-list-heading">
                   <h3>ポケふた一覧</h3>
-                  <span>{matchingLids.length}枚</span>
+                  <span>{prefectureLids.length}枚</span>
                 </div>
               ) : null}
-              {matchingLids.length > 0 ? (
+              {displayedLids.length > 0 ? (
                 <div className="pokefuta-grid">
-                  {matchingLids.map((lid) => <PokefutaCard lid={lid} key={lid.id} />)}
+                  {displayedLids.map((lid) => <PokefutaCard lid={lid} key={lid.id} />)}
                 </div>
               ) : (
                 <p className="dataset-empty">
