@@ -3,6 +3,7 @@ const CHECKS = {
     raidBosses: 'https://pogoapi.net/api/v1/raid_bosses.json',
     currentPokemonMoves:
       'https://pogoapi.net/api/v1/current_pokemon_moves.json',
+    pokemonMaxCp: 'https://pogoapi.net/api/v1/pokemon_max_cp.json',
   },
   watWowMap: {
     pokemon:
@@ -31,10 +32,11 @@ async function getJson(endpoint) {
 }
 
 async function run() {
-  const [raids, currentMoves, pokemon, move, japanesePokemon] =
+  const [raids, currentMoves, maxCp, pokemon, move, japanesePokemon] =
     await Promise.all([
       getJson(CHECKS.pogoApi.raidBosses),
       getJson(CHECKS.pogoApi.currentPokemonMoves),
+      getJson(CHECKS.pogoApi.pokemonMaxCp),
       getJson(CHECKS.watWowMap.pokemon),
       getJson(CHECKS.watWowMap.move),
       getJson(CHECKS.watWowMap.japanesePokemon),
@@ -46,13 +48,19 @@ async function run() {
   if (!Array.isArray(currentMoves) || currentMoves.length === 0) {
     throw new Error('PoGoAPI current_pokemon_moves schema check failed.');
   }
+  if (!Array.isArray(maxCp) || maxCp.length === 0 || typeof maxCp[0]?.max_cp !== 'number') {
+    throw new Error('PoGoAPI pokemon_max_cp schema check failed.');
+  }
   if (!isRecord(pokemon) || pokemon.pokedexId !== 1) {
     throw new Error('WatWowMap Pokémon schema check failed.');
   }
   if (!isRecord(move) || move.moveId !== 13) {
     throw new Error('WatWowMap move schema check failed.');
   }
-  if (!isRecord(japanesePokemon) || typeof japanesePokemon.poke_1 !== 'string') {
+  const japaneseBulbasaur = Array.isArray(japanesePokemon)
+    ? japanesePokemon.find((entry) => isRecord(entry) && entry.key === 'poke_1')?.value
+    : isRecord(japanesePokemon) ? japanesePokemon.poke_1 : undefined;
+  if (typeof japaneseBulbasaur !== 'string') {
     throw new Error('WatWowMap Japanese translation schema check failed.');
   }
 
@@ -63,10 +71,11 @@ async function run() {
     'PoGoAPI: OK',
     `- ${CHECKS.pogoApi.raidBosses} (${currentRaidCount} current bosses)`,
     `- ${CHECKS.pogoApi.currentPokemonMoves} (${currentMoves.length} records)`,
+    `- ${CHECKS.pogoApi.pokemonMaxCp} (${maxCp.length} records)`,
     'WatWowMap: OK',
     `- ${CHECKS.watWowMap.pokemon} (${pokemon.pokemonName})`,
     `- ${CHECKS.watWowMap.move} (${move.moveName})`,
-    `- ${CHECKS.watWowMap.japanesePokemon} (${japanesePokemon.poke_1})`,
+    `- ${CHECKS.watWowMap.japanesePokemon} (${japaneseBulbasaur})`,
   ].join('\n'));
 }
 

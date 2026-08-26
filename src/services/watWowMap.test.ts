@@ -23,6 +23,21 @@ const pokemonFixture = {
   attack: 118,
   defense: 111,
   stamina: 128,
+  genId: 1,
+  generation: 'Kanto',
+  height: 0.7,
+  weight: 6.9,
+  buddyGroupNumber: 2,
+  buddyDistance: 3,
+  buddyMegaEnergy: 15,
+  thirdMoveStardust: 10000,
+  thirdMoveCandy: 25,
+  gymDefenderEligible: true,
+  tradable: true,
+  transferable: true,
+  purificationDust: 3000,
+  purificationCandy: 3,
+  sizeSettings: [{ name: 'xxsLowerBound', value: 0.343 }],
   evolutions: [{ evoId: 2, formId: 166, candyCost: 25 }],
 };
 
@@ -35,6 +50,9 @@ const moveFixture = {
   power: 60,
   durationMs: 3000,
   energyDelta: -33,
+  pvpPower: 70,
+  pvpEnergyDelta: -45,
+  pvpBuffs: { targetDefenseStatStageChange: -1, buffActivationChance: 1 },
 };
 
 const invasionFixture = {
@@ -67,6 +85,11 @@ describe('WatWowMap response parsers', () => {
     expect(parseWatWowMapPokemon(pokemonFixture)).toMatchObject({
       pokemonName: 'Bulbasaur',
       evolutions: [{ evoId: 2, formId: 166, candyCost: 25 }],
+      height: 0.7,
+      buddyDistance: 3,
+      thirdMoveStardust: 10000,
+      purificationCandy: 3,
+      sizeSettings: [{ name: 'xxsLowerBound', value: 0.343 }],
     });
   });
 
@@ -75,6 +98,7 @@ describe('WatWowMap response parsers', () => {
       moveId: 13,
       moveName: 'Wrap',
       energyDelta: -33,
+      pvpBuffs: { targetDefenseStatStageChange: -1, buffActivationChance: 1 },
     });
   });
 
@@ -87,7 +111,7 @@ describe('WatWowMap response parsers', () => {
   });
 
   it('Japanese translation categoryをparseできる', () => {
-    expect(parseWatWowMapTranslations({ poke_1: 'フシギダネ' })).toEqual({
+    expect(parseWatWowMapTranslations([{ key: 'poke_1', value: 'フシギダネ' }])).toEqual({
       poke_1: 'フシギダネ',
     });
   });
@@ -124,7 +148,7 @@ describe('WatWowMap client', () => {
 
   it('日本語translationをcategory単位で取得できる', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(
-      new Response(JSON.stringify({ move_1: 'でんきショック' }), { status: 200 }),
+      new Response(JSON.stringify([{ key: 'move_1', value: 'でんきショック' }]), { status: 200 }),
     ));
     const result = await createWatWowMapClient()
       .fetchJapaneseTranslationCategory('moves');

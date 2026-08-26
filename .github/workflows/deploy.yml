@@ -44,6 +44,9 @@ jobs:
       - name: Refresh compact Game Master data
         continue-on-error: true
         run: npm run data:game
+      - name: Generate unified Pokémon data
+        continue-on-error: true
+        run: npm run data:unified
       - name: Refresh PvPoke rankings
         continue-on-error: true
         run: npm run data:pvp

@@ -23,6 +23,47 @@ export interface PogoApiPokemonTypesEntry {
   type: string[];
 }
 
+export interface PogoApiPokemonMaxCpEntry {
+  pokemon_id: number;
+  pokemon_name: string;
+  form: string;
+  max_cp: number;
+}
+
+export interface PogoApiEvolutionTarget {
+  pokemon_id: number;
+  pokemon_name: string;
+  form: string;
+  candy_required?: number;
+  item_required?: string;
+  lure_required?: string;
+  buddy_distance_required?: number;
+  must_be_buddy_to_evolve?: boolean;
+  only_evolves_in_daytime?: boolean;
+  only_evolves_in_nighttime?: boolean;
+  gender_required?: string;
+  no_candy_cost_if_traded?: boolean;
+  priority?: number;
+  upside_down?: boolean;
+}
+
+export interface PogoApiPokemonEvolutionEntry {
+  pokemon_id: number;
+  pokemon_name: string;
+  form: string;
+  evolutions: PogoApiEvolutionTarget[];
+}
+
+export interface PogoApiShinyPokemonEntry extends PogoApiPokemonIdentity {
+  found_wild: boolean;
+  found_raid: boolean;
+  found_egg: boolean;
+  found_evolution: boolean;
+  found_research: boolean;
+  found_photobomb: boolean;
+  alolan_shiny?: boolean;
+}
+
 export interface PogoApiCurrentPokemonMovesEntry {
   pokemon_id: number;
   pokemon_name: string;

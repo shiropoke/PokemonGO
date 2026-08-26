@@ -3,7 +3,12 @@ import {
   POGO_API_ENDPOINTS,
   createPogoApiClient,
   parsePogoApiCurrentPokemonMoves,
+  parsePogoApiPokemonEvolutions,
+  parsePogoApiPokemonForms,
+  parsePogoApiPokemonMaxCp,
   parsePogoApiRaidBosses,
+  parsePogoApiShadowPokemon,
+  parsePogoApiShinyPokemon,
 } from './pogoApi';
 import {
   ExternalDataValidationError,
@@ -68,6 +73,34 @@ describe('PoGoAPI response parsers', () => {
       fast_moves: ['Vine Whip', 'Tackle'],
       charged_moves: ['Sludge Bomb', 'Seed Bomb'],
     });
+  });
+
+  it('Unified Data用の現行Pokemon schemaを認識する', () => {
+    expect(parsePogoApiPokemonForms(['Normal', 'Alola'])).toEqual(['Normal', 'Alola']);
+    expect(parsePogoApiPokemonMaxCp([{
+      pokemon_id: 1, pokemon_name: 'Bulbasaur', form: 'Normal', max_cp: 1275,
+    }])[0]).toMatchObject({ pokemon_id: 1, form: 'Normal', max_cp: 1275 });
+    expect(parsePogoApiPokemonEvolutions([{
+      pokemon_id: 1,
+      pokemon_name: 'Bulbasaur',
+      form: 'Normal',
+      evolutions: [{
+        pokemon_id: 2, pokemon_name: 'Ivysaur', form: 'Normal',
+        candy_required: 25, item_required: 'Test Item', only_evolves_in_daytime: true,
+      }],
+    }])[0]?.evolutions[0]).toMatchObject({
+      pokemon_id: 2, candy_required: 25, item_required: 'Test Item',
+      only_evolves_in_daytime: true,
+    });
+    expect(parsePogoApiShinyPokemon({
+      1: {
+        id: 1, name: 'Bulbasaur', found_wild: true, found_raid: false,
+        found_egg: true, found_evolution: false, found_research: true,
+        found_photobomb: false,
+      },
+    })['1']?.found_wild).toBe(true);
+    expect(parsePogoApiShadowPokemon({ 1: { id: 1, name: 'Bulbasaur' } })['1'])
+      .toEqual({ id: 1, name: 'Bulbasaur' });
   });
 });
 

@@ -2,8 +2,12 @@ import { createExternalJsonClient } from './externalData';
 import type { ExternalDataRequestOptions } from '../types/externalData';
 import type {
   PogoApiCurrentPokemonMovesEntry,
+  PogoApiEvolutionTarget,
   PogoApiMove,
   PogoApiPokemonIdentity,
+  PogoApiPokemonEvolutionEntry,
+  PogoApiPokemonMaxCpEntry,
+  PogoApiShinyPokemonEntry,
   PogoApiPokemonStatsEntry,
   PogoApiPokemonTypesEntry,
   PogoApiRaidBoss,
@@ -141,6 +145,107 @@ function optionalNumber(value: unknown): number | undefined {
   return finiteNumber(value) ?? undefined;
 }
 
+function optionalBoolean(value: unknown): boolean | undefined {
+  return typeof value === 'boolean' ? value : undefined;
+}
+
+function normalizeMaxCp(value: unknown): PogoApiPokemonMaxCpEntry | null {
+  if (!isRecord(value)) return null;
+  const pokemonId = integer(value.pokemon_id);
+  const pokemonName = nonEmptyString(value.pokemon_name);
+  const form = nonEmptyString(value.form);
+  const maxCp = integer(value.max_cp);
+  if (pokemonId === null || !pokemonName || !form || maxCp === null) return null;
+  return { pokemon_id: pokemonId, pokemon_name: pokemonName, form, max_cp: maxCp };
+}
+
+function normalizeEvolutionTarget(value: unknown): PogoApiEvolutionTarget | null {
+  if (!isRecord(value)) return null;
+  const pokemonId = integer(value.pokemon_id);
+  const pokemonName = nonEmptyString(value.pokemon_name);
+  const form = nonEmptyString(value.form);
+  if (pokemonId === null || !pokemonName || !form) return null;
+  return {
+    pokemon_id: pokemonId,
+    pokemon_name: pokemonName,
+    form,
+    ...(integer(value.candy_required) !== null
+      ? { candy_required: integer(value.candy_required) as number }
+      : {}),
+    ...(nonEmptyString(value.item_required)
+      ? { item_required: nonEmptyString(value.item_required) as string }
+      : {}),
+    ...(nonEmptyString(value.lure_required)
+      ? { lure_required: nonEmptyString(value.lure_required) as string }
+      : {}),
+    ...(optionalNumber(value.buddy_distance_required) !== undefined
+      ? { buddy_distance_required: optionalNumber(value.buddy_distance_required) }
+      : {}),
+    ...(nonEmptyString(value.gender_required)
+      ? { gender_required: nonEmptyString(value.gender_required) as string }
+      : {}),
+    ...Object.fromEntries(
+      [
+        'must_be_buddy_to_evolve',
+        'only_evolves_in_daytime',
+        'only_evolves_in_nighttime',
+        'no_candy_cost_if_traded',
+        'upside_down',
+      ].flatMap((key) => {
+        const parsed = optionalBoolean(value[key]);
+        return parsed === undefined ? [] : [[key, parsed]];
+      }),
+    ),
+    ...(integer(value.priority) !== null
+      ? { priority: integer(value.priority) as number }
+      : {}),
+  };
+}
+
+function normalizePokemonEvolution(
+  value: unknown,
+): PogoApiPokemonEvolutionEntry | null {
+  if (!isRecord(value) || !Array.isArray(value.evolutions)) return null;
+  const pokemonId = integer(value.pokemon_id);
+  const pokemonName = nonEmptyString(value.pokemon_name);
+  const form = nonEmptyString(value.form);
+  if (pokemonId === null || !pokemonName || !form) return null;
+  const evolutions = value.evolutions.flatMap(
+    (entry) => normalizeEvolutionTarget(entry) ?? [],
+  );
+  return { pokemon_id: pokemonId, pokemon_name: pokemonName, form, evolutions };
+}
+
+function normalizeShiny(value: unknown): PogoApiShinyPokemonEntry | null {
+  if (!isRecord(value)) return null;
+  const id = integer(value.id);
+  const name = nonEmptyString(value.name);
+  const required = [
+    'found_wild',
+    'found_raid',
+    'found_egg',
+    'found_evolution',
+    'found_research',
+    'found_photobomb',
+  ] as const;
+  if (id === null || !name || required.some((key) => typeof value[key] !== 'boolean')) {
+    return null;
+  }
+  return {
+    id,
+    name,
+    found_wild: value.found_wild as boolean,
+    found_raid: value.found_raid as boolean,
+    found_egg: value.found_egg as boolean,
+    found_evolution: value.found_evolution as boolean,
+    found_research: value.found_research as boolean,
+    found_photobomb: value.found_photobomb as boolean,
+    ...(typeof value.alolan_shiny === 'boolean'
+      ? { alolan_shiny: value.alolan_shiny }
+      : {}),
+  };
+}
+
 function normalizeMove(value: unknown): PogoApiMove | null {
   if (!isRecord(value)) return null;
   const moveId = integer(value.move_id);
@@ -273,6 +378,55 @@ export function parsePogoApiMoves(value: unknown): PogoApiMove[] {
   return normalizedArray(value, normalizeMove);
 }
 
+export function parsePogoApiPokemonMaxCp(
+  value: unknown,
+): PogoApiPokemonMaxCpEntry[] {
+  return normalizedArray(value, normalizeMaxCp);
+}
+
+export function parsePogoApiPokemonForms(value: unknown): string[] {
+  const forms = stringArray(value);
+  if (!forms?.length) throw new Error('No Pokémon forms found.');
+  return forms;
+}
+
+export function parsePogoApiPokemonEvolutions(
+  value: unknown,
+): PogoApiPokemonEvolutionEntry[] {
+  return normalizedArray(value, normalizePokemonEvolution);
+}
+
+function parsePokemonIdentityRecord<T>(
+  value: unknown,
+  normalize: (entry: unknown) => T | null,
+): Record<string, T> {
+  if (!isRecord(value)) throw new Error('Expected a Pokémon keyed object.');
+  const result: Record<string, T> = {};
+  for (const [key, entry] of Object.entries(value)) {
+    const parsed = normalize(entry);
+    if (parsed) result[key] = parsed;
+  }
+  if (Object.keys(result).length === 0) throw new Error('No usable Pokémon found.');
+  return result;
+}
+
+export function parsePogoApiShinyPokemon(
+  value: unknown,
+): Record<string, PogoApiShinyPokemonEntry> {
+  return parsePokemonIdentityRecord(value, normalizeShiny);
+}
+
+export function parsePogoApiShadowPokemon(
+  value: unknown,
+): Record<string, PogoApiPokemonIdentity> {
+  return parsePokemonIdentityRecord(value, (entry) => {
+    if (!isRecord(entry)) return null;
+    const id = integer(entry.id);
+    const name = nonEmptyString(entry.name);
+    return id === null || !name ? null : { id, name };
+  });
+}
+
 export function parsePogoApiPokemonNames(
   value: unknown,
 ): Record<string, PogoApiPokemonIdentity> {
@@ -319,6 +473,36 @@ export function createPogoApiClient() {
       transport.request(
         POGO_API_ENDPOINTS.pokemonTypes,
         parsePogoApiPokemonTypes,
+        options,
+      ),
+    fetchPokemonMaxCp: (options?: ExternalDataRequestOptions) =>
+      transport.request(
+        POGO_API_ENDPOINTS.pokemonMaxCp,
+        parsePogoApiPokemonMaxCp,
+        options,
+      ),
+    fetchPokemonForms: (options?: ExternalDataRequestOptions) =>
+      transport.request(
+        POGO_API_ENDPOINTS.pokemonForms,
+        parsePogoApiPokemonForms,
+        options,
+      ),
+    fetchPokemonEvolutions: (options?: ExternalDataRequestOptions) =>
+      transport.request(
+        POGO_API_ENDPOINTS.pokemonEvolutions,
+        parsePogoApiPokemonEvolutions,
+        options,
+      ),
+    fetchShinyPokemon: (options?: ExternalDataRequestOptions) =>
+      transport.request(
+        POGO_API_ENDPOINTS.shinyPokemon,
+        parsePogoApiShinyPokemon,
+        options,
+      ),
+    fetchShadowPokemon: (options?: ExternalDataRequestOptions) =>
+      transport.request(
+        POGO_API_ENDPOINTS.shadowPokemon,
+        parsePogoApiShadowPokemon,
         options,
       ),
     fetchFastMoves: (options?: ExternalDataRequestOptions) =>

@@ -11,6 +11,29 @@ export interface WatWowMapEvolution {
   distance?: number;
 }
 
+export interface WatWowMapSizeSetting {
+  name: string;
+  value: number;
+}
+
+export interface WatWowMapCostumeOverrideEvolution {
+  costumeId: number;
+  costumeProto: string;
+  costumeName: string;
+}
+
+export interface WatWowMapTemporaryEvolution {
+  tempEvoId: number;
+  attack: number;
+  defense: number;
+  stamina: number;
+  height?: number;
+  weight?: number;
+  types?: number[];
+  firstEnergyCost?: number;
+  subsequentEnergyCost?: number;
+}
+
 export interface WatWowMapPokemon {
   pokedexId: number;
   pokemonName: string;
@@ -26,6 +49,32 @@ export interface WatWowMapPokemon {
   defense?: number;
   stamina?: number;
   generation?: string;
+  genId?: number;
+  height?: number;
+  weight?: number;
+  legendary?: boolean;
+  mythic?: boolean;
+  ultraBeast?: boolean;
+  buddyGroupNumber?: number;
+  buddyDistance?: number;
+  buddyMegaEnergy?: number;
+  thirdMoveStardust?: number;
+  thirdMoveCandy?: number;
+  gymDefenderEligible?: boolean;
+  tradable?: boolean;
+  transferable?: boolean;
+  purificationDust?: number;
+  purificationCandy?: number;
+  sizeSettings?: WatWowMapSizeSetting[];
+  costumeOverrideEvos?: WatWowMapCostumeOverrideEvolution[];
+}
+
+export interface WatWowMapPvpBuffs {
+  attackerAttackStatStageChange?: number;
+  attackerDefenseStatStageChange?: number;
+  targetAttackStatStageChange?: number;
+  targetDefenseStatStageChange?: number;
+  buffActivationChance?: number;
 }
 
 export interface WatWowMapMove {
@@ -39,12 +88,31 @@ export interface WatWowMapMove {
   energyDelta?: number;
   pvpPower?: number;
   pvpEnergyDelta?: number;
+  pvpDurationTurns?: number;
+  criticalChance?: number;
+  pvpBuffs?: WatWowMapPvpBuffs;
 }
 
 export interface WatWowMapForm {
   formId: number;
   formName: string;
   proto: string;
+  isCostume?: boolean;
+  attack?: number;
+  defense?: number;
+  stamina?: number;
+  height?: number;
+  weight?: number;
+  types?: number[];
+  quickMoves?: number[];
+  chargedMoves?: number[];
+  eliteQuickMoves?: number[];
+  eliteChargedMoves?: number[];
+  evolutions?: WatWowMapEvolution[];
+  tempEvolutions?: WatWowMapTemporaryEvolution[];
+  purificationDust?: number;
+  purificationCandy?: number;
+  costumeOverrideEvos?: WatWowMapCostumeOverrideEvolution[];
 }
 
 export interface WatWowMapCostume {

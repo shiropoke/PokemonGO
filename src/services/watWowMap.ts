@@ -8,6 +8,7 @@ import type {
   WatWowMapItem,
   WatWowMapMove,
   WatWowMapPokemon,
+  WatWowMapPvpBuffs,
   WatWowMapQuestDefinition,
   WatWowMapRaidLevelDefinition,
   WatWowMapTranslationCategory,
@@ -72,6 +73,54 @@ function normalizedArray<T>(
   return result;
 }
 
+function optionalBoolean(value: unknown): boolean | undefined {
+  return typeof value === 'boolean' ? value : undefined;
+}
+
+function normalizeSizeSetting(value: unknown) {
+  if (!isRecord(value)) return null;
+  const name = text(value.name);
+  const settingValue = finiteNumber(value.value);
+  return !name || settingValue === undefined ? null : { name, value: settingValue };
+}
+
+function normalizeCostumeOverrideEvolution(value: unknown) {
+  if (!isRecord(value)) return null;
+  const costumeId = integer(value.costumeId);
+  const costumeProto = text(value.costumeProto);
+  const costumeName = text(value.costumeName);
+  return costumeId === null || !costumeProto || !costumeName
+    ? null
+    : { costumeId, costumeProto, costumeName };
+}
+
+function normalizeTemporaryEvolution(value: unknown) {
+  if (!isRecord(value)) return null;
+  const tempEvoId = integer(value.tempEvoId);
+  const attack = integer(value.attack);
+  const defense = integer(value.defense);
+  const stamina = integer(value.stamina);
+  if (tempEvoId === null || attack === null || defense === null || stamina === null) {
+    return null;
+  }
+  const types = integerArray(value.types);
+  return {
+    tempEvoId,
+    attack,
+    defense,
+    stamina,
+    ...(finiteNumber(value.height) !== undefined ? { height: finiteNumber(value.height) } : {}),
+    ...(finiteNumber(value.weight) !== undefined ? { weight: finiteNumber(value.weight) } : {}),
+    ...(types ? { types } : {}),
+    ...(integer(value.firstEnergyCost) !== null
+      ? { firstEnergyCost: integer(value.firstEnergyCost) as number }
+      : {}),
+    ...(integer(value.subsequentEnergyCost) !== null
+      ? { subsequentEnergyCost: integer(value.subsequentEnergyCost) as number }
+      : {}),
+  };
+}
+
 function normalizeEvolution(value: unknown) {
   if (!isRecord(value)) return null;
   const evoId = integer(value.evoId);
@@ -114,6 +163,14 @@ function normalizePokemon(value: unknown): WatWowMapPokemon | null {
   const evolutions = Array.isArray(value.evolutions)
     ? value.evolutions.flatMap((entry) => normalizeEvolution(entry) ?? [])
     : [];
+  const sizeSettings = Array.isArray(value.sizeSettings)
+    ? value.sizeSettings.flatMap((entry) => normalizeSizeSetting(entry) ?? [])
+    : undefined;
+  const costumeOverrideEvos = Array.isArray(value.costumeOverrideEvos)
+    ? value.costumeOverrideEvos.flatMap(
+        (entry) => normalizeCostumeOverrideEvolution(entry) ?? [],
+      )
+    : undefined;
   return {
     pokedexId,
     pokemonName,
@@ -135,7 +192,46 @@ function normalizePokemon(value: unknown): WatWowMapPokemon | null {
       ? { stamina: finiteNumber(value.stamina) }
       : {}),
     ...(text(value.generation) ? { generation: text(value.generation) as string } : {}),
+    ...(integer(value.genId) !== null ? { genId: integer(value.genId) as number } : {}),
+    ...(finiteNumber(value.height) !== undefined ? { height: finiteNumber(value.height) } : {}),
+    ...(finiteNumber(value.weight) !== undefined ? { weight: finiteNumber(value.weight) } : {}),
+    ...Object.fromEntries(
+      ['legendary', 'mythic', 'ultraBeast', 'gymDefenderEligible', 'tradable', 'transferable']
+        .flatMap((key) => {
+          const parsed = optionalBoolean(value[key]);
+          return parsed === undefined ? [] : [[key, parsed]];
+        }),
+    ),
+    ...Object.fromEntries(
+      [
+        'buddyGroupNumber', 'buddyDistance', 'buddyMegaEnergy',
+        'thirdMoveStardust', 'thirdMoveCandy', 'purificationDust',
+        'purificationCandy',
+      ].flatMap((key) => {
+        const parsed = finiteNumber(value[key]);
+        return parsed === undefined ? [] : [[key, parsed]];
+      }),
+    ),
+    ...(sizeSettings ? { sizeSettings } : {}),
+    ...(costumeOverrideEvos ? { costumeOverrideEvos } : {}),
   };
+}
+
+function normalizePvpBuffs(value: unknown): WatWowMapPvpBuffs | undefined {
+  if (!isRecord(value)) return undefined;
+  const result: WatWowMapPvpBuffs = {};
+  const keys = [
+    'attackerAttackStatStageChange',
+    'attackerDefenseStatStageChange',
+    'targetAttackStatStageChange',
+    'targetDefenseStatStageChange',
+    'buffActivationChance',
+  ] as const;
+  for (const key of keys) {
+    const parsed = finiteNumber(value[key]);
+    if (parsed !== undefined) result[key] = parsed;
+  }
+  return Object.keys(result).length > 0 ? result : undefined;
 }
 
 function normalizeMove(value: unknown): WatWowMapMove | null {
@@ -166,6 +262,15 @@ function normalizeMove(value: unknown): WatWowMapMove | null {
     ...(finiteNumber(value.pvpEnergyDelta) !== undefined
       ? { pvpEnergyDelta: finiteNumber(value.pvpEnergyDelta) }
       : {}),
+    ...(finiteNumber(value.pvpDurationTurns) !== undefined
+      ? { pvpDurationTurns: finiteNumber(value.pvpDurationTurns) }
+      : {}),
+    ...(finiteNumber(value.criticalChance) !== undefined
+      ? { criticalChance: finiteNumber(value.criticalChance) }
+      : {}),
+    ...(normalizePvpBuffs(value.pvpBuffs)
+      ? { pvpBuffs: normalizePvpBuffs(value.pvpBuffs) }
+      : {}),
   };
 }
 
@@ -174,7 +279,43 @@ function normalizeForm(value: unknown): WatWowMapForm | null {
   const formId = integer(value.formId);
   const formName = text(value.formName);
   const proto = text(value.proto);
-  return formId === null || !formName || !proto ? null : { formId, formName, proto };
+  if (formId === null || !formName || !proto) return null;
+  const evolutions = Array.isArray(value.evolutions)
+    ? value.evolutions.flatMap((entry) => normalizeEvolution(entry) ?? [])
+    : undefined;
+  const tempEvolutions = Array.isArray(value.tempEvolutions)
+    ? value.tempEvolutions.flatMap((entry) => normalizeTemporaryEvolution(entry) ?? [])
+    : undefined;
+  const costumeOverrideEvos = Array.isArray(value.costumeOverrideEvos)
+    ? value.costumeOverrideEvos.flatMap(
+        (entry) => normalizeCostumeOverrideEvolution(entry) ?? [],
+      )
+    : undefined;
+  const result: WatWowMapForm = {
+    formId,
+    formName,
+    proto,
+    ...(optionalBoolean(value.isCostume) !== undefined
+      ? { isCostume: optionalBoolean(value.isCostume) }
+      : {}),
+    ...(evolutions ? { evolutions } : {}),
+    ...(tempEvolutions ? { tempEvolutions } : {}),
+    ...(costumeOverrideEvos ? { costumeOverrideEvos } : {}),
+  };
+  for (const key of [
+    'attack', 'defense', 'stamina', 'height', 'weight',
+    'purificationDust', 'purificationCandy',
+  ] as const) {
+    const parsed = finiteNumber(value[key]);
+    if (parsed !== undefined) result[key] = parsed;
+  }
+  for (const key of [
+    'types', 'quickMoves', 'chargedMoves', 'eliteQuickMoves', 'eliteChargedMoves',
+  ] as const) {
+    const parsed = integerArray(value[key]);
+    if (parsed) result[key] = parsed;
+  }
+  return result;
 }
 
 function normalizeCostume(value: unknown): WatWowMapCostume | null {
@@ -323,10 +464,18 @@ export function parseWatWowMapInvasions(value: unknown): WatWowMapInvasion[] {
 export function parseWatWowMapTranslations(
   value: unknown,
 ): WatWowMapTranslationEntries {
-  if (!isRecord(value)) throw new Error('Expected a translation object.');
-  const entries = Object.entries(value).filter(
-    (entry): entry is [string, string] => typeof entry[1] === 'string',
-  );
+  const entries: [string, string][] = Array.isArray(value)
+    ? value.flatMap((entry) => {
+        if (!isRecord(entry)) return [];
+        const key = text(entry.key);
+        const translated = text(entry.value);
+        return key && translated ? [[key, translated]] : [];
+      })
+    : isRecord(value)
+      ? Object.entries(value).filter(
+          (entry): entry is [string, string] => typeof entry[1] === 'string',
+        )
+      : [];
   if (entries.length === 0) throw new Error('No translations found.');
   return Object.fromEntries(entries);
 }
@@ -337,13 +486,11 @@ export function parseWatWowMapTranslationLocale(
   if (!isRecord(value)) throw new Error('Expected a locale object.');
   const result: WatWowMapTranslationLocale = {};
   for (const [category, entries] of Object.entries(value)) {
-    if (!isRecord(entries)) continue;
-    const parsed = Object.entries(entries).filter(
-      (entry): entry is [string, string] => typeof entry[1] === 'string',
-    );
-    if (parsed.length > 0) {
+    try {
       (result as Record<string, WatWowMapTranslationEntries>)[category] =
-        Object.fromEntries(parsed);
+        parseWatWowMapTranslations(entries);
+    } catch {
+      // Unknown or empty future categories do not invalidate useful locale data.
     }
   }
   if (Object.keys(result).length === 0) throw new Error('No locale categories found.');
