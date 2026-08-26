@@ -11,6 +11,7 @@
     "data:event-links": "node scripts/generate-event-japanese-links.mjs",
     "data:pokefuta": "node scripts/generate-pokefuta-data.mjs",
     "data:pokefuta:full": "node scripts/generate-pokefuta-data.mjs --full",
+    "check:data-sources": "node scripts/check-data-sources.mjs",
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
