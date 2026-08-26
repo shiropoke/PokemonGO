@@ -91,3 +91,21 @@ export function ScrapedDuckCredit() {
     </footer>
   );
 }
+
+/** レイドの現在出現判定と、ポケモン固有情報の補完元を明示する。 */
+export function RaidDataCredit() {
+  return (
+    <footer className="dataset-credit">
+      <span>レイド情報: </span>
+      <a href="https://leekduck.com/" target="_blank" rel="noopener noreferrer">Leek Duck</a>
+      <span>・</span>
+      <a href="https://github.com/bigfoott/ScrapedDuck" target="_blank" rel="noopener noreferrer">ScrapedDuck</a>
+      <span> ／ ポケモン詳細データ: </span>
+      <a href="https://pogoapi.net/" target="_blank" rel="noopener noreferrer">PoGoAPI</a>
+      <span>・</span>
+      <a href="https://github.com/WatWowMap/pogo-data-api" target="_blank" rel="noopener noreferrer">WatWowMap</a>
+      <span>・</span>
+      <a href="https://github.com/PokeMiners/pogo_assets" target="_blank" rel="noopener noreferrer">PokeMiners</a>
+    </footer>
+  );
+}

@@ -67,9 +67,21 @@ async function run() {
   const currentRaidCount = Object.values(raids.current)
     .filter(Array.isArray)
     .reduce((total, entries) => total + entries.length, 0);
+  const raidTiers = Object.entries(raids.current)
+    .filter(([, entries]) => Array.isArray(entries))
+    .map(([tier, entries]) => `${tier}: ${entries.length}`)
+    .join(', ');
+  const raidExamples = Object.values(raids.current)
+    .filter(Array.isArray)
+    .flat()
+    .slice(0, 3)
+    .map((entry) => isRecord(entry) ? entry.name : null)
+    .filter((name) => typeof name === 'string')
+    .join(', ');
   console.log([
     'PoGoAPI: OK',
-    `- ${CHECKS.pogoApi.raidBosses} (${currentRaidCount} current bosses)`,
+    `- ${CHECKS.pogoApi.raidBosses} (${currentRaidCount} current bosses; tiers ${raidTiers})`,
+    `- representative bosses: ${raidExamples || 'none'}`,
     `- ${CHECKS.pogoApi.currentPokemonMoves} (${currentMoves.length} records)`,
     `- ${CHECKS.pogoApi.pokemonMaxCp} (${maxCp.length} records)`,
     'WatWowMap: OK',

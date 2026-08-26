@@ -278,6 +278,67 @@
   font-weight: 750;
 }
 
+.dataset-stats--three {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.raid-card__details {
+  border-top: 1px solid var(--gray-100);
+  padding-top: 10px;
+}
+
+.raid-card__details summary {
+  color: var(--blue-700);
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.raid-card__details-content {
+  display: grid;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.raid-card__details-content p {
+  display: grid;
+  gap: 3px;
+  margin: 0;
+  color: var(--gray-700);
+  font-size: 0.78rem;
+  overflow-wrap: anywhere;
+}
+
+.raid-card__details-content p strong {
+  color: var(--gray-900);
+}
+
+.raid-card__pokemon-details .raid-card__details-content {
+  gap: 14px;
+}
+
+.raid-card__pokemon-details section {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+
+.raid-card__pokemon-details h4 {
+  margin: 0;
+  color: var(--gray-800);
+  font-size: 0.78rem;
+}
+
+.raid-card__moves p {
+  grid-template-columns: minmax(74px, auto) minmax(0, 1fr);
+  align-items: start;
+}
+
+.raid-card__moves p span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
 .research-list,
 .rocket-cards {
   display: grid;

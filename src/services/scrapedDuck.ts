@@ -4,12 +4,12 @@ import type {
   DatasetLoadOptions,
   EggHatch,
   FieldResearchTask,
-  RaidBoss,
   ResearchReward,
   RocketLineup,
   RocketPokemon,
   ScrapedDuckDataset,
 } from '../types/scrapedDuck';
+import type { RaidBoss } from '../types/raids';
 import { SCRAPED_DUCK_CACHE_KEYS } from './appStorage';
 import { loadRocketDialogueEntries } from './rocketDialogues';
 import {
@@ -160,6 +160,9 @@ function normalizeRaid(item: unknown, index: number): RaidBoss | null {
     combatPower,
     boostedWeather: readNamedObjectArray(item.boostedWeather),
     image: optionalUrl(item.image),
+    isMega: /^mega\s+/i.test(name) || /^mega\b/i.test(tier),
+    sourceTier: tier,
+    sources: { membership: 'scrapedduck', details: 'scrapedduck', image: 'scrapedduck' },
   };
 }
 

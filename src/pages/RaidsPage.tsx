@@ -3,14 +3,17 @@ import {
   DatasetError,
   DatasetPageHeader,
   DatasetSkeleton,
-  ScrapedDuckCredit,
+  RaidDataCredit,
   StaleDataNotice,
 } from '../components/DatasetPageHeader';
 import { RaidCard } from '../components/RaidCard';
 import { RaidFilters } from '../components/RaidFilters';
 import { RefreshButton } from '../components/RefreshButton';
 import { useCachedDataset } from '../hooks/useCachedDataset';
-import { loadRaids, SCRAPED_DUCK_CACHE_TTL_MS } from '../services/scrapedDuck';
+import {
+  loadRaidData,
+  RAID_DATA_CACHE_TTL_MS,
+} from '../services/raidData';
 import {
   filterRaidTierGroups,
   groupRaidsByTier,
@@ -21,9 +24,9 @@ import { getHashQueryParam } from '../types/navigation';
 import '../styles/data-pages.css';
 
 export function RaidsPage() {
-  const state = useCachedDataset(loadRaids, {
+  const state = useCachedDataset(loadRaidData, {
     revalidateOnFocus: true,
-    staleTimeMs: SCRAPED_DUCK_CACHE_TTL_MS,
+    staleTimeMs: RAID_DATA_CACHE_TTL_MS,
   });
   const [filter, setFilter] = useState<RaidFilter>('all');
   const [targetRaidId, setTargetRaidId] = useState(() =>
@@ -124,7 +127,7 @@ export function RaidsPage() {
         </>
       ) : null}
 
-      <ScrapedDuckCredit />
+      <RaidDataCredit />
     </div>
   );
 }

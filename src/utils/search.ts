@@ -2,7 +2,7 @@ import { SITE_PAGES } from '../constants/sitePages';
 import type { Page } from '../types/navigation';
 import type { ScrapedDuckEvent } from '../types/events';
 import type { Pokemon } from '../types/pokemon';
-import type { RaidBoss } from '../types/scrapedDuck';
+import type { RaidBoss } from '../types/raids';
 import { getEventTypeLabel, localizeEventTitle } from './eventLocalization';
 import { getRaidTierLabel } from './scrapedDuckLocalization';
 

@@ -1,4 +1,4 @@
-import type { RaidBoss } from '../types/scrapedDuck';
+import type { RaidBoss } from '../types/raids';
 import { getRaidTierLabel } from './scrapedDuckLocalization';
 
 export interface RaidTierGroup {

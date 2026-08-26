@@ -1,3 +1,5 @@
+import type { CombatPowerRange } from './raids';
+
 export type ScrapedDuckDataset = 'raids' | 'research' | 'eggs' | 'rocket';
 
 export type CachedDataSource = 'network' | 'cache';
@@ -15,29 +17,11 @@ export interface DatasetLoadOptions {
   forceRefresh?: boolean;
 }
 
-export interface CombatPowerRange {
-  min: number;
-  max: number;
-}
+/** @deprecated レイド共通型は `types/raids` から利用します。 */
+export type { CombatPowerRange } from './raids';
 
-export interface RaidBoss {
-  id: string;
-  name: string;
-  displayName: string;
-  /** 既存Game Master辞書と照合できた場合だけ設定する内部ID。 */
-  speciesId: string | null;
-  tier: string;
-  /** ScrapedDuckの現行データでは、nameの `Shadow ` 接頭辞で表現される。 */
-  isShadow: boolean;
-  canBeShiny: boolean;
-  types: string[];
-  combatPower: {
-    normal: CombatPowerRange | null;
-    boosted: CombatPowerRange | null;
-  } | null;
-  boostedWeather: string[];
-  image: string | null;
-}
+/** @deprecated レイド共通型は `types/raids` から利用します。 */
+export type { RaidBoss } from './raids';
 
 export interface ResearchReward {
   id: string;

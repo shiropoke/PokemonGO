@@ -5,6 +5,8 @@ export const IV_CHECKER_STORAGE_KEY = 'pokemon-go-information:iv-checker:v1';
 export const WEEKLY_EVENT_VIEW_STORAGE_KEY = 'pokemon-go:weekly-event-view';
 export const EVENTS_CACHE_KEY = 'pokemon-go-information:events:v1';
 export const POKEMON_DATA_CACHE_KEY = 'pokemon-go-information:pokemon-data:v2';
+/** 旧PoGoAPI主導レイド実装のcache。読み込みには使わず、保存データ削除時だけ安全に除去する。 */
+const LEGACY_POGO_RAID_DATA_CACHE_KEY = 'pokemon-go-information:raids:pogoapi:v1';
 
 export const SCRAPED_DUCK_CACHE_KEYS = {
   raids: 'pokemon-go-information:scraped-duck:raids:v1',
@@ -21,6 +23,7 @@ export const APP_LOCAL_STORAGE_KEYS = [
   WEEKLY_EVENT_VIEW_STORAGE_KEY,
   EVENTS_CACHE_KEY,
   POKEMON_DATA_CACHE_KEY,
+  LEGACY_POGO_RAID_DATA_CACHE_KEY,
   ...Object.values(SCRAPED_DUCK_CACHE_KEYS),
 ] as const;
 

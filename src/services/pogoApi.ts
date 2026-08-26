@@ -301,14 +301,18 @@ function normalizeMove(value: unknown): PogoApiMove | null {
   };
 }
 
-function normalizeRaidBoss(value: unknown): PogoApiRaidBoss | null {
+function normalizeRaidBoss(
+  value: unknown,
+  fallbackTier: string,
+): PogoApiRaidBoss | null {
   if (!isRecord(value)) return null;
   const id = integer(value.id);
   const name = nonEmptyString(value.name);
   const form = nonEmptyString(value.form);
-  const tier = typeof value.tier === 'string'
+  const recordTier = typeof value.tier === 'string'
     ? nonEmptyString(value.tier)
     : integer(value.tier);
+  const tier = recordTier ?? nonEmptyString(fallbackTier);
   const types = stringArray(value.type);
   const boostedWeather = stringArray(value.boosted_weather);
   if (
@@ -338,7 +342,10 @@ function normalizeRaidPeriod(
   if (!isRecord(value)) throw new Error('Expected a raid tier object.');
   const result: Record<string, PogoApiRaidBoss[]> = {};
   for (const [tier, bosses] of Object.entries(value)) {
-    result[tier] = normalizedArray(bosses, normalizeRaidBoss);
+    result[tier] = normalizedArray(
+      bosses,
+      (boss) => normalizeRaidBoss(boss, tier),
+    );
   }
   if (!allowEmpty && Object.keys(result).length === 0) {
     throw new Error('No raid tiers found.');
@@ -347,12 +354,13 @@ function normalizeRaidPeriod(
 }
 
 export function parsePogoApiRaidBosses(value: unknown): PogoApiRaidBosses {
-  if (!isRecord(value) || !isRecord(value.current) || !isRecord(value.previous)) {
+  if (!isRecord(value) || !isRecord(value.current)) {
     throw new Error('Invalid raid boss response.');
   }
   return {
     current: normalizeRaidPeriod(value.current),
-    previous: normalizeRaidPeriod(value.previous, true),
+    // previous は履歴用の任意情報。欠落・破損していても current を捨てない。
+    previous: isRecord(value.previous) ? normalizeRaidPeriod(value.previous, true) : {},
   };
 }
 

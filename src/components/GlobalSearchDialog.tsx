@@ -9,11 +9,11 @@ import {
 } from 'react';
 import { loadEvents } from '../services/events';
 import { fetchPokemonData } from '../services/pokemonData';
-import { loadRaids } from '../services/scrapedDuck';
+import { loadRaidData } from '../services/raidData';
 import type { ScrapedDuckEvent } from '../types/events';
 import type { NavigationQuery, Page } from '../types/navigation';
 import type { Pokemon } from '../types/pokemon';
-import type { RaidBoss } from '../types/scrapedDuck';
+import type { RaidBoss } from '../types/raids';
 import {
   normalizeSearchText,
   searchGlobalData,
@@ -166,7 +166,7 @@ export function GlobalSearchDialog({
     loadingRef.current = true;
     requestedVersionRef.current = requestVersion;
     setData((current) => ({ ...current, loading: true, failed: [] }));
-    void Promise.allSettled([fetchPokemonData(), loadEvents(), loadRaids()]).then(
+    void Promise.allSettled([fetchPokemonData(), loadEvents(), loadRaidData()]).then(
       ([pokemonResult, eventsResult, raidsResult]) => {
         loadingRef.current = false;
         const failed = [

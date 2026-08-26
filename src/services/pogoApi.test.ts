@@ -67,6 +67,34 @@ describe('PoGoAPI response parsers', () => {
     });
   });
 
+  it('record自身にtierが無くても外側のtier keyを引き継ぐ', () => {
+    const parsed = parsePogoApiRaidBosses({
+      current: {
+        5: [{
+          id: 377,
+          name: 'Regirock',
+          form: 'Normal',
+          type: ['Rock'],
+          boosted_weather: ['Partly Cloudy'],
+          possible_shiny: true,
+          min_unboosted_cp: 1703,
+          max_unboosted_cp: 1784,
+          min_boosted_cp: 2129,
+          max_boosted_cp: 2230,
+        }],
+      },
+      previous: {},
+    });
+
+    expect(parsed.current['5']?.[0]?.tier).toBe('5');
+  });
+
+  it('履歴previousが欠落してもcurrentだけを有効な現在レイドとして扱う', () => {
+    const parsed = parsePogoApiRaidBosses({ current: raidFixture.current });
+    expect(parsed.current['5']).toHaveLength(1);
+    expect(parsed.previous).toEqual({});
+  });
+
   it('current Pokémon moves responseを認識する', () => {
     expect(parsePogoApiCurrentPokemonMoves(currentMovesFixture)[0]).toMatchObject({
       pokemon_id: 1,

@@ -273,10 +273,11 @@ export function getTypeLabelJa(type: string): string {
 
 export function getRaidTierLabel(tier: string): string {
   const normalized = tier.trim().toLowerCase();
-  if (normalized === '1-star raids' || normalized === 'tier 1') return '★1';
-  if (normalized === '3-star raids' || normalized === 'tier 3') return '★3';
-  if (normalized === '5-star raids' || normalized === 'tier 5') return '伝説 / ★5';
-  if (normalized === 'mega raids' || normalized === 'mega') return 'メガ';
+  if (normalized === '1-star raids' || normalized === 'tier 1' || normalized === '1' || normalized === '1-star') return '★1';
+  if (normalized === '3-star raids' || normalized === 'tier 3' || normalized === '3' || normalized === '3-star') return '★3';
+  // PoGoAPIのtier 6はゲーム画面の★6ではなく、★5の内部強度分類です。
+  if (normalized === '5-star raids' || normalized === 'tier 5' || normalized === '5' || normalized === '5-star' || normalized === '6' || normalized === 'tier 6') return '伝説 / ★5';
+  if (normalized === 'mega raids' || normalized === 'mega' || normalized === 'mega_legendary') return 'メガ';
   return tier || 'その他';
 }
 

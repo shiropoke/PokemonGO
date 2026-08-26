@@ -2,10 +2,12 @@ import { useEffect, useMemo, useState } from 'react';
 import { useFavorites } from '../contexts/FavoritesContext';
 import { loadEvents } from '../services/events';
 import { fetchPokemonData } from '../services/pokemonData';
-import { loadEggs, loadRaids, loadResearch } from '../services/scrapedDuck';
+import { loadEggs, loadResearch } from '../services/scrapedDuck';
+import { loadRaidData } from '../services/raidData';
 import type { ScrapedDuckEvent } from '../types/events';
 import type { Pokemon } from '../types/pokemon';
-import type { EggHatch, FieldResearchTask, RaidBoss } from '../types/scrapedDuck';
+import type { EggHatch, FieldResearchTask } from '../types/scrapedDuck';
+import type { RaidBoss } from '../types/raids';
 import { WeeklyEvents } from '../components/WeeklyEvents';
 import { InternalLink } from '../components/InternalLink';
 import type { NavigationQuery, Page } from '../types/navigation';
@@ -214,7 +216,7 @@ export function HomePage({ onNavigate }: { onNavigate: NavigateHandler }) {
     void Promise.allSettled([
       loadEvents(),
       fetchPokemonData(),
-      loadRaids(),
+      loadRaidData(),
       loadEggs(),
       loadResearch(),
     ]).then((results) => {

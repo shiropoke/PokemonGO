@@ -1,4 +1,4 @@
-import type { RaidBoss } from '../types/scrapedDuck';
+import type { RaidBoss } from '../types/raids';
 import { getRaidTierLabel } from '../utils/scrapedDuckLocalization';
 import { getTypeWeaknesses } from '../utils/typeEffectiveness';
 import { DatasetImage } from './DatasetImage';
@@ -6,8 +6,23 @@ import { FavoriteButton } from './FavoriteButton';
 import { RaidCountersPanel } from './RaidCountersPanel';
 import { TypeBadge } from './TypeBadge';
 
+function formatCost(cost: { stardust?: number; candy?: number }): string {
+  return [
+    cost.stardust !== undefined ? `${cost.stardust.toLocaleString('ja-JP')} ほしのすな` : null,
+    cost.candy !== undefined ? `${cost.candy} アメ` : null,
+  ].filter((value): value is string => Boolean(value)).join(' / ');
+}
+
 export function RaidCard({ raid }: { raid: RaidBoss }) {
   const weaknesses = getTypeWeaknesses(raid.types);
+  const details = raid.pokemonDetails;
+  const hasPokemonDetails = Boolean(details && (
+    raid.pokedexId
+    || details.stats
+    || details.maxCp !== undefined
+    || details.moves
+    || details.evolutions?.length
+  ));
 
   return (
     <article className="dataset-card raid-card">
@@ -63,6 +78,76 @@ export function RaidCard({ raid }: { raid: RaidBoss }) {
             </div>
           ) : null}
         </dl>
+      ) : null}
+
+      {raid.boostedWeather.length > 0 ? (
+        <details className="raid-card__details">
+          <summary>詳細</summary>
+          <div className="raid-card__details-content">
+            <p><strong>ブースト天候</strong><span>{raid.boostedWeather.join('・')}</span></p>
+          </div>
+        </details>
+      ) : null}
+
+      {hasPokemonDetails && details ? (
+        <details className="raid-card__details raid-card__pokemon-details">
+          <summary>ポケモン詳細</summary>
+          <div className="raid-card__details-content">
+            <section>
+              <h4>基本情報</h4>
+              <dl className="dataset-stats">
+                {raid.pokedexId ? <div><dt>図鑑番号</dt><dd>No. {raid.pokedexId}</dd></div> : null}
+                {details.form ? <div><dt>Form</dt><dd>{details.form}</dd></div> : null}
+                {details.maxCp !== undefined ? <div><dt>最大CP</dt><dd>{details.maxCp.toLocaleString('ja-JP')}</dd></div> : null}
+                {details.buddyDistanceKm !== undefined ? <div><dt>相棒距離</dt><dd>{details.buddyDistanceKm} km</dd></div> : null}
+                {details.size?.heightM !== undefined ? <div><dt>高さ</dt><dd>{details.size.heightM} m</dd></div> : null}
+                {details.size?.weightKg !== undefined ? <div><dt>重さ</dt><dd>{details.size.weightKg} kg</dd></div> : null}
+              </dl>
+            </section>
+
+            {details.stats ? (
+              <section>
+                <h4>種族値</h4>
+                <dl className="dataset-stats dataset-stats--three">
+                  <div><dt>攻撃</dt><dd>{details.stats.attack}</dd></div>
+                  <div><dt>防御</dt><dd>{details.stats.defense}</dd></div>
+                  <div><dt>HP</dt><dd>{details.stats.stamina}</dd></div>
+                </dl>
+              </section>
+            ) : null}
+
+            {details.secondMoveCost || (raid.isShadow && details.purificationCost) ? (
+              <section>
+                <h4>コスト</h4>
+                <dl className="dataset-stats">
+                  {details.secondMoveCost ? (
+                    <div><dt>技解放</dt><dd>{formatCost(details.secondMoveCost)}</dd></div>
+                  ) : null}
+                  {raid.isShadow && details.purificationCost ? (
+                    <div><dt>リトレーン</dt><dd>{formatCost(details.purificationCost)}</dd></div>
+                  ) : null}
+                </dl>
+              </section>
+            ) : null}
+
+            {details.moves ? (
+              <section className="raid-card__moves">
+                <h4>技</h4>
+                {details.moves.fast.length > 0 ? <p><strong>通常技</strong><span>{details.moves.fast.join('・')}</span></p> : null}
+                {details.moves.charged.length > 0 ? <p><strong>ゲージ技</strong><span>{details.moves.charged.join('・')}</span></p> : null}
+                {details.moves.eliteFast.length > 0 ? <p><strong>Elite通常技</strong><span>{details.moves.eliteFast.join('・')}</span></p> : null}
+                {details.moves.eliteCharged.length > 0 ? <p><strong>Eliteゲージ技</strong><span>{details.moves.eliteCharged.join('・')}</span></p> : null}
+              </section>
+            ) : null}
+
+            {details.evolutions?.length ? (
+              <section className="raid-card__moves">
+                <h4>進化先</h4>
+                <p><span>{details.evolutions.join('・')}</span></p>
+              </section>
+            ) : null}
+          </div>
+        </details>
       ) : null}
 
       <RaidCountersPanel

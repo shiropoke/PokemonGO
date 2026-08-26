@@ -97,6 +97,7 @@ export interface PogoApiRaidBoss {
   id: number;
   name: string;
   form: string;
+  /** record固有tierが無い場合も、外側period keyから必ず補われる。 */
   tier: number | string;
   type: string[];
   boosted_weather: string[];

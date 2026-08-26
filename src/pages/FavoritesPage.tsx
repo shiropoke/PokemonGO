@@ -4,10 +4,12 @@ import { InternalLink } from '../components/InternalLink';
 import { useFavorites } from '../contexts/FavoritesContext';
 import { loadEvents } from '../services/events';
 import { fetchPokemonData } from '../services/pokemonData';
-import { loadEggs, loadRaids, loadResearch } from '../services/scrapedDuck';
+import { loadEggs, loadResearch } from '../services/scrapedDuck';
+import { loadRaidData } from '../services/raidData';
 import type { ScrapedDuckEvent } from '../types/events';
 import type { Pokemon } from '../types/pokemon';
-import type { EggHatch, FieldResearchTask, RaidBoss } from '../types/scrapedDuck';
+import type { EggHatch, FieldResearchTask } from '../types/scrapedDuck';
+import type { RaidBoss } from '../types/raids';
 import type { NavigationQuery, Page } from '../types/navigation';
 import { getEventTimingStatus } from '../utils/date';
 import { eventTitleMentionsPokemon, externalPokemonMatches } from '../utils/pokemonMatching';
@@ -37,7 +39,7 @@ export function FavoritesPage({
     let ignore = false;
     setState((current) => ({ ...current, loading: true, error: false }));
     void Promise.allSettled([
-      fetchPokemonData(), loadEvents(), loadRaids(), loadEggs(), loadResearch(),
+      fetchPokemonData(), loadEvents(), loadRaidData(), loadEggs(), loadResearch(),
     ]).then(([pokemon, events, raids, eggs, research]) => {
       if (ignore) return;
       setState({
