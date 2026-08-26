@@ -1,11 +1,37 @@
 import { describe, expect, it, vi } from 'vitest';
-import { shareCurrentSite, SITE_SHARE_TITLE } from './siteShare';
+import {
+  getSiteHomeShareUrl,
+  shareCurrentSite,
+  shareSiteHome,
+  SITE_SHARE_TITLE,
+} from './siteShare';
 
 describe('site sharing', () => {
   const url = 'https://shiropoke.github.io/PokemonGO/#/raids';
 
   it('正式サイト名を共有タイトルに使う', () => {
     expect(SITE_SHARE_TITLE).toBe('GO Scope');
+  });
+
+  it('設定ページではなくGitHub Pages配下のホームURLを生成する', () => {
+    expect(
+      getSiteHomeShareUrl('https://shiropoke.github.io/PokemonGO/#/settings'),
+    ).toBe('https://shiropoke.github.io/PokemonGO/#/home');
+  });
+
+  it('設定ページの共有ではWeb Share APIへホームURLを渡す', async () => {
+    const share = vi.fn(async () => undefined);
+
+    await expect(
+      shareSiteHome(
+        { share },
+        'https://shiropoke.github.io/PokemonGO/#/settings',
+      ),
+    ).resolves.toBe('shared');
+    expect(share).toHaveBeenCalledWith({
+      title: SITE_SHARE_TITLE,
+      url: 'https://shiropoke.github.io/PokemonGO/#/home',
+    });
   });
 
   it('Web Share APIが利用できる場合は現在URLを共有する', async () => {

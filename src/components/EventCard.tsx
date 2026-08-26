@@ -10,6 +10,7 @@ import {
   localizeEventTitle,
 } from "../utils/eventLocalization";
 import { parseEventSummary } from "../utils/eventDetails";
+import { getPreferredEventUrl } from '../utils/eventLinks';
 import { safeExternalUrl } from "../utils/url";
 import "../styles/event-details.css";
 
@@ -52,7 +53,7 @@ export function EventCard({ event, status, now }: EventCardProps) {
   const [expanded, setExpanded] = useState(false);
   const panelId = useId();
   const imageUrl = safeExternalUrl(event.image);
-  const eventUrl = safeExternalUrl(event.link);
+  const eventUrl = safeExternalUrl(getPreferredEventUrl(event));
   const startDate = parseEventDate(event.start);
   const endDate = parseEventDate(event.end);
   const localizedTitle = localizeEventTitle(event.name);

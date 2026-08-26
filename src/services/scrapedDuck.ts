@@ -33,7 +33,18 @@ export const SCRAPED_DUCK_DATA_URLS = {
 export const SCRAPED_DUCK_CACHE_TTL_MS = 5 * 60 * 1000;
 
 const CACHE_VERSION = 1;
-const inFlightRequests = new Map<ScrapedDuckDataset, Promise<unknown>>();
+
+interface DatasetNetworkResult<T> {
+  data: T;
+  fetchedAt: number;
+}
+
+interface InFlightRequest {
+  forceRefresh: boolean;
+  promise: Promise<DatasetNetworkResult<unknown>>;
+}
+
+const inFlightRequests = new Map<ScrapedDuckDataset, InFlightRequest>();
 
 interface CacheEnvelope {
   version: number;
@@ -340,11 +351,12 @@ function isFresh(fetchedAt: number): boolean {
   return age >= 0 && age < SCRAPED_DUCK_CACHE_TTL_MS;
 }
 
-async function requestDataset<T>(definition: DatasetDefinition<T>): Promise<{
-  data: T;
-  fetchedAt: number;
-}> {
+async function requestDataset<T>(
+  definition: DatasetDefinition<T>,
+  forceRefresh = false,
+): Promise<DatasetNetworkResult<T>> {
   const response = await fetch(SCRAPED_DUCK_DATA_URLS[definition.key], {
+    cache: forceRefresh ? 'no-store' : 'default',
     headers: { Accept: 'application/json' },
   });
   if (!response.ok) throw new ScrapedDuckFetchError(definition.key);
@@ -356,20 +368,32 @@ async function requestDataset<T>(definition: DatasetDefinition<T>): Promise<{
   return { data, fetchedAt };
 }
 
-function getNetworkRequest<T>(definition: DatasetDefinition<T>): Promise<{
-  data: T;
-  fetchedAt: number;
-}> {
-  const existing = inFlightRequests.get(definition.key) as
-    | Promise<{ data: T; fetchedAt: number }>
-    | undefined;
-  if (existing) return existing;
+function getNetworkRequest<T>(
+  definition: DatasetDefinition<T>,
+  forceRefresh = false,
+): Promise<DatasetNetworkResult<T>> {
+  const existing = inFlightRequests.get(definition.key);
+  if (existing && (!forceRefresh || existing.forceRefresh)) {
+    return existing.promise as Promise<DatasetNetworkResult<T>>;
+  }
 
-  const request = requestDataset(definition).finally(() => {
-    inFlightRequests.delete(definition.key);
-  });
-  inFlightRequests.set(definition.key, request);
-  return request;
+  const promise = existing
+    ? existing.promise
+        .catch(() => undefined)
+        .then(() => requestDataset(definition, true))
+    : requestDataset(definition, forceRefresh);
+  const record: InFlightRequest = {
+    forceRefresh,
+    promise: promise as Promise<DatasetNetworkResult<unknown>>,
+  };
+  inFlightRequests.set(definition.key, record);
+  const clear = () => {
+    if (inFlightRequests.get(definition.key) === record) {
+      inFlightRequests.delete(definition.key);
+    }
+  };
+  void promise.then(clear, clear);
+  return promise;
 }
 
 async function loadDataset<T>(
@@ -377,12 +401,12 @@ async function loadDataset<T>(
   options: DatasetLoadOptions = {},
 ): Promise<CachedDataResult<T>> {
   const cached = readCache(definition);
-  if (cached && isFresh(cached.fetchedAt)) {
+  if (cached && isFresh(cached.fetchedAt) && !options.forceRefresh) {
     return { ...cached, source: 'cache', stale: false };
   }
 
   try {
-    const result = await getNetworkRequest(definition);
+    const result = await getNetworkRequest(definition, options.forceRefresh);
     if (options.signal?.aborted) {
       throw new DOMException('The operation was aborted', 'AbortError');
     }

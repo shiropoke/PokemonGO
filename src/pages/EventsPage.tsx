@@ -1,9 +1,10 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { EventCard } from "../components/EventCard";
 import { EventFilters } from "../components/EventFilters";
 import { EventSkeleton } from "../components/EventSkeleton";
 import { RefreshButton } from "../components/RefreshButton";
-import { loadEvents } from "../services/events";
+import { EVENTS_CACHE_TTL_MS, loadEvents } from "../services/events";
+import type { DatasetLoadOptions } from '../types/scrapedDuck';
 import type {
   EventCategory,
   EventTimingStatus,
@@ -72,24 +73,30 @@ export function EventsPage() {
     getHashQueryParam(window.location.hash, "event"),
   );
   const [highlightedEventId, setHighlightedEventId] = useState<string | null>(null);
+  const resultRef = useRef<EventsFetchResult | null>(null);
+  const requestCountRef = useRef(0);
+  const lastRevalidationAttemptRef = useRef(0);
 
   const requestEvents = useCallback(
-    async (signal?: AbortSignal) => {
+    async (options: DatasetLoadOptions = {}) => {
+      requestCountRef.current += 1;
       setLoading(true);
       setError(false);
 
       try {
-        const nextResult = await loadEvents({ signal });
-        if (!signal?.aborted) {
+        const nextResult = await loadEvents(options);
+        if (!options.signal?.aborted) {
+          resultRef.current = nextResult;
           setResult(nextResult);
           setNow(Date.now());
         }
       } catch {
-        if (!signal?.aborted) {
+        if (!options.signal?.aborted) {
           setError(true);
         }
       } finally {
-        if (!signal?.aborted) {
+        requestCountRef.current = Math.max(0, requestCountRef.current - 1);
+        if (!options.signal?.aborted && requestCountRef.current === 0) {
           setLoading(false);
         }
       }
@@ -99,22 +106,38 @@ export function EventsPage() {
 
   useEffect(() => {
     const controller = new AbortController();
-    void requestEvents(controller.signal);
+    void requestEvents({ signal: controller.signal });
     return () => controller.abort();
   }, [requestEvents]);
 
   useEffect(() => {
-    const updateNow = () => setNow(Date.now());
-    const timer = window.setInterval(updateNow, 60_000);
-    window.addEventListener("focus", updateNow);
-    document.addEventListener("visibilitychange", updateNow);
+    const updateNowAndRevalidate = () => {
+      const currentTime = Date.now();
+      setNow(currentTime);
+      const current = resultRef.current;
+      if (
+        document.visibilityState === 'visible'
+        && current
+        && requestCountRef.current === 0
+        && currentTime - Math.max(
+          current.fetchedAt,
+          lastRevalidationAttemptRef.current,
+        ) >= EVENTS_CACHE_TTL_MS
+      ) {
+        lastRevalidationAttemptRef.current = currentTime;
+        void requestEvents({ forceRefresh: true });
+      }
+    };
+    const timer = window.setInterval(updateNowAndRevalidate, 60_000);
+    window.addEventListener("focus", updateNowAndRevalidate);
+    document.addEventListener("visibilitychange", updateNowAndRevalidate);
 
     return () => {
       window.clearInterval(timer);
-      window.removeEventListener("focus", updateNow);
-      document.removeEventListener("visibilitychange", updateNow);
+      window.removeEventListener("focus", updateNowAndRevalidate);
+      document.removeEventListener("visibilitychange", updateNowAndRevalidate);
     };
-  }, []);
+  }, [requestEvents]);
 
   useEffect(() => {
     const syncTarget = () => {
@@ -177,7 +200,10 @@ export function EventsPage() {
         {result ? (
           <div className="events-page__update">
             <span>最終更新 {formatLastUpdated(result.fetchedAt)}</span>
-            <RefreshButton />
+            <RefreshButton
+              loading={loading && Boolean(result)}
+              onClick={() => requestEvents({ forceRefresh: true })}
+            />
           </div>
         ) : null}
       </header>
@@ -193,7 +219,10 @@ export function EventsPage() {
       ) : error && !result ? (
         <div className="events-error" role="alert">
           <p>イベント情報を取得できませんでした</p>
-          <RefreshButton />
+          <RefreshButton
+            loading={loading}
+            onClick={() => requestEvents({ forceRefresh: true })}
+          />
         </div>
       ) : result ? (
         <>

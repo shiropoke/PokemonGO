@@ -1,3 +1,5 @@
+import { getPageHash } from '../types/navigation';
+
 export const SITE_SHARE_TITLE = 'GO Scope';
 
 export type SiteShareResult = 'shared' | 'copied' | 'cancelled' | 'failed';
@@ -7,6 +9,13 @@ interface ShareNavigator {
   clipboard?: {
     writeText(value: string): Promise<void>;
   };
+}
+
+export function getSiteHomeShareUrl(currentUrl: string): string {
+  const homeUrl = new URL(currentUrl);
+  homeUrl.search = '';
+  homeUrl.hash = getPageHash('home');
+  return homeUrl.toString();
 }
 
 function isAbortError(error: unknown): boolean {
@@ -43,4 +52,11 @@ export async function shareCurrentSite(
   }
 
   return copyUrl(navigatorLike, url);
+}
+
+export function shareSiteHome(
+  navigatorLike: ShareNavigator,
+  currentUrl: string,
+): Promise<SiteShareResult> {
+  return shareCurrentSite(navigatorLike, getSiteHomeShareUrl(currentUrl));
 }

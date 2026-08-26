@@ -54,4 +54,14 @@ describe('RefreshButton', () => {
     expect(blur).toHaveBeenCalledTimes(1);
     expect(reload).toHaveBeenCalledTimes(1);
   });
+
+  it('dataset更新中はdisabledとloading表示になる', () => {
+    const markup = renderToStaticMarkup(
+      <RefreshButton loading onClick={vi.fn()} />,
+    );
+
+    expect(markup).toContain('aria-busy="true"');
+    expect(markup).toContain('disabled=""');
+    expect(markup).toContain('<span>更新中</span>');
+  });
 });

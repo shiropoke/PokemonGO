@@ -1,0 +1,122 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-08-26T03:27:24.376Z",
+  "sources": {
+    "events": "https://raw.githubusercontent.com/bigfoott/ScrapedDuck/data/events.json",
+    "officialEnglishNews": "https://pokemongo.com/news",
+    "officialJapaneseNews": "https://pokemongo.com/ja/news"
+  },
+  "summary": {
+    "totalEvents": 57,
+    "matchedEvents": 8,
+    "fallbackEvents": 49,
+    "pairedOfficialArticles": 23,
+    "ambiguousEvents": 0
+  },
+  "entries": [
+    {
+      "eventID": "pokemon-go-fest-2026-mega-finale",
+      "eventName": "Pokémon GO Fest 2026: Mega Finale",
+      "eventType": "pokemon-go-fest",
+      "start": "2026-09-05T10:00:00.000",
+      "end": "2026-09-06T18:00:00.000",
+      "officialJapaneseUrl": "https://pokemongo.com/ja/news/gofest2026-finale-save-the-date",
+      "officialEnglishUrl": "https://pokemongo.com/news/gofest2026-finale-save-the-date",
+      "officialTitleJapanese": "「Pokémon GO Fest 2026:メガフィナーレ」で最後の夏の冒険に出発しよう",
+      "officialTitleEnglish": "Your Final Summer Adventure Begins with Pokémon GO Fest: Mega Finale",
+      "confidence": "high",
+      "matchReason": "article-contains-event-name-and-date"
+    },
+    {
+      "eventID": "go-pass-august-2026",
+      "eventName": "GO Pass: August",
+      "eventType": "go-pass",
+      "start": "2026-08-04T10:00:00.000",
+      "end": "2026-09-08T10:00:00.000",
+      "officialJapaneseUrl": "https://pokemongo.com/ja/news/go-pass-august-2026",
+      "officialEnglishUrl": "https://pokemongo.com/news/go-pass-august-2026",
+      "officialTitleJapanese": "「GOパス:8月」で「キラチャーム」が再び登場!「ラティアス」とも出会えます",
+      "officialTitleEnglish": "The Lucky Trinket returns and Latias soars into GO Pass: August!",
+      "confidence": "high",
+      "matchReason": "title-contains-event-name"
+    },
+    {
+      "eventID": "super-mega-raid-day-september-2026",
+      "eventName": "Super Mega Raid Day",
+      "eventType": "raid-day",
+      "start": "2026-09-19T14:00:00.000",
+      "end": "2026-09-19T17:00:00.000",
+      "officialJapaneseUrl": "https://pokemongo.com/ja/news/save-the-date-s24",
+      "officialEnglishUrl": "https://pokemongo.com/news/save-the-date-s24",
+      "officialTitleJapanese": "次のシーズンで開催される「コミュニティ・デイ」の日程をお知らせします",
+      "officialTitleEnglish": "Save the dates for next Season’s Community Days!",
+      "confidence": "high",
+      "matchReason": "article-contains-event-name-and-date"
+    },
+    {
+      "eventID": "catch-mastery-september-2026",
+      "eventName": "Catch Mastery",
+      "eventType": "event",
+      "start": "2026-09-26T10:00:00.000",
+      "end": "2026-09-26T20:00:00.000",
+      "officialJapaneseUrl": "https://pokemongo.com/ja/news/save-the-date-s24",
+      "officialEnglishUrl": "https://pokemongo.com/news/save-the-date-s24",
+      "officialTitleJapanese": "次のシーズンで開催される「コミュニティ・デイ」の日程をお知らせします",
+      "officialTitleEnglish": "Save the dates for next Season’s Community Days!",
+      "confidence": "high",
+      "matchReason": "article-contains-event-name-and-date"
+    },
+    {
+      "eventID": "max-battle-day-october-2026",
+      "eventName": "Max Battle Day",
+      "eventType": "max-battles",
+      "start": "2026-10-03T14:00:00.000",
+      "end": "2026-10-03T17:00:00.000",
+      "officialJapaneseUrl": "https://pokemongo.com/ja/news/save-the-date-s24",
+      "officialEnglishUrl": "https://pokemongo.com/news/save-the-date-s24",
+      "officialTitleJapanese": "次のシーズンで開催される「コミュニティ・デイ」の日程をお知らせします",
+      "officialTitleEnglish": "Save the dates for next Season’s Community Days!",
+      "confidence": "high",
+      "matchReason": "article-contains-event-name-and-date"
+    },
+    {
+      "eventID": "max-battle-day-october-24-2026",
+      "eventName": "Max Battle Day",
+      "eventType": "max-battles",
+      "start": "2026-10-24T14:00:00.000",
+      "end": "2026-10-24T17:00:00.000",
+      "officialJapaneseUrl": "https://pokemongo.com/ja/news/save-the-date-s24",
+      "officialEnglishUrl": "https://pokemongo.com/news/save-the-date-s24",
+      "officialTitleJapanese": "次のシーズンで開催される「コミュニティ・デイ」の日程をお知らせします",
+      "officialTitleEnglish": "Save the dates for next Season’s Community Days!",
+      "confidence": "high",
+      "matchReason": "article-contains-event-name-and-date"
+    },
+    {
+      "eventID": "super-mega-raid-day-october-2026",
+      "eventName": "Super Mega Raid Day",
+      "eventType": "raid-day",
+      "start": "2026-10-31T14:00:00.000",
+      "end": "2026-10-31T17:00:00.000",
+      "officialJapaneseUrl": "https://pokemongo.com/ja/news/save-the-date-s24",
+      "officialEnglishUrl": "https://pokemongo.com/news/save-the-date-s24",
+      "officialTitleJapanese": "次のシーズンで開催される「コミュニティ・デイ」の日程をお知らせします",
+      "officialTitleEnglish": "Save the dates for next Season’s Community Days!",
+      "confidence": "high",
+      "matchReason": "article-contains-event-name-and-date"
+    },
+    {
+      "eventID": "super-mega-raid-day-november-2026",
+      "eventName": "Super Mega Raid Day",
+      "eventType": "raid-day",
+      "start": "2026-11-28T14:00:00.000",
+      "end": "2026-11-28T17:00:00.000",
+      "officialJapaneseUrl": "https://pokemongo.com/ja/news/save-the-date-s24",
+      "officialEnglishUrl": "https://pokemongo.com/news/save-the-date-s24",
+      "officialTitleJapanese": "次のシーズンで開催される「コミュニティ・デイ」の日程をお知らせします",
+      "officialTitleEnglish": "Save the dates for next Season’s Community Days!",
+      "confidence": "high",
+      "matchReason": "article-contains-event-name-and-date"
+    }
+  ]
+}

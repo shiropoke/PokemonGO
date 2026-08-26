@@ -154,12 +154,14 @@ export function RocketPage() {
       <DatasetPageHeader
         title="GOロケット団"
         fetchedAt={state.result?.fetchedAt}
-        action={<RefreshButton />}
+        action={<RefreshButton loading={state.refreshing} onClick={state.refresh} />}
       />
 
       {state.result?.stale ? <StaleDataNotice /> : null}
       {state.loading && !state.result ? <DatasetSkeleton /> : null}
-      {state.error && !state.result ? <DatasetError action={<RefreshButton />} /> : null}
+      {state.error && !state.result ? (
+        <DatasetError action={<RefreshButton loading={state.refreshing} onClick={state.refresh} />} />
+      ) : null}
 
       {state.result ? (
         <>

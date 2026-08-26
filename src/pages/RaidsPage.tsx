@@ -10,7 +10,7 @@ import { RaidCard } from '../components/RaidCard';
 import { RaidFilters } from '../components/RaidFilters';
 import { RefreshButton } from '../components/RefreshButton';
 import { useCachedDataset } from '../hooks/useCachedDataset';
-import { loadRaids } from '../services/scrapedDuck';
+import { loadRaids, SCRAPED_DUCK_CACHE_TTL_MS } from '../services/scrapedDuck';
 import {
   filterRaidTierGroups,
   groupRaidsByTier,
@@ -21,7 +21,10 @@ import { getHashQueryParam } from '../types/navigation';
 import '../styles/data-pages.css';
 
 export function RaidsPage() {
-  const state = useCachedDataset(loadRaids);
+  const state = useCachedDataset(loadRaids, {
+    revalidateOnFocus: true,
+    staleTimeMs: SCRAPED_DUCK_CACHE_TTL_MS,
+  });
   const [filter, setFilter] = useState<RaidFilter>('all');
   const [targetRaidId, setTargetRaidId] = useState(() =>
     getHashQueryParam(window.location.hash, 'raid'),
@@ -76,12 +79,14 @@ export function RaidsPage() {
       <DatasetPageHeader
         title="レイド"
         fetchedAt={state.result?.fetchedAt}
-        action={<RefreshButton />}
+        action={<RefreshButton loading={state.refreshing} onClick={state.refresh} />}
       />
 
       {state.result?.stale ? <StaleDataNotice /> : null}
       {state.loading && !state.result ? <DatasetSkeleton /> : null}
-      {state.error && !state.result ? <DatasetError action={<RefreshButton />} /> : null}
+      {state.error && !state.result ? (
+        <DatasetError action={<RefreshButton loading={state.refreshing} onClick={state.refresh} />} />
+      ) : null}
 
       {state.result ? (
         <>

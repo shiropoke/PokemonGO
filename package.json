@@ -8,6 +8,7 @@
     "data:game": "node scripts/generate-game-data.mjs",
     "data:pvp": "node scripts/generate-pvp-rankings.mjs",
     "data:rocket-dialogues": "node scripts/generate-rocket-dialogues.mjs",
+    "data:event-links": "node scripts/generate-event-japanese-links.mjs",
     "data:pokefuta": "node scripts/generate-pokefuta-data.mjs",
     "data:pokefuta:full": "node scripts/generate-pokefuta-data.mjs --full",
     "dev": "vite",

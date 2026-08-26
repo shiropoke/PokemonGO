@@ -11,6 +11,8 @@ export interface CachedDataResult<T> {
 
 export interface DatasetLoadOptions {
   signal?: AbortSignal;
+  /** 手動更新時はlocalStorageとHTTPのfresh cacheを使わず再取得する。 */
+  forceRefresh?: boolean;
 }
 
 export interface CombatPowerRange {

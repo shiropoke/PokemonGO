@@ -149,6 +149,7 @@ export async function loadPokefuta(
   options: DatasetLoadOptions = {},
 ): Promise<CachedDataResult<PokefutaDataset>> {
   const response = await fetch(POKEFUTA_DATA_URL, {
+    cache: options.forceRefresh ? 'no-store' : 'default',
     signal: options.signal,
     headers: { Accept: 'application/json' },
   });

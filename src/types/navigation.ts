@@ -11,6 +11,7 @@ export type Page =
   | 'eggs'
   | 'rocket'
   | 'pokefuta'
+  | 'settings'
   | 'favorites'
   | 'terms'
   | 'privacy'
@@ -29,6 +30,7 @@ export const PAGE_PATHS: Record<Page, string> = {
   eggs: 'eggs',
   rocket: 'rocket',
   pokefuta: 'pokefuta',
+  settings: 'settings',
   favorites: 'favorites',
   terms: 'terms',
   privacy: 'privacy',
@@ -79,6 +81,7 @@ const PAGE_TITLES: Record<Page, string> = {
   eggs: 'タマゴ | GO Scope',
   rocket: 'GOロケット団 | GO Scope',
   pokefuta: 'ポケふた | GO Scope',
+  settings: '設定 | GO Scope',
   favorites: 'お気に入り | GO Scope',
   terms: '利用規約 | GO Scope',
   privacy: 'プライバシーポリシー | GO Scope',

@@ -32,6 +32,9 @@ jobs:
       - name: Refresh Rocket dialogues
         continue-on-error: true
         run: npm run data:rocket-dialogues
+      - name: Refresh Japanese event links
+        continue-on-error: true
+        run: npm run data:event-links
       - name: Refresh Poké Lids data
         continue-on-error: true
         run: npm run data:pokefuta

@@ -1,5 +1,8 @@
 interface RefreshButtonProps {
   className?: string;
+  disabled?: boolean;
+  loading?: boolean;
+  onClick?: () => void | Promise<void>;
 }
 
 export function reloadCurrentPage(): void {
@@ -18,11 +21,22 @@ export function reloadCurrentPage(): void {
   }
 }
 
-export function RefreshButton({ className }: RefreshButtonProps) {
+export function RefreshButton({
+  className,
+  disabled = false,
+  loading = false,
+  onClick,
+}: RefreshButtonProps) {
   const classes = ['refresh-button', className].filter(Boolean).join(' ');
 
   return (
-    <button className={classes} type="button" onClick={reloadCurrentPage}>
+    <button
+      className={classes}
+      type="button"
+      aria-busy={loading || undefined}
+      disabled={disabled || loading}
+      onClick={onClick ? () => void onClick() : reloadCurrentPage}
+    >
       <svg
         aria-hidden="true"
         focusable="false"
@@ -31,7 +45,7 @@ export function RefreshButton({ className }: RefreshButtonProps) {
         <path d="M20 11a8 8 0 1 0-2.34 5.66" />
         <path d="M20 4v7h-7" />
       </svg>
-      <span>更新</span>
+      <span>{loading ? '更新中' : '更新'}</span>
     </button>
   );
 }

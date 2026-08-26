@@ -17,6 +17,7 @@ import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage';
 import { RaidsPage } from './pages/RaidsPage';
 import { ResearchPage } from './pages/ResearchPage';
 import { RocketPage } from './pages/RocketPage';
+import { SettingsPage } from './pages/SettingsPage';
 import { TermsPage } from './pages/TermsPage';
 import { useMainTabSwipe } from './hooks/useMainTabSwipe';
 import {
@@ -59,7 +60,18 @@ function getStorage(): Storage | null {
 
 type NavigateHandler = (page: Page, query?: NavigationQuery) => void;
 
-function renderPage(page: Page, onNavigate: NavigateHandler) {
+interface SettingsStateProps {
+  tabPosition: TabPosition;
+  onTabPositionChange(position: TabPosition): void;
+  theme: Theme;
+  onThemeChange(theme: Theme): void;
+}
+
+function renderPage(
+  page: Page,
+  onNavigate: NavigateHandler,
+  settingsState: SettingsStateProps,
+) {
   switch (page) {
     case 'home': return <HomePage onNavigate={onNavigate} />;
     case 'events': return <EventsPage />;
@@ -79,6 +91,7 @@ function renderPage(page: Page, onNavigate: NavigateHandler) {
       />
     );
     case 'favorites': return <FavoritesPage onNavigate={onNavigate} />;
+    case 'settings': return <SettingsPage {...settingsState} />;
     case 'terms': return <TermsPage />;
     case 'privacy': return <PrivacyPolicyPage />;
     case 'contact': return <ContactPage onNavigate={onNavigate} />;
@@ -88,13 +101,14 @@ function renderPage(page: Page, onNavigate: NavigateHandler) {
 function PageContent({
   page,
   onNavigate,
+  ...settingsState
 }: {
   page: Page;
   onNavigate: NavigateHandler;
-}) {
+} & SettingsStateProps) {
   return (
     <div className="page-content-frame">
-      {renderPage(page, onNavigate)}
+      {renderPage(page, onNavigate, settingsState)}
       <LegalFooter onNavigate={onNavigate} />
     </div>
   );
@@ -301,7 +315,14 @@ export default function App() {
                     transform: `translate3d(0, -${pageTransition.scrollOffset}px, 0)`,
                   }}
                 >
-                  <PageContent page={pageTransition.from} onNavigate={navigate} />
+                  <PageContent
+                    page={pageTransition.from}
+                    onNavigate={navigate}
+                    tabPosition={tabPosition}
+                    onTabPositionChange={changeTabPosition}
+                    theme={theme}
+                    onThemeChange={changeTheme}
+                  />
                 </div>
               </div>
             ) : null}
@@ -314,7 +335,14 @@ export default function App() {
                 }
               } : undefined}
             >
-              <PageContent page={activeContentPage} onNavigate={navigate} />
+              <PageContent
+                page={activeContentPage}
+                onNavigate={navigate}
+                tabPosition={tabPosition}
+                onTabPositionChange={changeTabPosition}
+                theme={theme}
+                onThemeChange={changeTheme}
+              />
             </div>
           </>
         </main>
@@ -326,10 +354,6 @@ export default function App() {
         open={isMenuOpen}
         onClose={() => setIsMenuOpen(false)}
         onNavigate={navigate}
-        tabPosition={tabPosition}
-        onTabPositionChange={changeTabPosition}
-        theme={theme}
-        onThemeChange={changeTheme}
       />
       <GlobalSearchDialog
         open={isSearchOpen}

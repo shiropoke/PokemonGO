@@ -1,21 +1,23 @@
 import type { EventsFetchResult, ScrapedDuckEvent } from "../types/events";
+import type { DatasetLoadOptions } from '../types/scrapedDuck';
+import { applyJapaneseEventLinks } from '../utils/eventLinks';
 import { EVENTS_CACHE_KEY } from './appStorage';
+import { loadEventJapaneseLinks } from './eventJapaneseLinks';
 
 export const SCRAPED_DUCK_EVENTS_URL =
   "https://raw.githubusercontent.com/bigfoott/ScrapedDuck/data/events.json";
 export const EVENTS_CACHE_TTL_MS = 5 * 60 * 1000;
 
 const CACHE_VERSION = 1;
-let inFlightRequest: Promise<EventsFetchResult> | null = null;
+let inFlightRequest: {
+  forceRefresh: boolean;
+  promise: Promise<EventsFetchResult>;
+} | null = null;
 
 interface EventsCacheRecord {
   version: number;
   fetchedAt: number;
   events: ScrapedDuckEvent[];
-}
-
-interface LoadEventsOptions {
-  signal?: AbortSignal;
 }
 
 export class EventsFetchError extends Error {
@@ -62,6 +64,7 @@ function normalizeEvent(value: unknown, index: number): ScrapedDuckEvent | null 
     eventType: optionalString(candidate.eventType) ?? "unknown",
     heading,
     link: optionalString(candidate.link),
+    officialJapaneseUrl: null,
     image: optionalString(candidate.image),
     start,
     end,
@@ -139,8 +142,11 @@ function isFresh(record: EventsCacheRecord, now: number): boolean {
   return age >= 0 && age < EVENTS_CACHE_TTL_MS;
 }
 
-async function fetchEventsFromNetwork(): Promise<EventsFetchResult> {
+async function fetchEventsFromNetwork(
+  forceRefresh = false,
+): Promise<EventsFetchResult> {
   const response = await fetch(SCRAPED_DUCK_EVENTS_URL, {
+    cache: forceRefresh ? 'no-store' : 'default',
     headers: { Accept: "application/json" },
   });
 
@@ -168,26 +174,33 @@ async function fetchEventsFromNetwork(): Promise<EventsFetchResult> {
   };
 }
 
-function getNetworkRequest(): Promise<EventsFetchResult> {
-  if (!inFlightRequest) {
-    inFlightRequest = fetchEventsFromNetwork().finally(() => {
-      inFlightRequest = null;
-    });
+function getNetworkRequest(forceRefresh = false): Promise<EventsFetchResult> {
+  if (inFlightRequest && (!forceRefresh || inFlightRequest.forceRefresh)) {
+    return inFlightRequest.promise;
   }
 
-  return inFlightRequest;
+  const promise = inFlightRequest
+    ? inFlightRequest.promise
+        .catch(() => undefined)
+        .then(() => fetchEventsFromNetwork(true))
+    : fetchEventsFromNetwork(forceRefresh);
+  const record = { forceRefresh, promise };
+  inFlightRequest = record;
+  const clear = () => {
+    if (inFlightRequest === record) inFlightRequest = null;
+  };
+  void promise.then(clear, clear);
+  return promise;
 }
 
-export async function loadEvents(
-  options: LoadEventsOptions = {},
+async function loadEventsDataset(
+  options: DatasetLoadOptions,
 ): Promise<EventsFetchResult> {
   const { signal } = options;
   const cached = readEventsCache();
   const now = Date.now();
 
-  // GitHub Raw 側のキャッシュ負荷を抑えるため、手動操作を含めて取得後
-  // 5分間は必ずブラウザキャッシュを使う。
-  if (cached && isFresh(cached, now)) {
+  if (cached && isFresh(cached, now) && !options.forceRefresh) {
     return {
       events: cached.events,
       fetchedAt: cached.fetchedAt,
@@ -197,7 +210,7 @@ export async function loadEvents(
   }
 
   try {
-    const networkResult = await getNetworkRequest();
+    const networkResult = await getNetworkRequest(options.forceRefresh);
     if (signal?.aborted) {
       throw new DOMException("The operation was aborted", "AbortError");
     }
@@ -219,5 +232,21 @@ export async function loadEvents(
     throw error instanceof EventsFetchError
       ? error
       : new EventsFetchError();
+  }
+}
+
+export async function loadEvents(
+  options: DatasetLoadOptions = {},
+): Promise<EventsFetchResult> {
+  const result = await loadEventsDataset(options);
+  try {
+    const entries = await loadEventJapaneseLinks(options);
+    return {
+      ...result,
+      events: applyJapaneseEventLinks(result.events, entries),
+    };
+  } catch (error) {
+    if (options.signal?.aborted) throw error;
+    return result;
   }
 }

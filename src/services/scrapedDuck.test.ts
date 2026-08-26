@@ -33,8 +33,8 @@ const raidPayload = [{
   image: 'https://example.com/mr-mime.png',
 }];
 
-function raidResponse(): Response {
-  return new Response(JSON.stringify(raidPayload), {
+function raidResponse(payload = raidPayload): Response {
+  return new Response(JSON.stringify(payload), {
     status: 200,
     headers: { 'Content-Type': 'application/json' },
   });
@@ -164,5 +164,51 @@ describe('ScrapedDuck共通キャッシュ', () => {
     expect(stale.source).toBe('cache');
     expect(stale.stale).toBe(true);
     expect(stale.data[0]?.displayName).toBe('バリヤード（ガラルのすがた）');
+  });
+
+  it('forceRefreshはfresh cacheを無視してno-storeで新データを保存する', async () => {
+    const updatedPayload = [{
+      ...raidPayload[0]!,
+      name: 'Lunala',
+      tier: '5-Star Raids',
+    }];
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(raidResponse())
+      .mockResolvedValueOnce(raidResponse(updatedPayload));
+    vi.stubGlobal('fetch', fetchMock);
+
+    const first = await loadRaids();
+    vi.advanceTimersByTime(1_000);
+    const refreshed = await loadRaids({ forceRefresh: true });
+    const cached = await loadRaids();
+
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(fetchMock.mock.calls[1]?.[1]).toMatchObject({ cache: 'no-store' });
+    expect(refreshed.source).toBe('network');
+    expect(refreshed.fetchedAt).toBeGreaterThan(first.fetchedAt);
+    expect(refreshed.data[0]?.displayName).toBe('ルナアーラ');
+    expect(cached.source).toBe('cache');
+    expect(cached.data[0]?.displayName).toBe('ルナアーラ');
+    expect(cached.fetchedAt).toBe(refreshed.fetchedAt);
+  });
+
+  it('forceRefresh失敗時もfresh cacheをstaleとして返す', async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(raidResponse())
+      .mockRejectedValueOnce(new TypeError('offline'));
+    vi.stubGlobal('fetch', fetchMock);
+
+    const first = await loadRaids();
+    const fallback = await loadRaids({ forceRefresh: true });
+
+    expect(first.source).toBe('network');
+    expect(fallback).toMatchObject({
+      source: 'cache',
+      stale: true,
+      fetchedAt: first.fetchedAt,
+    });
+    expect(fallback.data).toEqual(first.data);
   });
 });

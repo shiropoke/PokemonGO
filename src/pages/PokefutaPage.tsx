@@ -105,7 +105,7 @@ export function PokefutaPage({ prefectureSlug, onNavigate }: PokefutaPageProps) 
       <DatasetPageHeader
         title="ポケふた"
         fetchedAt={state.result?.fetchedAt}
-        action={<RefreshButton />}
+        action={<RefreshButton loading={state.refreshing} onClick={state.refresh} />}
       />
       <p className="dataset-page__intro">
         日本全国のポケモンマンホール「ポケふた」を、都道府県・設置場所・描かれているポケモンから確認できます。
@@ -115,7 +115,7 @@ export function PokefutaPage({ prefectureSlug, onNavigate }: PokefutaPageProps) 
       {state.error && !state.result ? (
         <div className="dataset-error" role="alert">
           <p>ポケふた情報を読み込めませんでした</p>
-          <RefreshButton />
+          <RefreshButton loading={state.refreshing} onClick={state.refresh} />
         </div>
       ) : null}
 

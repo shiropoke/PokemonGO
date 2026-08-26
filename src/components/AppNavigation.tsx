@@ -1,13 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { CSSProperties, ReactNode, RefObject } from 'react';
-import { createPortal } from 'react-dom';
 import raidMenuIcon from '../assets/navigation/raid-menu-icon.png';
-import { ThemeToggle } from './ThemeToggle';
 import { OTHER_LINKS, PRIMARY_LINKS, TOOL_LINKS } from '../constants/sitePages';
-import { clearAppLocalStorage } from '../services/appStorage';
-import { shareCurrentSite } from '../services/siteShare';
-import type { TabPosition } from '../services/tabPosition';
-import type { Theme } from '../services/theme';
 import type { NavigationQuery, Page } from '../types/navigation';
 import { getPageHash } from '../types/navigation';
 
@@ -32,10 +26,6 @@ interface SideDrawerProps extends NavigationProps {
   menuButtonRef: RefObject<HTMLButtonElement>;
   open: boolean;
   onClose(): void;
-  tabPosition: TabPosition;
-  onTabPositionChange(position: TabPosition): void;
-  theme: Theme;
-  onThemeChange(theme: Theme): void;
 }
 
 function NavIcon({ name }: { name: IconName }) {
@@ -146,21 +136,38 @@ export function SiteHeader({
           <Brand compact />
         </a>
 
-        <button
-          ref={searchButtonRef}
-          className="site-search-trigger"
-          type="button"
-          aria-label="サイト内を検索"
-          aria-haspopup="dialog"
-          aria-expanded={searchOpen}
-          aria-controls="global-search-dialog"
-          onClick={onSearchOpen}
-        >
-          <svg aria-hidden="true" viewBox="0 0 24 24" fill="none">
-            <circle cx="10.5" cy="10.5" r="6.5" />
-            <path d="m15.5 15.5 4 4" />
-          </svg>
-        </button>
+        <div className="shell-header__actions">
+          <button
+            ref={searchButtonRef}
+            className="site-search-trigger"
+            type="button"
+            aria-label="サイト内を検索"
+            aria-haspopup="dialog"
+            aria-expanded={searchOpen}
+            aria-controls="global-search-dialog"
+            onClick={onSearchOpen}
+          >
+            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none">
+              <circle cx="10.5" cy="10.5" r="6.5" />
+              <path d="m15.5 15.5 4 4" />
+            </svg>
+          </button>
+          <a
+            className={`site-settings-trigger${current === 'settings' ? ' is-active' : ''}`}
+            href={getPageHash('settings')}
+            aria-label="設定"
+            aria-current={current === 'settings' ? 'page' : undefined}
+            onClick={(event) => {
+              event.preventDefault();
+              onNavigate('settings');
+            }}
+          >
+            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none">
+              <path d="M9.6 3.5h4.8l.6 2.2 1.9 1.1 2.2-.7 2.4 4.2-1.6 1.7v2l1.6 1.7-2.4 4.2-2.2-.7-1.9 1.1-.6 2.2H9.6L9 20.3l-1.9-1.1-2.2.7-2.4-4.2L4.1 14v-2l-1.6-1.7 2.4-4.2 2.2.7L9 5.7l.6-2.2Z" />
+              <circle cx="12" cy="13" r="3" />
+            </svg>
+          </a>
+        </div>
       </div>
     </header>
   );
@@ -262,55 +269,13 @@ export function SideDrawer({
   onClose,
   onNavigate,
   open,
-  tabPosition,
-  onTabPositionChange,
-  theme,
-  onThemeChange,
 }: SideDrawerProps) {
   const drawerRef = useRef<HTMLElement>(null);
   const [toolsOpen, setToolsOpen] = useState(true);
   const [otherOpen, setOtherOpen] = useState(true);
   const [scrollLocked, setScrollLocked] = useState(false);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
   const navigationPendingRef = useRef(false);
   const pendingNavigationRef = useRef<Page | null>(null);
-  const deleteButtonRef = useRef<HTMLButtonElement>(null);
-  const deleteDialogRef = useRef<HTMLElement>(null);
-  const deleteCancelButtonRef = useRef<HTMLButtonElement>(null);
-  const toastTimerRef = useRef<number | null>(null);
-
-  const showToast = useCallback((message: string) => {
-    if (toastTimerRef.current !== null) {
-      window.clearTimeout(toastTimerRef.current);
-    }
-    setToastMessage(message);
-    toastTimerRef.current = window.setTimeout(() => {
-      setToastMessage(null);
-      toastTimerRef.current = null;
-    }, 2000);
-  }, []);
-
-  const closeDeleteDialog = useCallback(() => {
-    setDeleteDialogOpen(false);
-    window.requestAnimationFrame(() => {
-      deleteButtonRef.current?.focus({ preventScroll: true });
-    });
-  }, []);
-
-  useEffect(() => () => {
-    if (toastTimerRef.current !== null) {
-      window.clearTimeout(toastTimerRef.current);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (!deleteDialogOpen) return undefined;
-    const focusTimer = window.setTimeout(() => {
-      deleteCancelButtonRef.current?.focus({ preventScroll: true });
-    }, 20);
-    return () => window.clearTimeout(focusTimer);
-  }, [deleteDialogOpen]);
 
   useEffect(() => {
     if (open) {
@@ -393,30 +358,6 @@ export function SideDrawer({
   useEffect(() => {
     if (!open) return undefined;
     const onKeyDown = (event: KeyboardEvent) => {
-      if (deleteDialogOpen) {
-        if (event.key === 'Escape') {
-          event.preventDefault();
-          closeDeleteDialog();
-          return;
-        }
-        if (event.key !== 'Tab') return;
-
-        const dialogFocusable = deleteDialogRef.current
-          ? Array.from(deleteDialogRef.current.querySelectorAll<HTMLElement>(focusableSelector))
-          : [];
-        const firstDialogItem = dialogFocusable.at(0);
-        const lastDialogItem = dialogFocusable.at(-1);
-        if (!firstDialogItem || !lastDialogItem) return;
-        if (event.shiftKey && document.activeElement === firstDialogItem) {
-          event.preventDefault();
-          lastDialogItem.focus();
-        } else if (!event.shiftKey && document.activeElement === lastDialogItem) {
-          event.preventDefault();
-          firstDialogItem.focus();
-        }
-        return;
-      }
-
       if (event.key === 'Escape') {
         event.preventDefault();
         onClose();
@@ -450,34 +391,7 @@ export function SideDrawer({
 
     document.addEventListener('keydown', onKeyDown);
     return () => document.removeEventListener('keydown', onKeyDown);
-  }, [closeDeleteDialog, deleteDialogOpen, menuButtonRef, onClose, open]);
-
-  const handleShare = async () => {
-    const result = await shareCurrentSite(navigator, window.location.href);
-    if (result === 'copied') {
-      showToast('リンクをコピーしました');
-    } else if (result === 'failed') {
-      showToast('共有できませんでした');
-    }
-  };
-
-  const handleDeleteStoredData = () => {
-    let storage: Storage | null = null;
-    try {
-      storage = window.localStorage;
-    } catch {
-      storage = null;
-    }
-
-    const result = clearAppLocalStorage(storage);
-    if (result.success) {
-      window.location.reload();
-      return;
-    }
-
-    closeDeleteDialog();
-    showToast('保存データを削除できませんでした');
-  };
+  }, [menuButtonRef, onClose, open]);
 
   const navigateFromDrawer = (page: Page) => {
     navigationPendingRef.current = true;
@@ -486,7 +400,6 @@ export function SideDrawer({
   };
 
   return (
-    <>
       <div
         className={`drawer-layer${open ? ' is-open' : ''}`}
         aria-hidden={!open && !scrollLocked}
@@ -530,108 +443,8 @@ export function SideDrawer({
           />
         </nav>
 
-        <footer className="side-drawer__footer">
-          <div className="drawer-setting">
-            <span id="drawer-tab-position-label" className="drawer-setting__label">
-              タブ位置
-            </span>
-            <div
-              className="drawer-segmented-control"
-              role="group"
-              aria-labelledby="drawer-tab-position-label"
-            >
-              {([
-                ['top', '上部'],
-                ['bottom', '下部'],
-              ] as const).map(([position, label]) => (
-                <button
-                  key={position}
-                  type="button"
-                  className={tabPosition === position ? 'is-selected' : ''}
-                  aria-pressed={tabPosition === position}
-                  onClick={() => onTabPositionChange(position)}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
-          </div>
-          <div className="side-drawer__footer-actions">
-            <ThemeToggle theme={theme} onChange={onThemeChange} />
-            <button
-              className="drawer-footer-action"
-              type="button"
-              aria-label="このサイトを共有"
-              onClick={() => void handleShare()}
-            >
-              <svg aria-hidden="true" viewBox="0 0 24 24" fill="none">
-                <path d="M12 15V3m0 0L7.5 7.5M12 3l4.5 4.5" />
-                <path d="M6 10.5H4.5A1.5 1.5 0 0 0 3 12v7.5A1.5 1.5 0 0 0 4.5 21h15a1.5 1.5 0 0 0 1.5-1.5V12a1.5 1.5 0 0 0-1.5-1.5H18" />
-              </svg>
-            </button>
-            <button
-              ref={deleteButtonRef}
-              className="drawer-footer-action drawer-footer-action--danger"
-              type="button"
-              aria-label="このサイトの保存データを削除"
-              aria-haspopup="dialog"
-              aria-expanded={deleteDialogOpen}
-              onClick={() => setDeleteDialogOpen(true)}
-            >
-              <svg aria-hidden="true" viewBox="0 0 24 24" fill="none">
-                <path d="M4 7h16M9 7V4.5h6V7m3 0-1 13H7L6 7m4 4v5m4-5v5" />
-              </svg>
-            </button>
-          </div>
-        </footer>
         </aside>
       </div>
-
-      {typeof document !== 'undefined' ? createPortal(
-        <>
-          {deleteDialogOpen ? (
-            <div className="storage-dialog-layer" onClick={closeDeleteDialog}>
-              <section
-                ref={deleteDialogRef}
-                className="storage-dialog"
-                role="dialog"
-                aria-modal="true"
-                aria-labelledby="storage-dialog-title"
-                aria-describedby="storage-dialog-description"
-                onClick={(event) => event.stopPropagation()}
-              >
-                <h2 id="storage-dialog-title">保存データを削除しますか？</h2>
-                <p id="storage-dialog-description">
-                  このサイトに保存されている設定・お気に入り・入力内容などを削除します。この操作は元に戻せません。
-                </p>
-                <div className="storage-dialog__actions">
-                  <button
-                    ref={deleteCancelButtonRef}
-                    type="button"
-                    onClick={closeDeleteDialog}
-                  >
-                    キャンセル
-                  </button>
-                  <button
-                    className="storage-dialog__delete"
-                    type="button"
-                    onClick={handleDeleteStoredData}
-                  >
-                    削除
-                  </button>
-                </div>
-              </section>
-            </div>
-          ) : null}
-          {toastMessage ? (
-            <div className="site-action-toast" role="status" aria-live="polite">
-              {toastMessage}
-            </div>
-          ) : null}
-        </>,
-        document.body,
-      ) : null}
-    </>
   );
 }
 

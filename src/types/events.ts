@@ -4,6 +4,7 @@ export interface ScrapedDuckEvent {
   eventType: string;
   heading: string | null;
   link: string | null;
+  officialJapaneseUrl?: string | null;
   image: string | null;
   start: string | null;
   end: string | null;

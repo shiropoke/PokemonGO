@@ -39,6 +39,17 @@ function successfulResponse(): Response {
   });
 }
 
+function linksResponse(): Response {
+  return new Response(JSON.stringify({ schemaVersion: 1, entries: [] }), {
+    status: 200,
+    headers: { 'Content-Type': 'application/json' },
+  });
+}
+
+function isEventLinksRequest(input: RequestInfo | URL): boolean {
+  return String(input).includes('event-japanese-links.json');
+}
+
 describe('event data cache', () => {
   beforeEach(() => {
     vi.useFakeTimers();
@@ -52,7 +63,12 @@ describe('event data cache', () => {
   });
 
   it('does not access the network again during the five-minute cache window', async () => {
-    const fetchMock = vi.fn().mockResolvedValue(successfulResponse());
+    let eventsRequestCount = 0;
+    const fetchMock = vi.fn((input: RequestInfo | URL) => {
+      if (isEventLinksRequest(input)) return Promise.resolve(linksResponse());
+      eventsRequestCount += 1;
+      return Promise.resolve(successfulResponse());
+    });
     vi.stubGlobal('fetch', fetchMock);
 
     const first = await loadEvents();
@@ -61,14 +77,18 @@ describe('event data cache', () => {
 
     expect(first.source).toBe('network');
     expect(second.source).toBe('cache');
-    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(eventsRequestCount).toBe(1);
   });
 
   it('uses an expired cache when the next network request fails', async () => {
-    const fetchMock = vi
-      .fn()
-      .mockResolvedValueOnce(successfulResponse())
-      .mockRejectedValueOnce(new TypeError('offline'));
+    let eventsRequestCount = 0;
+    const fetchMock = vi.fn((input: RequestInfo | URL) => {
+      if (isEventLinksRequest(input)) return Promise.resolve(linksResponse());
+      eventsRequestCount += 1;
+      return eventsRequestCount === 1
+        ? Promise.resolve(successfulResponse())
+        : Promise.reject(new TypeError('offline'));
+    });
     vi.stubGlobal('fetch', fetchMock);
 
     const first = await loadEvents();
@@ -79,6 +99,23 @@ describe('event data cache', () => {
     expect(fallback.source).toBe('cache');
     expect(fallback.stale).toBe(true);
     expect(fallback.events[0]?.eventID).toBe('test-event');
-    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(eventsRequestCount).toBe(2);
+  });
+
+  it('forceRefreshはfresh cacheを無視してno-storeで再取得する', async () => {
+    let eventsRequestCount = 0;
+    const fetchMock = vi.fn((input: RequestInfo | URL, init?: RequestInit) => {
+      if (isEventLinksRequest(input)) return Promise.resolve(linksResponse());
+      eventsRequestCount += 1;
+      expect(init?.cache).toBe(eventsRequestCount === 1 ? 'default' : 'no-store');
+      return Promise.resolve(successfulResponse());
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    await loadEvents();
+    const refreshed = await loadEvents({ forceRefresh: true });
+
+    expect(eventsRequestCount).toBe(2);
+    expect(refreshed.source).toBe('network');
   });
 });
