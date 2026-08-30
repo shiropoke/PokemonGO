@@ -39,4 +39,12 @@ describe('main tab transition direction', () => {
     expect(getAdjacentMainTab('iv', 1)).toBeNull();
     expect(getAdjacentMainTab('moves', 1)).toBeNull();
   });
+
+  it('uses the configured order for transitions and adjacent tabs', () => {
+    const tabs = ['home', 'research', 'rocket', 'pvp-rankings'] as const;
+    expect(getMainTabTransitionDirection('research', 'rocket', tabs)).toBe('right');
+    expect(getMainTabTransitionDirection('rocket', 'research', tabs)).toBe('left');
+    expect(getAdjacentMainTab('research', 1, tabs)).toBe('rocket');
+    expect(getAdjacentMainTab('rocket', -1, tabs)).toBe('research');
+  });
 });

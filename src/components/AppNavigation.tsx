@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { CSSProperties, ReactNode, RefObject } from 'react';
 import raidMenuIcon from '../assets/navigation/raid-menu-icon.png';
-import { OTHER_LINKS, PRIMARY_LINKS, TOOL_LINKS } from '../constants/sitePages';
+import { getSitePageDefinition, OTHER_LINKS, TOOL_LINKS } from '../constants/sitePages';
 import type { NavigationQuery, Page } from '../types/navigation';
 import { getPageHash } from '../types/navigation';
 
@@ -450,11 +450,18 @@ export function SideDrawer({
   );
 }
 
-export function PrimaryNavigation({ current, onNavigate }: NavigationProps) {
+export function PrimaryNavigation({
+  current,
+  mainTabs,
+  onNavigate,
+}: NavigationProps & { mainTabs: readonly Page[] }) {
   return (
     <div className="primary-navigation-shell" data-main-tab-swipe-ignore>
       <nav className="primary-navigation" aria-label="主要ページ">
-        {PRIMARY_LINKS.map((item) => (
+        {mainTabs.map((page) => {
+          const item = getSitePageDefinition(page);
+          if (!item) return null;
+          return (
           <a
             key={item.page}
             className={current === item.page ? 'is-active' : ''}
@@ -467,7 +474,8 @@ export function PrimaryNavigation({ current, onNavigate }: NavigationProps) {
           >
             {item.label}
           </a>
-        ))}
+          );
+        })}
       </nav>
     </div>
   );

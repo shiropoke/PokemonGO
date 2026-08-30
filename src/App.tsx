@@ -27,6 +27,12 @@ import {
 } from './services/tabPosition';
 import type { TabPosition } from './services/tabPosition';
 import {
+  isMainTabs,
+  resolveInitialMainTabs,
+  saveMainTabs,
+  type MainTabs,
+} from './services/mainTabs';
+import {
   applyTheme,
   readStoredTheme,
   resolveInitialTheme,
@@ -65,6 +71,8 @@ type NavigateHandler = (page: Page, query?: NavigationQuery) => void;
 interface SettingsStateProps {
   tabPosition: TabPosition;
   onTabPositionChange(position: TabPosition): void;
+  mainTabs: MainTabs;
+  onMainTabsChange(tabs: MainTabs): void;
   theme: Theme;
   onThemeChange(theme: Theme): void;
   onSettingsReturn(): void;
@@ -153,6 +161,9 @@ export default function App() {
   const [tabPosition, setTabPosition] = useState<TabPosition>(() =>
     resolveInitialTabPosition(getStorage()),
   );
+  const [mainTabs, setMainTabs] = useState<MainTabs>(() =>
+    resolveInitialMainTabs(getStorage()),
+  );
 
   useEffect(() => {
     const onHashChange = () => {
@@ -177,7 +188,7 @@ export default function App() {
   useEffect(() => {
     if (pageTransition || page === visiblePage) return;
 
-    const direction = getMainTabTransitionDirection(visiblePage, page);
+    const direction = getMainTabTransitionDirection(visiblePage, page, mainTabs);
     if (!direction) {
       setVisiblePage(page);
       return;
@@ -198,7 +209,7 @@ export default function App() {
     } satisfies PageTransition;
     pageTransitionRef.current = nextTransition;
     setPageTransition(nextTransition);
-  }, [page, pageTransition, visiblePage]);
+  }, [mainTabs, page, pageTransition, visiblePage]);
 
   const finishPageTransition = useCallback((transitionId: number) => {
     const current = pageTransitionRef.current;
@@ -289,10 +300,17 @@ export default function App() {
     saveTabPosition(nextPosition, getStorage());
   };
 
+  const changeMainTabs = (nextTabs: MainTabs) => {
+    if (!isMainTabs(nextTabs)) return;
+    setMainTabs(nextTabs);
+    saveMainTabs(nextTabs, getStorage());
+  };
+
   const navigationPage = pageTransition?.to ?? visiblePage;
   const activeContentPage = pageTransition?.to ?? visiblePage;
   const mainTabSwipeHandlers = useMainTabSwipe({
     currentPage: visiblePage,
+    mainTabs,
     disabled:
       isMenuOpen
       || isSearchOpen
@@ -325,7 +343,7 @@ export default function App() {
         className="page-shell-content"
         aria-hidden={isMenuOpen || isSearchOpen || undefined}
       >
-        <PrimaryNavigation current={navigationPage} onNavigate={navigate} />
+        <PrimaryNavigation current={navigationPage} mainTabs={mainTabs} onNavigate={navigate} />
 
         <main
           ref={pageSwipeSurfaceRef}
@@ -351,6 +369,8 @@ export default function App() {
                     onNavigate={navigate}
                     tabPosition={tabPosition}
                     onTabPositionChange={changeTabPosition}
+                    mainTabs={mainTabs}
+                    onMainTabsChange={changeMainTabs}
                     theme={theme}
                     onThemeChange={changeTheme}
                     onSettingsReturn={returnFromSettings}
@@ -372,6 +392,8 @@ export default function App() {
                 onNavigate={navigate}
                 tabPosition={tabPosition}
                 onTabPositionChange={changeTabPosition}
+                mainTabs={mainTabs}
+                onMainTabsChange={changeMainTabs}
                 theme={theme}
                 onThemeChange={changeTheme}
                 onSettingsReturn={returnFromSettings}

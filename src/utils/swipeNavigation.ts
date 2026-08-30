@@ -1,5 +1,5 @@
 import type { Page } from '../types/navigation';
-import { getAdjacentMainTab } from './mainTabTransition';
+import { getAdjacentMainTab, MAIN_TABS } from './mainTabTransition';
 
 export type SwipeDirectionLock = 'pending' | 'horizontal' | 'vertical';
 
@@ -101,6 +101,7 @@ export function isMultiTouchSwipeBlocked(
 
 interface MainTabSwipeTargetOptions {
   currentPage: Page;
+  mainTabs?: readonly Page[];
   directionLock: SwipeDirectionLock;
   dx: number;
   dy: number;
@@ -109,6 +110,7 @@ interface MainTabSwipeTargetOptions {
 
 export function getMainTabSwipeTarget({
   currentPage,
+  mainTabs = MAIN_TABS,
   directionLock,
   dx,
   dy,
@@ -120,5 +122,5 @@ export function getMainTabSwipeTarget({
   const threshold = Math.max(SWIPE_MIN_DISTANCE, viewportWidth * SWIPE_VIEWPORT_RATIO);
   if (Math.abs(dx) < threshold) return null;
 
-  return getAdjacentMainTab(currentPage, dx < 0 ? 1 : -1);
+  return getAdjacentMainTab(currentPage, dx < 0 ? 1 : -1, mainTabs);
 }

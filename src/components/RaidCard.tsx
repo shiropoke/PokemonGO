@@ -1,6 +1,7 @@
 import type { RaidBoss } from '../types/raids';
 import { getRaidTierLabel } from '../utils/scrapedDuckLocalization';
 import { getTypeWeaknesses } from '../utils/typeEffectiveness';
+import { getWeatherDisplay } from '../utils/weather';
 import { DatasetImage } from './DatasetImage';
 import { FavoriteButton } from './FavoriteButton';
 import { RaidCountersPanel } from './RaidCountersPanel';
@@ -73,20 +74,29 @@ export function RaidCard({ raid }: { raid: RaidBoss }) {
           </div>
           {raid.combatPower.boosted ? (
             <div>
-              <dt>天候ブースト</dt>
-              <dd>{raid.combatPower.boosted.min}～{raid.combatPower.boosted.max}</dd>
+              <dt>天候ブーストCP</dt>
+              <dd className="raid-card__boosted-cp">
+                <span>{raid.combatPower.boosted.min}～{raid.combatPower.boosted.max}</span>
+                {raid.boostedWeather.length > 0 ? (
+                  <span className="raid-card__boosted-weather" aria-label="ブースト天候">
+                    {raid.boostedWeather.map((weather, index) => {
+                      const display = getWeatherDisplay(weather);
+
+                      return (
+                        <span className="raid-card__weather" key={`${weather}-${index}`}>
+                          {display.icon ? (
+                            <img src={display.icon} alt="" aria-hidden="true" width="22" height="22" />
+                          ) : null}
+                          <span>{display.label}</span>
+                        </span>
+                      );
+                    })}
+                  </span>
+                ) : null}
+              </dd>
             </div>
           ) : null}
         </dl>
-      ) : null}
-
-      {raid.boostedWeather.length > 0 ? (
-        <details className="raid-card__details">
-          <summary>詳細</summary>
-          <div className="raid-card__details-content">
-            <p><strong>ブースト天候</strong><span>{raid.boostedWeather.join('・')}</span></p>
-          </div>
-        </details>
       ) : null}
 
       {hasPokemonDetails && details ? (

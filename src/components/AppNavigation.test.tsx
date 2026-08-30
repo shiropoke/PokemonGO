@@ -1,7 +1,7 @@
 import { createRef } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it, vi } from 'vitest';
-import { SideDrawer, SiteHeader } from './AppNavigation';
+import { PrimaryNavigation, SideDrawer, SiteHeader } from './AppNavigation';
 
 describe('SiteHeader', () => {
   it('検索の直後に設定へのリンクを表示し、設定ページではactiveにする', () => {
@@ -47,5 +47,21 @@ describe('SideDrawer', () => {
     expect(markup).not.toContain('ダークモード');
     expect(markup).not.toContain('サイトの共有');
     expect(markup).not.toContain('保存データの削除');
+  });
+});
+
+describe('PrimaryNavigation', () => {
+  it('renders the configured four-tab order', () => {
+    const markup = renderToStaticMarkup(
+      <PrimaryNavigation
+        current="rocket"
+        mainTabs={['home', 'research', 'rocket', 'pvp-rankings']}
+        onNavigate={vi.fn()}
+      />,
+    );
+
+    expect(markup.indexOf('ホーム')).toBeLessThan(markup.indexOf('フィールドリサーチ'));
+    expect(markup.indexOf('フィールドリサーチ')).toBeLessThan(markup.indexOf('GOロケット団'));
+    expect(markup.indexOf('GOロケット団')).toBeLessThan(markup.indexOf('PvPランキング'));
   });
 });

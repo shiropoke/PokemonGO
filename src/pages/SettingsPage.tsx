@@ -1,6 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { clearAppLocalStorage } from '../services/appStorage';
+import { getMainTabCandidates, type MainTabs } from '../services/mainTabs';
+import { getSitePageDefinition } from '../constants/sitePages';
+import type { Page } from '../types/navigation';
 import { shareSiteHome } from '../services/siteShare';
 import type { TabPosition } from '../services/tabPosition';
 import type { Theme } from '../services/theme';
@@ -15,6 +18,8 @@ const focusableSelector = [
 interface SettingsPageProps {
   tabPosition: TabPosition;
   onTabPositionChange(position: TabPosition): void;
+  mainTabs: MainTabs;
+  onMainTabsChange(tabs: MainTabs): void;
   theme: Theme;
   onThemeChange(theme: Theme): void;
   onReturn(): void;
@@ -23,6 +28,8 @@ interface SettingsPageProps {
 export function SettingsPage({
   tabPosition,
   onTabPositionChange,
+  mainTabs,
+  onMainTabsChange,
   theme,
   onThemeChange,
   onReturn,
@@ -150,6 +157,35 @@ export function SettingsPage({
               >
                 {label}
               </button>
+            ))}
+          </div>
+        </section>
+
+        <section className="settings-card" aria-labelledby="settings-main-tabs-title">
+          <div className="settings-card__copy">
+            <h2 id="settings-main-tabs-title">タブの編集</h2>
+            <p>ホームは固定です。残り3つのメインタブを選択できます。</p>
+          </div>
+          <div className="settings-tab-editor" aria-labelledby="settings-main-tabs-title">
+            <div className="settings-tab-editor__row"><span>タブ1</span><strong>ホーム（固定）</strong></div>
+            {mainTabs.slice(1).map((page, index) => (
+              <label className="settings-tab-editor__row" key={index}>
+                <span>タブ{index + 2}</span>
+                <select
+                  value={page}
+                  onChange={(event) => {
+                    const next = [...mainTabs] as [Page, Page, Page, Page];
+                    next[index + 1] = event.target.value as Page;
+                    onMainTabsChange(next);
+                  }}
+                >
+                  {getMainTabCandidates().map((candidate) => (
+                    <option key={candidate} value={candidate} disabled={candidate !== page && mainTabs.includes(candidate)}>
+                      {getSitePageDefinition(candidate)?.label ?? candidate}
+                    </option>
+                  ))}
+                </select>
+              </label>
             ))}
           </div>
         </section>

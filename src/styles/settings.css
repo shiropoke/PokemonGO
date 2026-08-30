@@ -89,6 +89,34 @@
   color: #fff;
 }
 
+.settings-tab-editor {
+  display: grid;
+  gap: 10px;
+}
+
+.settings-tab-editor__row {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: 54px minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+  color: var(--text-secondary);
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
+.settings-tab-editor__row strong,
+.settings-tab-editor__row select {
+  min-width: 0;
+  min-height: 44px;
+  padding: 8px 10px;
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  background: var(--surface-secondary);
+  color: var(--text);
+  font: inherit;
+}
+
 .settings-switch {
   display: inline-flex;
   min-width: 92px;
@@ -188,6 +216,11 @@
   .settings-action-button,
   .settings-danger-button {
     width: 100%;
+  }
+
+  .settings-tab-editor__row {
+    grid-template-columns: 50px minmax(0, 1fr);
+    gap: 8px;
   }
 }
 

@@ -26,6 +26,17 @@ describe('main tab swipe navigation', () => {
     })).toBe('events');
   });
 
+  it('uses the configured tab order for swipe targets', () => {
+    expect(getMainTabSwipeTarget({
+      currentPage: 'research',
+      mainTabs: ['home', 'research', 'rocket', 'pvp-rankings'],
+      directionLock: 'horizontal',
+      dx: -100,
+      dy: 10,
+      viewportWidth: 390,
+    })).toBe('rocket');
+  });
+
   it('moves to the previous tab after a clear right swipe', () => {
     expect(getMainTabSwipeTarget({
       currentPage: 'raids',

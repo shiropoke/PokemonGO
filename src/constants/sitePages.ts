@@ -133,3 +133,7 @@ function navigationLinks(
 export const PRIMARY_LINKS = navigationLinks(({ primary }) => primary);
 export const TOOL_LINKS = navigationLinks(({ group }) => group === 'tools');
 export const OTHER_LINKS = navigationLinks(({ group }) => group === 'other');
+
+export function getSitePageDefinition(page: Page): SitePageDefinition | undefined {
+  return SITE_PAGES.find((definition) => definition.page === page);
+}

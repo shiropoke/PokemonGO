@@ -65,7 +65,7 @@
 }
 
 .menu-trigger:hover {
-  background: rgba(30, 136, 229, 0.09);
+  background: transparent;
   color: var(--blue-700);
 }
 

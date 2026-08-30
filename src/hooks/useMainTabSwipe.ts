@@ -22,6 +22,7 @@ interface MainTabSwipeGesture {
 
 interface UseMainTabSwipeOptions {
   currentPage: Page;
+  mainTabs: readonly Page[];
   disabled: boolean;
   surfaceRef: RefObject<HTMLElement | null>;
   onNavigate(page: Page): void;
@@ -29,6 +30,7 @@ interface UseMainTabSwipeOptions {
 
 export function useMainTabSwipe({
   currentPage,
+  mainTabs,
   disabled,
   surfaceRef,
   onNavigate,
@@ -101,6 +103,7 @@ export function useMainTabSwipe({
       const directionLock = resolveSwipeDirectionLock(gesture.directionLock, dx, dy);
       const targetPage = getMainTabSwipeTarget({
         currentPage,
+        mainTabs,
         directionLock,
         dx,
         dy,
@@ -109,7 +112,7 @@ export function useMainTabSwipe({
       if (targetPage) onNavigate(targetPage);
     }
     resetPointer(event.pointerId);
-  }, [currentPage, disabled, onNavigate, resetPointer]);
+  }, [currentPage, disabled, mainTabs, onNavigate, resetPointer]);
 
   const onPointerCancel = useCallback<PointerEventHandler<HTMLElement>>((event) => {
     resetPointer(event.pointerId);
