@@ -2,6 +2,7 @@ interface RefreshButtonProps {
   className?: string;
   disabled?: boolean;
   loading?: boolean;
+  label?: string;
   onClick?: () => void | Promise<void>;
 }
 
@@ -25,6 +26,7 @@ export function RefreshButton({
   className,
   disabled = false,
   loading = false,
+  label = '更新',
   onClick,
 }: RefreshButtonProps) {
   const classes = ['refresh-button', className].filter(Boolean).join(' ');
@@ -45,7 +47,7 @@ export function RefreshButton({
         <path d="M20 11a8 8 0 1 0-2.34 5.66" />
         <path d="M20 4v7h-7" />
       </svg>
-      <span>{loading ? '更新中' : '更新'}</span>
+      <span>{loading ? '更新中' : label}</span>
     </button>
   );
 }

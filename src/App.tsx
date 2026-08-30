@@ -2,6 +2,7 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react
 import { PrimaryNavigation, SideDrawer, SiteHeader } from './components/AppNavigation';
 import { GlobalSearchDialog } from './components/GlobalSearchDialog';
 import { LegalFooter } from './components/LegalFooter';
+import { reloadCurrentPage } from './components/RefreshButton';
 import { ContactPage } from './pages/ContactPage';
 import { EventsPage } from './pages/EventsPage';
 import { EggsPage } from './pages/EggsPage';
@@ -12,6 +13,7 @@ import { IvCheckerPage } from './pages/IvCheckerPage';
 import { MoveCheckerPage } from './pages/MoveCheckerPage';
 import { PowerUpPage } from './pages/PowerUpPage';
 import { PokefutaPage } from './pages/PokefutaPage';
+import { PokemonCenterStampRallyPage } from './pages/PokemonCenterStampRallyPage';
 import { PokemonPokedexPage } from './pages/PokemonPokedexPage';
 import { PvpRankingsPage } from './pages/PvpRankingsPage';
 import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage';
@@ -107,6 +109,7 @@ function renderPage(
         onNavigate={onNavigate}
       />
     );
+    case 'pokemon-center-stamp-rally': return <PokemonCenterStampRallyPage />;
     case 'favorites': return <FavoritesPage onNavigate={onNavigate} />;
     case 'settings': return <SettingsPage {...settingsState} onReturn={settingsState.onSettingsReturn} />;
     case 'terms': return <TermsPage />;
@@ -335,6 +338,7 @@ export default function App() {
           setIsMenuOpen(false);
           setIsSearchOpen(true);
         }}
+        onRefresh={reloadCurrentPage}
         onSettingsToggle={toggleSettings}
       />
 

@@ -40,4 +40,9 @@ describe('main tab preferences', () => {
     );
     expect(APP_LOCAL_STORAGE_KEYS).toContain(MAIN_TABS_STORAGE_KEY);
   });
+
+  it('includes newly registered normal pages as editable tab candidates', async () => {
+    const { getMainTabCandidates } = await import('./mainTabs');
+    expect(getMainTabCandidates()).toContain('pokemon-center-stamp-rally');
+  });
 });

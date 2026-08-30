@@ -12,6 +12,7 @@ export type Page =
   | 'rocket'
   | 'pokemon'
   | 'pokefuta'
+  | 'pokemon-center-stamp-rally'
   | 'settings'
   | 'favorites'
   | 'terms'
@@ -32,6 +33,7 @@ export const PAGE_PATHS: Record<Page, string> = {
   rocket: 'rocket',
   pokemon: 'pokemon',
   pokefuta: 'pokefuta',
+  'pokemon-center-stamp-rally': 'pokemon-center-stamp-rally',
   settings: 'settings',
   favorites: 'favorites',
   terms: 'terms',
@@ -84,6 +86,7 @@ const PAGE_TITLES: Record<Page, string> = {
   rocket: 'GOロケット団 | GO Scope',
   pokemon: 'ポケモン図鑑 | GO Scope',
   pokefuta: 'ポケふた | GO Scope',
+  'pokemon-center-stamp-rally': 'ポケモンセンタースタンプラリー | GO Scope',
   settings: '設定 | GO Scope',
   favorites: 'お気に入り | GO Scope',
   terms: '利用規約 | GO Scope',

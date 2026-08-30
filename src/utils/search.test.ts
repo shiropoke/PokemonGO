@@ -117,6 +117,7 @@ describe('グローバル検索', () => {
     expect(searchGlobalData(source, '問い合わせ').pages[0]?.page).toBe('contact');
     expect(searchGlobalData(source, 'マンホール').pages[0]?.page).toBe('pokefuta');
     expect(searchGlobalData(source, 'ポケモンマンホール').pages[0]?.page).toBe('pokefuta');
+    expect(searchGlobalData(source, 'スタンプラリー').pages[0]?.page).toBe('pokemon-center-stamp-rally');
   });
 
   it('該当なしでは全カテゴリが0件になる', () => {
@@ -135,6 +136,7 @@ describe('グローバル検索', () => {
       'iv',
       'pvp-rankings',
       'pokefuta',
+      'pokemon-center-stamp-rally',
     ]);
   });
 });

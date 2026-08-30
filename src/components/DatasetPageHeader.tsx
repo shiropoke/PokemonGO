@@ -5,18 +5,12 @@ interface DatasetPageHeaderProps {
   eyebrow?: string;
   title: string;
   fetchedAt?: number;
-  refreshing?: boolean;
-  onReload?: () => void;
-  action?: ReactNode;
 }
 
 export function DatasetPageHeader({
   eyebrow,
   title,
   fetchedAt,
-  refreshing,
-  onReload,
-  action,
 }: DatasetPageHeaderProps) {
   return (
     <header className="page-heading dataset-page__heading">
@@ -27,11 +21,6 @@ export function DatasetPageHeader({
       {fetchedAt !== undefined ? (
         <div className="dataset-page__update">
           <span>最終更新 {formatLastUpdated(fetchedAt)}</span>
-          {action ?? (onReload ? (
-            <button type="button" onClick={onReload} disabled={refreshing}>
-              {refreshing ? '取得中' : '更新確認'}
-            </button>
-          ) : null)}
         </div>
       ) : null}
     </header>

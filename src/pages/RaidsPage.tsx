@@ -82,13 +82,12 @@ export function RaidsPage() {
       <DatasetPageHeader
         title="レイド"
         fetchedAt={state.result?.fetchedAt}
-        action={<RefreshButton loading={state.refreshing} onClick={state.refresh} />}
       />
 
       {state.result?.stale ? <StaleDataNotice /> : null}
       {state.loading && !state.result ? <DatasetSkeleton /> : null}
       {state.error && !state.result ? (
-        <DatasetError action={<RefreshButton loading={state.refreshing} onClick={state.refresh} />} />
+        <DatasetError action={<RefreshButton loading={state.refreshing} label="再試行" onClick={state.refresh} />} />
       ) : null}
 
       {state.result ? (

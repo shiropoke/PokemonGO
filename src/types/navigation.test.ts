@@ -53,6 +53,12 @@ describe('hash navigation', () => {
     expect(getPageTitle('pokemon')).toBe('ポケモン図鑑 | GO Scope');
   });
 
+  it('ポケモンセンタースタンプラリーのhashとtitleを生成・解析する', () => {
+    expect(getPageHash('pokemon-center-stamp-rally')).toBe('#/pokemon-center-stamp-rally');
+    expect(getPageFromHash('#/pokemon-center-stamp-rally')).toBe('pokemon-center-stamp-rally');
+    expect(getPageTitle('pokemon-center-stamp-rally')).toBe('ポケモンセンタースタンプラリー | GO Scope');
+  });
+
   it('設定のhashとtitleを生成・解析する', () => {
     expect(getPageHash('settings')).toBe('#/settings');
     expect(getPageFromHash('#/settings')).toBe('settings');

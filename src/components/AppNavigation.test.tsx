@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { PrimaryNavigation, SideDrawer, SiteHeader } from './AppNavigation';
 
 describe('SiteHeader', () => {
-  it('検索の直後に設定へのリンクを表示し、設定ページではactiveにする', () => {
+  it('更新、検索、設定の順にアイコン操作を表示し、設定ページではactiveにする', () => {
     const markup = renderToStaticMarkup(
       <SiteHeader
         current="settings"
@@ -16,13 +16,17 @@ describe('SiteHeader', () => {
         searchButtonRef={createRef<HTMLButtonElement>()}
         searchOpen={false}
         onSearchOpen={vi.fn()}
+        onRefresh={vi.fn()}
         onSettingsToggle={vi.fn()}
       />,
     );
 
+    const refreshIndex = markup.indexOf('aria-label="サイトを更新"');
     const searchIndex = markup.indexOf('aria-label="サイト内を検索"');
     const settingsIndex = markup.indexOf('aria-label="設定"');
+    expect(refreshIndex).toBeGreaterThan(-1);
     expect(searchIndex).toBeGreaterThan(-1);
+    expect(searchIndex).toBeGreaterThan(refreshIndex);
     expect(settingsIndex).toBeGreaterThan(searchIndex);
     expect(markup).toContain('href="#/settings"');
     expect(markup).toContain('aria-current="page"');

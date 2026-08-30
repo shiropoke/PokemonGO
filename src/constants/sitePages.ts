@@ -109,6 +109,14 @@ export const SITE_PAGES: readonly SitePageDefinition[] = [
     keywords: ['ポケふた', 'ポケモンマンホール', 'マンホール', 'ご当地', '都道府県', '設置場所'],
   },
   {
+    page: 'pokemon-center-stamp-rally',
+    label: 'ポケモンセンタースタンプラリー',
+    group: 'other',
+    primary: false,
+    popularSearch: true,
+    keywords: ['ポケモンセンター', 'ポケセン', 'スタンプラリー', 'GOスタンプラリー', 'ロケーション背景'],
+  },
+  {
     page: 'favorites',
     label: 'お気に入り',
     group: 'other',

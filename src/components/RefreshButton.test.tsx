@@ -64,4 +64,9 @@ describe('RefreshButton', () => {
     expect(markup).toContain('disabled=""');
     expect(markup).toContain('<span>更新中</span>');
   });
+
+  it('error recovery can use a retry label without changing its callback', () => {
+    const markup = renderToStaticMarkup(<RefreshButton label="再試行" onClick={vi.fn()} />);
+    expect(markup).toContain('<span>再試行</span>');
+  });
 });

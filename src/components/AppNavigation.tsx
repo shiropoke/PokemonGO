@@ -20,6 +20,7 @@ interface SiteHeaderProps extends NavigationProps {
   searchButtonRef: RefObject<HTMLButtonElement>;
   searchOpen: boolean;
   onSearchOpen(): void;
+  onRefresh(): void;
   onSettingsToggle(): void;
 }
 
@@ -100,6 +101,7 @@ export function SiteHeader({
   searchButtonRef,
   searchOpen,
   onSearchOpen,
+  onRefresh,
   onSettingsToggle,
 }: SiteHeaderProps) {
   return (
@@ -139,6 +141,17 @@ export function SiteHeader({
         </a>
 
         <div className="shell-header__actions">
+          <button
+            className="site-refresh-trigger"
+            type="button"
+            aria-label="サイトを更新"
+            onClick={onRefresh}
+          >
+            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none">
+              <path d="M20 11a8 8 0 1 0-2.34 5.66" />
+              <path d="M20 4v7h-7" />
+            </svg>
+          </button>
           <button
             ref={searchButtonRef}
             className="site-search-trigger"

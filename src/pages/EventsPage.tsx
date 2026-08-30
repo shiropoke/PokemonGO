@@ -200,10 +200,6 @@ export function EventsPage() {
         {result ? (
           <div className="events-page__update">
             <span>最終更新 {formatLastUpdated(result.fetchedAt)}</span>
-            <RefreshButton
-              loading={loading && Boolean(result)}
-              onClick={() => requestEvents({ forceRefresh: true })}
-            />
           </div>
         ) : null}
       </header>
@@ -221,6 +217,7 @@ export function EventsPage() {
           <p>イベント情報を取得できませんでした</p>
           <RefreshButton
             loading={loading}
+            label="再試行"
             onClick={() => requestEvents({ forceRefresh: true })}
           />
         </div>
