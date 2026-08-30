@@ -12,6 +12,7 @@ import { IvCheckerPage } from './pages/IvCheckerPage';
 import { MoveCheckerPage } from './pages/MoveCheckerPage';
 import { PowerUpPage } from './pages/PowerUpPage';
 import { PokefutaPage } from './pages/PokefutaPage';
+import { PokemonPokedexPage } from './pages/PokemonPokedexPage';
 import { PvpRankingsPage } from './pages/PvpRankingsPage';
 import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage';
 import { RaidsPage } from './pages/RaidsPage';
@@ -39,6 +40,7 @@ import {
   type MainTabTransitionDirection,
 } from './utils/mainTabTransition';
 import { scrollPageToTop, shouldResetPageScroll } from './utils/navigationScroll';
+import { resolveSettingsReturnHash } from './utils/settingsReturn';
 
 const PAGE_TRANSITION_FALLBACK_MS = 360;
 
@@ -65,6 +67,7 @@ interface SettingsStateProps {
   onTabPositionChange(position: TabPosition): void;
   theme: Theme;
   onThemeChange(theme: Theme): void;
+  onSettingsReturn(): void;
 }
 
 function renderPage(
@@ -84,6 +87,12 @@ function renderPage(
     case 'research': return <ResearchPage />;
     case 'eggs': return <EggsPage />;
     case 'rocket': return <RocketPage />;
+    case 'pokemon': return (
+      <PokemonPokedexPage
+        selectedKey={getHashQueryParam(window.location.hash, 'key')}
+        onNavigate={onNavigate}
+      />
+    );
     case 'pokefuta': return (
       <PokefutaPage
         prefectureSlug={getHashQueryParam(window.location.hash, 'pref')}
@@ -91,7 +100,7 @@ function renderPage(
       />
     );
     case 'favorites': return <FavoritesPage onNavigate={onNavigate} />;
-    case 'settings': return <SettingsPage {...settingsState} />;
+    case 'settings': return <SettingsPage {...settingsState} onReturn={settingsState.onSettingsReturn} />;
     case 'terms': return <TermsPage />;
     case 'privacy': return <PrivacyPolicyPage />;
     case 'contact': return <ContactPage onNavigate={onNavigate} />;
@@ -132,6 +141,9 @@ export default function App() {
   const pendingScrollResetRef = useRef(
     shouldResetPageScroll(initialPage, window.location.hash),
   );
+  const settingsReturnHashRef = useRef(
+    initialPage === 'settings' ? getPageHash('home') : (window.location.hash || getPageHash('home')),
+  );
   const [theme, setTheme] = useState<Theme>(() =>
     resolveInitialTheme(
       getStorage(),
@@ -145,6 +157,9 @@ export default function App() {
   useEffect(() => {
     const onHashChange = () => {
       const nextPage = getPageFromHash(window.location.hash);
+      if (nextPage !== 'settings') {
+        settingsReturnHashRef.current = window.location.hash || getPageHash('home');
+      }
       pendingScrollResetRef.current = shouldResetPageScroll(
         nextPage,
         window.location.hash,
@@ -239,6 +254,9 @@ export default function App() {
   }, []);
 
   const navigate = useCallback((nextPage: Page, query?: NavigationQuery) => {
+    if (nextPage === 'settings' && getPageFromHash(window.location.hash) !== 'settings') {
+      settingsReturnHashRef.current = window.location.hash || getPageHash('home');
+    }
     const nextHash = getPageHash(nextPage, query);
     pendingScrollResetRef.current = shouldResetPageScroll(nextPage, nextHash);
     if (window.location.hash !== nextHash) {
@@ -248,6 +266,18 @@ export default function App() {
       setNavigationSequence((sequence) => sequence + 1);
     }
   }, []);
+
+  const returnFromSettings = useCallback(() => {
+    const nextHash = resolveSettingsReturnHash(settingsReturnHashRef.current);
+    const nextPage = getPageFromHash(nextHash);
+    pendingScrollResetRef.current = shouldResetPageScroll(nextPage, nextHash);
+    if (window.location.hash !== nextHash) window.location.hash = nextHash;
+  }, []);
+
+  const toggleSettings = useCallback(() => {
+    if (page === 'settings') returnFromSettings();
+    else navigate('settings');
+  }, [navigate, page, returnFromSettings]);
 
   const changeTheme = (nextTheme: Theme) => {
     setTheme(nextTheme);
@@ -287,6 +317,7 @@ export default function App() {
           setIsMenuOpen(false);
           setIsSearchOpen(true);
         }}
+        onSettingsToggle={toggleSettings}
       />
 
       <div
@@ -322,6 +353,7 @@ export default function App() {
                     onTabPositionChange={changeTabPosition}
                     theme={theme}
                     onThemeChange={changeTheme}
+                    onSettingsReturn={returnFromSettings}
                   />
                 </div>
               </div>
@@ -342,6 +374,7 @@ export default function App() {
                 onTabPositionChange={changeTabPosition}
                 theme={theme}
                 onThemeChange={changeTheme}
+                onSettingsReturn={returnFromSettings}
               />
             </div>
           </>

@@ -17,6 +17,7 @@ interface SettingsPageProps {
   onTabPositionChange(position: TabPosition): void;
   theme: Theme;
   onThemeChange(theme: Theme): void;
+  onReturn(): void;
 }
 
 export function SettingsPage({
@@ -24,6 +25,7 @@ export function SettingsPage({
   onTabPositionChange,
   theme,
   onThemeChange,
+  onReturn,
 }: SettingsPageProps) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -119,6 +121,7 @@ export function SettingsPage({
 
   return (
     <div className="settings-page">
+      <button className="settings-back" type="button" onClick={onReturn}>← 戻る</button>
       <header className="page-heading settings-page__heading">
         <div><h1>設定</h1></div>
       </header>

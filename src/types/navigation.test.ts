@@ -46,6 +46,13 @@ describe('hash navigation', () => {
     expect(getPageTitle('pokefuta')).toBe('ポケふた | GO Scope');
   });
 
+  it('ポケモン図鑑のhash・key query・titleを生成・解析する', () => {
+    expect(getPageHash('pokemon')).toBe('#/pokemon');
+    expect(getPageHash('pokemon', { key: '25:normal' })).toBe('#/pokemon?key=25%3Anormal');
+    expect(getPageFromHash('#/pokemon?key=25%3Anormal')).toBe('pokemon');
+    expect(getPageTitle('pokemon')).toBe('ポケモン図鑑 | GO Scope');
+  });
+
   it('設定のhashとtitleを生成・解析する', () => {
     expect(getPageHash('settings')).toBe('#/settings');
     expect(getPageFromHash('#/settings')).toBe('settings');

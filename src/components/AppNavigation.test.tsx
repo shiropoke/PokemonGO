@@ -16,6 +16,7 @@ describe('SiteHeader', () => {
         searchButtonRef={createRef<HTMLButtonElement>()}
         searchOpen={false}
         onSearchOpen={vi.fn()}
+        onSettingsToggle={vi.fn()}
       />,
     );
 

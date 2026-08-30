@@ -20,6 +20,7 @@ interface SiteHeaderProps extends NavigationProps {
   searchButtonRef: RefObject<HTMLButtonElement>;
   searchOpen: boolean;
   onSearchOpen(): void;
+  onSettingsToggle(): void;
 }
 
 interface SideDrawerProps extends NavigationProps {
@@ -99,6 +100,7 @@ export function SiteHeader({
   searchButtonRef,
   searchOpen,
   onSearchOpen,
+  onSettingsToggle,
 }: SiteHeaderProps) {
   return (
     <header
@@ -159,7 +161,7 @@ export function SiteHeader({
             aria-current={current === 'settings' ? 'page' : undefined}
             onClick={(event) => {
               event.preventDefault();
-              onNavigate('settings');
+              onSettingsToggle();
             }}
           >
             <svg aria-hidden="true" viewBox="0 0 24 24" fill="none">

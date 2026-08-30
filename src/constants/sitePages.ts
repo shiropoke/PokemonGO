@@ -94,6 +94,13 @@ export const SITE_PAGES: readonly SitePageDefinition[] = [
     keywords: ['ロケット団', 'したっぱ', 'リーダー', 'サカキ'],
   },
   {
+    page: 'pokemon',
+    label: 'ポケモン図鑑',
+    group: 'other',
+    primary: false,
+    keywords: ['図鑑', 'ポケモン', 'フォーム', '種族値'],
+  },
+  {
     page: 'pokefuta',
     label: 'ポケふた',
     group: 'other',
