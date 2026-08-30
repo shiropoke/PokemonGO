@@ -92,6 +92,9 @@ export function RaidsPage() {
 
       {state.result ? (
         <>
+          <aside className="dataset-notice" role="note">
+            レイド情報は外部データを参照しているため、ゲーム内の更新から本サイトへの反映まで時間がかかる場合があります。最新情報は『Pokémon GO』アプリ内をご確認ください。
+          </aside>
           <RaidFilters selected={filter} onChange={setFilter} />
 
           {groups.length > 0 ? (

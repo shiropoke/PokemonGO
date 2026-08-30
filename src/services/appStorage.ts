@@ -1,6 +1,7 @@
 export const THEME_STORAGE_KEY = 'pokemon-go:theme';
 export const TAB_POSITION_STORAGE_KEY = 'pokemon-go:tab-position';
 export const MAIN_TABS_STORAGE_KEY = 'pokemon-go:main-tabs:v1';
+export const HOME_SECTION_ORDER_STORAGE_KEY = 'pokemon-go:home-sections:v1';
 export const FAVORITES_STORAGE_KEY = 'pokemon-go:favorites';
 export const IV_CHECKER_STORAGE_KEY = 'pokemon-go-information:iv-checker:v1';
 export const WEEKLY_EVENT_VIEW_STORAGE_KEY = 'pokemon-go:weekly-event-view';
@@ -20,6 +21,7 @@ export const APP_LOCAL_STORAGE_KEYS = [
   THEME_STORAGE_KEY,
   TAB_POSITION_STORAGE_KEY,
   MAIN_TABS_STORAGE_KEY,
+  HOME_SECTION_ORDER_STORAGE_KEY,
   FAVORITES_STORAGE_KEY,
   IV_CHECKER_STORAGE_KEY,
   WEEKLY_EVENT_VIEW_STORAGE_KEY,

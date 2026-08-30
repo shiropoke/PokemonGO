@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from 'react';
+import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
+import { HomeSectionOrderDialog } from '../components/HomeSectionOrderDialog';
 import { useFavorites } from '../contexts/FavoritesContext';
 import { loadEvents } from '../services/events';
 import { fetchPokemonData } from '../services/pokemonData';
@@ -33,6 +34,13 @@ import { groupRaidsByTier } from '../utils/raidClassification';
 import { getRaidTierLabel } from '../utils/scrapedDuckLocalization';
 import { safeExternalUrl } from '../utils/url';
 import { getWeeklyEvents } from '../utils/weeklyEvents';
+import {
+  HOME_SECTION_IDS,
+  resolveInitialHomeSectionOrder,
+  saveHomeSectionOrder,
+  type HomeSectionId,
+  type HomeSectionOrder,
+} from '../services/homeSectionOrder';
 
 interface HomeDataState {
   events: ScrapedDuckEvent[];
@@ -199,6 +207,11 @@ export function HomePage({ onNavigate }: { onNavigate: NavigateHandler }) {
   const { favorites } = useFavorites();
   const [now, setNow] = useState(() => Date.now());
   const [reloadKey, setReloadKey] = useState(0);
+  const [sectionOrder, setSectionOrder] = useState<HomeSectionOrder>(() => {
+    try { return resolveInitialHomeSectionOrder(window.localStorage); } catch { return HOME_SECTION_IDS; }
+  });
+  const [isOrderDialogOpen, setIsOrderDialogOpen] = useState(false);
+  const editButtonRef = useRef<HTMLButtonElement>(null);
   const [state, setState] = useState<HomeDataState>({
     events: [],
     pokemon: [],
@@ -363,6 +376,28 @@ export function HomePage({ onNavigate }: { onNavigate: NavigateHandler }) {
     return insights.slice(0, 6);
   }, [favorites, state.eggs, state.pokemon, state.raids, state.research]);
 
+  const closeOrderDialog = () => {
+    setIsOrderDialogOpen(false);
+    window.requestAnimationFrame(() => editButtonRef.current?.focus({ preventScroll: true }));
+  };
+
+  const saveSectionOrder = (nextOrder: HomeSectionOrder) => {
+    setSectionOrder(nextOrder);
+    try { saveHomeSectionOrder(nextOrder, window.localStorage); } catch { saveHomeSectionOrder(nextOrder); }
+    closeOrderDialog();
+  };
+
+  const renderHomeSection = (id: HomeSectionId) => {
+    switch (id) {
+      case 'featured': return <section className="dashboard-card dashboard-card--wide"><div className="section-heading-row"><h2>注目イベント</h2><InternalLink page="events" onNavigate={onNavigate}>すべて見る</InternalLink></div><FeaturedEvent key={featuredEvent?.eventID ?? 'empty'} event={featuredEvent} now={now} onNavigate={onNavigate} /></section>;
+      case 'limited-today': return <section className="dashboard-card dashboard-card--wide"><h2>今日の時間限定イベント</h2><HomeEventList events={limitedToday} now={now} empty="今日の時間限定イベントはありません。" onNavigate={onNavigate} /><div className="home-today-details"><details><summary>今日開始するイベント <span>{startsToday.length}件</span></summary><HomeEventList events={startsToday} now={now} empty="今日開始するイベントはありません。" onNavigate={onNavigate} /></details><details><summary>今日終了するイベント <span>{endsToday.length}件</span></summary><HomeEventList events={endsToday} now={now} empty="今日終了するイベントはありません。" onNavigate={onNavigate} /></details></div></section>;
+      case 'ongoing': return <section className="dashboard-card dashboard-card--wide"><div className="section-heading-row"><h2>開催中のイベント</h2><InternalLink page="events" onNavigate={onNavigate}>すべて見る</InternalLink></div><HomeEventList events={groups.ongoing} now={now} empty="現在開催中のイベントはありません。" limit={4} onNavigate={onNavigate} /></section>;
+      case 'weekly': return <section className="dashboard-card dashboard-card--wide"><div className="section-heading-row"><h2>今週のイベント</h2><InternalLink page="events" onNavigate={onNavigate}>イベント一覧</InternalLink></div><WeeklyEvents events={weeklyEvents} now={now} /></section>;
+      case 'raids': return <section className="dashboard-card dashboard-card--wide"><div className="section-heading-row"><h2>現在のレイド</h2><InternalLink page="raids" onNavigate={onNavigate}>すべて見る</InternalLink></div>{state.raids.length === 0 ? <p className="dashboard-empty">現在のレイド情報を取得できませんでした。</p> : <div className="dashboard-raid-list">{featuredRaids.map((raid) => <InternalLink page="raids" onNavigate={onNavigate} className="dashboard-raid" key={raid.id}>{raid.image ? <img src={raid.image} alt="" loading="lazy" /> : <span className="dashboard-raid__placeholder" aria-hidden="true" />}<span><strong>{raid.displayName}</strong><small>{getRaidTierLabel(raid.tier)}{raid.isShadow ? <span className="dashboard-raid__shadow">シャドウ</span> : null}</small></span></InternalLink>)}</div>}</section>;
+      case 'favorites': return <section className="dashboard-card dashboard-card--wide"><div className="section-heading-row"><h2>お気に入り情報</h2><InternalLink page="favorites" onNavigate={onNavigate}>お気に入りを管理</InternalLink></div>{favorites.length === 0 ? <p className="dashboard-empty">ポケモンをお気に入りに追加すると、開催中情報をここで確認できます。</p> : <>{favoriteInsights.length > 0 ? <div className="favorite-insight-list">{favoriteInsights.map((insight) => <InternalLink page={insight.page} onNavigate={onNavigate} key={insight.key}><strong>{insight.name}</strong><span>{insight.detail}</span></InternalLink>)}</div> : null}{favoriteEventMatches.length > 0 || favoriteInsights.length === 0 ? <HomeEventList events={favoriteEventMatches} now={now} empty="現在のレイド・イベント・タマゴ・リサーチに一致するお気に入りはありません。" onNavigate={onNavigate} /> : null}</>}</section>;
+    }
+  };
+
   return (
     <div className="home-page">
       <header className="page-heading dashboard-heading home-hero-heading">
@@ -413,94 +448,10 @@ export function HomePage({ onNavigate }: { onNavigate: NavigateHandler }) {
         </div>
       ) : (
         <div className="dashboard-grid">
-          <section className="dashboard-card dashboard-card--wide">
-            <div className="section-heading-row">
-              <h2>注目イベント</h2>
-              <InternalLink page="events" onNavigate={onNavigate}>すべて見る</InternalLink>
-            </div>
-            <FeaturedEvent key={featuredEvent?.eventID ?? 'empty'} event={featuredEvent} now={now} onNavigate={onNavigate} />
-          </section>
-
-          <section className="dashboard-card dashboard-card--wide">
-            <h2>今日の時間限定イベント</h2>
-            <HomeEventList events={limitedToday} now={now} empty="今日の時間限定イベントはありません。" onNavigate={onNavigate} />
-            <div className="home-today-details">
-              <details>
-                <summary>今日開始するイベント <span>{startsToday.length}件</span></summary>
-                <HomeEventList events={startsToday} now={now} empty="今日開始するイベントはありません。" onNavigate={onNavigate} />
-              </details>
-              <details>
-                <summary>今日終了するイベント <span>{endsToday.length}件</span></summary>
-                <HomeEventList events={endsToday} now={now} empty="今日終了するイベントはありません。" onNavigate={onNavigate} />
-              </details>
-            </div>
-          </section>
-
-          <section className="dashboard-card dashboard-card--wide">
-            <div className="section-heading-row">
-              <h2>開催中のイベント</h2>
-              <InternalLink page="events" onNavigate={onNavigate}>すべて見る</InternalLink>
-            </div>
-            <HomeEventList events={groups.ongoing} now={now} empty="現在開催中のイベントはありません。" limit={4} onNavigate={onNavigate} />
-          </section>
-
-          <section className="dashboard-card dashboard-card--wide">
-            <div className="section-heading-row">
-              <h2>今週のイベント</h2>
-              <InternalLink page="events" onNavigate={onNavigate}>イベント一覧</InternalLink>
-            </div>
-            <WeeklyEvents events={weeklyEvents} now={now} />
-          </section>
-
-          <section className="dashboard-card dashboard-card--wide">
-            <div className="section-heading-row">
-              <h2>現在のレイド</h2>
-              <InternalLink page="raids" onNavigate={onNavigate}>すべて見る</InternalLink>
-            </div>
-            {state.raids.length === 0 ? (
-              <p className="dashboard-empty">現在のレイド情報を取得できませんでした。</p>
-            ) : (
-              <div className="dashboard-raid-list">
-                {featuredRaids.map((raid) => (
-                  <InternalLink page="raids" onNavigate={onNavigate} className="dashboard-raid" key={raid.id}>
-                    {raid.image ? <img src={raid.image} alt="" loading="lazy" /> : <span className="dashboard-raid__placeholder" aria-hidden="true" />}
-                    <span>
-                      <strong>{raid.displayName}</strong>
-                      <small>
-                        {getRaidTierLabel(raid.tier)}
-                        {raid.isShadow ? <span className="dashboard-raid__shadow">シャドウ</span> : null}
-                      </small>
-                    </span>
-                  </InternalLink>
-                ))}
-              </div>
-            )}
-          </section>
-
-          <section className="dashboard-card dashboard-card--wide">
-            <div className="section-heading-row">
-              <h2>お気に入り情報</h2>
-              <InternalLink page="favorites" onNavigate={onNavigate}>お気に入りを管理</InternalLink>
-            </div>
-            {favorites.length === 0 ? (
-              <p className="dashboard-empty">ポケモンをお気に入りに追加すると、開催中情報をここで確認できます。</p>
-            ) : (
-              <>
-                {favoriteInsights.length > 0 ? (
-                  <div className="favorite-insight-list">
-                    {favoriteInsights.map((insight) => (
-                      <InternalLink page={insight.page} onNavigate={onNavigate} key={insight.key}><strong>{insight.name}</strong><span>{insight.detail}</span></InternalLink>
-                    ))}
-                  </div>
-                ) : null}
-                {favoriteEventMatches.length > 0 || favoriteInsights.length === 0 ? (
-                  <HomeEventList events={favoriteEventMatches} now={now} empty="現在のレイド・イベント・タマゴ・リサーチに一致するお気に入りはありません。" onNavigate={onNavigate} />
-                ) : null}
-              </>
-            )}
-          </section>
+          {sectionOrder.map((id) => <Fragment key={id}>{renderHomeSection(id)}{id === 'favorites' ? <div className="home-section-order-edit"><button ref={editButtonRef} type="button" onClick={() => setIsOrderDialogOpen(true)}>ホームを編集</button></div> : null}</Fragment>)}
         </div>
       )}
+      {isOrderDialogOpen ? <HomeSectionOrderDialog order={sectionOrder} onCancel={closeOrderDialog} onSave={saveSectionOrder} /> : null}
     </div>
   );
 }
