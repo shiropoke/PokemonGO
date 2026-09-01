@@ -62,12 +62,15 @@ function eventOverlapsRange(event: ScrapedDuckEvent, range: WeekRange): boolean 
 }
 
 /** 日本語UIの一週間（月曜 00:00 以上、翌月曜 00:00 未満）を返します。 */
-export function getJapaneseWeekRange(reference: Date | number = new Date()): WeekRange {
+export function getJapaneseWeekRange(
+  reference: Date | number = new Date(),
+  weekOffset = 0,
+): WeekRange {
   const date = reference instanceof Date ? reference : new Date(reference);
   const localDate = Number.isNaN(date.getTime()) ? new Date() : date;
   const start = startOfLocalDay(localDate);
   const mondayOffset = (start.getDay() + 6) % 7;
-  start.setDate(start.getDate() - mondayOffset);
+  start.setDate(start.getDate() - mondayOffset + weekOffset * 7);
 
   const days = Array.from({ length: 7 }, (_, index) => {
     const day = new Date(start);
@@ -84,8 +87,9 @@ export function getJapaneseWeekRange(reference: Date | number = new Date()): Wee
 export function getWeeklyEvents(
   events: readonly ScrapedDuckEvent[],
   reference: Date | number = new Date(),
+  weekOffset = 0,
 ): ScrapedDuckEvent[] {
-  const range = getJapaneseWeekRange(reference);
+  const range = getJapaneseWeekRange(reference, weekOffset);
   const seen = new Set<string>();
 
   return events
@@ -104,8 +108,9 @@ export function getWeeklyEvents(
 export function groupWeeklyEvents(
   events: readonly ScrapedDuckEvent[],
   reference: Date | number = new Date(),
+  weekOffset = 0,
 ): WeeklyEventGroup[] {
-  const range = getJapaneseWeekRange(reference);
+  const range = getJapaneseWeekRange(reference, weekOffset);
   const groups = new Map<number, ScrapedDuckEvent[]>();
 
   for (const event of events) {
@@ -135,8 +140,9 @@ export function groupWeeklyEvents(
 export function getWeeklyEventCalendarSpan(
   event: ScrapedDuckEvent,
   reference: Date | number = new Date(),
+  weekOffset = 0,
 ): WeeklyEventCalendarSpan | null {
-  const range = getJapaneseWeekRange(reference);
+  const range = getJapaneseWeekRange(reference, weekOffset);
   const start = parseEventDate(event.start);
   const end = parseEventDate(event.end);
   if (!start && !end) return null;

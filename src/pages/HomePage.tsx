@@ -33,7 +33,6 @@ import { eventTitleMentionsPokemon, externalPokemonMatches } from '../utils/poke
 import { groupRaidsByTier } from '../utils/raidClassification';
 import { getRaidTierLabel } from '../utils/scrapedDuckLocalization';
 import { safeExternalUrl } from '../utils/url';
-import { getWeeklyEvents } from '../utils/weeklyEvents';
 import {
   HOME_SECTION_IDS,
   resolveInitialHomeSectionOrder,
@@ -332,10 +331,6 @@ export function HomePage({ onNavigate }: { onNavigate: NavigateHandler }) {
     () => hasStaleHomeData(state.updates),
     [state.updates],
   );
-  const weeklyEvents = useMemo(
-    () => getWeeklyEvents(state.events, now),
-    [now, state.events],
-  );
   const featuredRaids = useMemo(
     () => {
       const tierGroups = groupRaidsByTier(state.raids);
@@ -392,7 +387,7 @@ export function HomePage({ onNavigate }: { onNavigate: NavigateHandler }) {
       case 'featured': return <section className="dashboard-card dashboard-card--wide"><div className="section-heading-row"><h2>注目イベント</h2><InternalLink page="events" onNavigate={onNavigate}>すべて見る</InternalLink></div><FeaturedEvent key={featuredEvent?.eventID ?? 'empty'} event={featuredEvent} now={now} onNavigate={onNavigate} /></section>;
       case 'limited-today': return <section className="dashboard-card dashboard-card--wide"><h2>今日の時間限定イベント</h2><HomeEventList events={limitedToday} now={now} empty="今日の時間限定イベントはありません。" onNavigate={onNavigate} /><div className="home-today-details"><details><summary>今日開始するイベント <span>{startsToday.length}件</span></summary><HomeEventList events={startsToday} now={now} empty="今日開始するイベントはありません。" onNavigate={onNavigate} /></details><details><summary>今日終了するイベント <span>{endsToday.length}件</span></summary><HomeEventList events={endsToday} now={now} empty="今日終了するイベントはありません。" onNavigate={onNavigate} /></details></div></section>;
       case 'ongoing': return <section className="dashboard-card dashboard-card--wide"><div className="section-heading-row"><h2>開催中のイベント</h2><InternalLink page="events" onNavigate={onNavigate}>すべて見る</InternalLink></div><HomeEventList events={groups.ongoing} now={now} empty="現在開催中のイベントはありません。" limit={4} onNavigate={onNavigate} /></section>;
-      case 'weekly': return <section className="dashboard-card dashboard-card--wide"><div className="section-heading-row"><h2>今週のイベント</h2><InternalLink page="events" onNavigate={onNavigate}>イベント一覧</InternalLink></div><WeeklyEvents events={weeklyEvents} now={now} /></section>;
+      case 'weekly': return <section className="dashboard-card dashboard-card--wide"><div className="section-heading-row"><h2>週間イベント</h2><InternalLink page="events" onNavigate={onNavigate}>イベント一覧</InternalLink></div><WeeklyEvents events={state.events} now={now} /></section>;
       case 'raids': return <section className="dashboard-card dashboard-card--wide"><div className="section-heading-row"><h2>現在のレイド</h2><InternalLink page="raids" onNavigate={onNavigate}>すべて見る</InternalLink></div>{state.raids.length === 0 ? <p className="dashboard-empty">現在のレイド情報を取得できませんでした。</p> : <div className="dashboard-raid-list">{featuredRaids.map((raid) => <InternalLink page="raids" onNavigate={onNavigate} className="dashboard-raid" key={raid.id}>{raid.image ? <img src={raid.image} alt="" loading="lazy" /> : <span className="dashboard-raid__placeholder" aria-hidden="true" />}<span><strong>{raid.displayName}</strong><small>{getRaidTierLabel(raid.tier)}{raid.isShadow ? <span className="dashboard-raid__shadow">シャドウ</span> : null}</small></span></InternalLink>)}</div>}</section>;
       case 'favorites': return <section className="dashboard-card dashboard-card--wide"><div className="section-heading-row"><h2>お気に入り情報</h2><InternalLink page="favorites" onNavigate={onNavigate}>お気に入りを管理</InternalLink></div>{favorites.length === 0 ? <p className="dashboard-empty">ポケモンをお気に入りに追加すると、開催中情報をここで確認できます。</p> : <>{favoriteInsights.length > 0 ? <div className="favorite-insight-list">{favoriteInsights.map((insight) => <InternalLink page={insight.page} onNavigate={onNavigate} key={insight.key}><strong>{insight.name}</strong><span>{insight.detail}</span></InternalLink>)}</div> : null}{favoriteEventMatches.length > 0 || favoriteInsights.length === 0 ? <HomeEventList events={favoriteEventMatches} now={now} empty="現在のレイド・イベント・タマゴ・リサーチに一致するお気に入りはありません。" onNavigate={onNavigate} /> : null}</>}</section>;
     }

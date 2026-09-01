@@ -8,6 +8,7 @@ import {
   formatWeeklyEventRange,
   getJapaneseWeekRange,
   getWeeklyEventCalendarSpan,
+  getWeeklyEvents,
   groupWeeklyEvents,
   readWeeklyEventView,
   saveWeeklyEventView,
@@ -65,8 +66,16 @@ export function WeeklyEvents({ events, now }: WeeklyEventsProps) {
   const [view, setView] = useState<WeeklyEventView>(() =>
     readWeeklyEventView(getBrowserStorage()),
   );
-  const range = useMemo(() => getJapaneseWeekRange(now), [now]);
-  const groups = useMemo(() => groupWeeklyEvents(events, now), [events, now]);
+  const [weekOffset, setWeekOffset] = useState(0);
+  const range = useMemo(() => getJapaneseWeekRange(now, weekOffset), [now, weekOffset]);
+  const weeklyEvents = useMemo(
+    () => getWeeklyEvents(events, now, weekOffset),
+    [events, now, weekOffset],
+  );
+  const groups = useMemo(
+    () => groupWeeklyEvents(weeklyEvents, now, weekOffset),
+    [weeklyEvents, now, weekOffset],
+  );
 
   const changeView = (nextView: WeeklyEventView) => {
     setView(nextView);
@@ -76,6 +85,24 @@ export function WeeklyEvents({ events, now }: WeeklyEventsProps) {
   return (
     <div className="weekly-events">
       <div className="weekly-events__toolbar">
+        <div className="weekly-period-switch" role="group" aria-label="表示する週">
+          <button
+            type="button"
+            className={weekOffset === 0 ? 'is-active' : undefined}
+            aria-pressed={weekOffset === 0}
+            onClick={() => setWeekOffset(0)}
+          >
+            今週
+          </button>
+          <button
+            type="button"
+            className={weekOffset === 1 ? 'is-active' : undefined}
+            aria-pressed={weekOffset === 1}
+            onClick={() => setWeekOffset(1)}
+          >
+            来週
+          </button>
+        </div>
         <div className="weekly-view-switch" role="group" aria-label="今週のイベント表示">
           <button
             type="button"
@@ -96,8 +123,10 @@ export function WeeklyEvents({ events, now }: WeeklyEventsProps) {
         </div>
       </div>
 
-      {events.length === 0 ? (
-        <p className="dashboard-empty">今週のイベントはありません。</p>
+      {weeklyEvents.length === 0 ? (
+        <p className="dashboard-empty">
+          {weekOffset === 0 ? '今週のイベントはありません。' : '来週のイベントはありません。'}
+        </p>
       ) : view === 'list' ? (
         <div className="weekly-events__view weekly-event-list" key="list">
           {groups.map((group) => (
@@ -125,7 +154,7 @@ export function WeeklyEvents({ events, now }: WeeklyEventsProps) {
               {range.days.map((day) => {
                 const dayOfWeek = day.getDay();
                 const classes = [
-                  isSameLocalDay(day, new Date(now)) ? 'is-today' : '',
+                  weekOffset === 0 && isSameLocalDay(day, new Date(now)) ? 'is-today' : '',
                   dayOfWeek === 6 ? 'is-saturday' : '',
                   dayOfWeek === 0 ? 'is-sunday' : '',
                 ]
@@ -140,8 +169,8 @@ export function WeeklyEvents({ events, now }: WeeklyEventsProps) {
               })}
             </div>
             <div className="week-calendar__events">
-              {events.map((event, index) => {
-                const span = getWeeklyEventCalendarSpan(event, now);
+              {weeklyEvents.map((event, index) => {
+                const span = getWeeklyEventCalendarSpan(event, now, weekOffset);
                 if (!span) return null;
                 const category = getEventCategory(event.eventType);
                 return (

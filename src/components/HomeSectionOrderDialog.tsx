@@ -10,7 +10,7 @@ const SECTION_LABELS: Record<HomeSectionId, string> = {
   featured: '注目イベント',
   'limited-today': '今日の時間限定イベント',
   ongoing: '開催中のイベント',
-  weekly: '今週のイベント',
+  weekly: '週間イベント',
   raids: '現在のレイド',
   favorites: 'お気に入り情報',
 };

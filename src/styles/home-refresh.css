@@ -382,10 +382,13 @@
 
 .weekly-events__toolbar {
   display: flex;
-  justify-content: flex-end;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px;
   margin: -3px 0 12px;
 }
 
+.weekly-period-switch,
 .weekly-view-switch {
   display: inline-grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -396,6 +399,7 @@
   background: var(--surface-secondary, var(--gray-50));
 }
 
+.weekly-period-switch button,
 .weekly-view-switch button {
   min-width: 74px;
   min-height: 36px;
@@ -410,11 +414,13 @@
   cursor: pointer;
 }
 
+.weekly-period-switch button.is-active,
 .weekly-view-switch button.is-active {
   background: var(--accent, var(--blue-700));
   color: #fff;
 }
 
+.weekly-period-switch button:focus-visible,
 .weekly-view-switch button:focus-visible {
   outline: 2px solid var(--accent, var(--blue-700));
   outline-offset: 2px;
@@ -666,13 +672,15 @@
   }
 
   .weekly-events__toolbar {
-    justify-content: stretch;
+    justify-content: space-between;
   }
 
+  .weekly-period-switch,
   .weekly-view-switch {
-    width: 100%;
+    max-width: 100%;
   }
 
+  .weekly-period-switch button,
   .weekly-view-switch button {
     min-width: 0;
   }

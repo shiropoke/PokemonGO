@@ -46,6 +46,21 @@ describe('weekly events', () => {
     expect(range.days[6]?.getDay()).toBe(0);
   });
 
+  it('can return the following Monday-through-Sunday range for next week', () => {
+    const range = getJapaneseWeekRange(reference, 1);
+
+    expect([range.start.getFullYear(), range.start.getMonth(), range.start.getDate()]).toEqual([
+      2026,
+      7,
+      24,
+    ]);
+    expect([range.end.getFullYear(), range.end.getMonth(), range.end.getDate()]).toEqual([
+      2026,
+      7,
+      31,
+    ]);
+  });
+
   it('includes long-running events overlapping the week and sorts by start', () => {
     const overlapping = event(
       'overlapping',
@@ -79,6 +94,27 @@ describe('weekly events', () => {
     expect(getWeeklyEventCalendarSpan(multiDay, reference)).toEqual({
       startColumn: 2,
       endColumn: 6,
+    });
+  });
+
+  it('filters and maps events using the selected next-week range', () => {
+    const nextWeek = event(
+      'next-week',
+      '2026-08-25T10:00:00.000',
+      '2026-08-27T20:00:00.000',
+    );
+    const thisWeek = event(
+      'this-week',
+      '2026-08-19T10:00:00.000',
+      '2026-08-19T20:00:00.000',
+    );
+
+    expect(getWeeklyEvents([thisWeek, nextWeek], reference, 1).map(({ eventID }) => eventID)).toEqual([
+      'next-week',
+    ]);
+    expect(getWeeklyEventCalendarSpan(nextWeek, reference, 1)).toEqual({
+      startColumn: 2,
+      endColumn: 5,
     });
   });
 
