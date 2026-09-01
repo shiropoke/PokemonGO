@@ -279,17 +279,6 @@ dd {
   text-transform: uppercase;
 }
 
-/* Events */
-
-.events-page__update {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  color: var(--gray-500);
-  font-size: 0.76rem;
-  white-space: nowrap;
-}
-
 .events-error button,
 .inline-error button {
   min-height: 38px;
@@ -1475,19 +1464,6 @@ dd {
     font-size: 1.55rem;
   }
 
-  .events-page__heading {
-    display: flex;
-    gap: 10px;
-    align-items: flex-end;
-  }
-
-  .events-page__update {
-    display: grid;
-    gap: 4px;
-    justify-items: end;
-    font-size: 0.66rem;
-  }
-
   .filter-chips {
     margin-right: -14px;
     margin-left: -14px;
@@ -1675,11 +1651,6 @@ dd {
     min-height: 46px;
   }
 
-  .events-page__update span {
-    max-width: 92px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {

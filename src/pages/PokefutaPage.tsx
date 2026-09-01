@@ -102,10 +102,7 @@ export function PokefutaPage({ prefectureSlug, onNavigate }: PokefutaPageProps) 
 
   return (
     <div className="dataset-page pokefuta-page">
-      <DatasetPageHeader
-        title="ポケふた"
-        fetchedAt={state.result?.fetchedAt}
-      />
+      <DatasetPageHeader title="ポケふた" />
       <p className="dataset-page__intro">
         日本全国のポケモンマンホール「ポケふた」を、都道府県・設置場所・描かれているポケモンから確認できます。
       </p>

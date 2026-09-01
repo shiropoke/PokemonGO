@@ -65,3 +65,21 @@ export function moveHomeSection(
   next.splice(targetIndex, 0, source);
   return next as HomeSectionOrder;
 }
+
+/** source を、取り除いた後の配列における destinationIndex へ挿入します。 */
+export function moveHomeSectionToIndex(
+  order: HomeSectionOrder,
+  source: HomeSectionId,
+  destinationIndex: number,
+): HomeSectionOrder {
+  const sourceIndex = order.indexOf(source);
+  if (sourceIndex < 0 || !Number.isInteger(destinationIndex)) return order;
+
+  const targetIndex = Math.max(0, Math.min(order.length - 1, destinationIndex));
+  if (sourceIndex === targetIndex) return order;
+
+  const next = [...order];
+  next.splice(sourceIndex, 1);
+  next.splice(targetIndex, 0, source);
+  return next as HomeSectionOrder;
+}

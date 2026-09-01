@@ -7,6 +7,8 @@ import { getPageHash } from '../types/navigation';
 
 type IconName = 'home' | 'calendar' | 'raid' | 'tools' | 'more';
 
+export const SCROLL_TO_TOP_THRESHOLD = 240;
+
 interface NavigationProps {
   current: Page;
   onNavigate(page: Page, query?: NavigationQuery): void;
@@ -104,6 +106,22 @@ export function SiteHeader({
   onRefresh,
   onSettingsToggle,
 }: SiteHeaderProps) {
+  const [showScrollTop, setShowScrollTop] = useState(false);
+
+  useEffect(() => {
+    const updateScrollTopVisibility = () => {
+      setShowScrollTop(window.scrollY > SCROLL_TO_TOP_THRESHOLD);
+    };
+    updateScrollTopVisibility();
+    window.addEventListener('scroll', updateScrollTopVisibility, { passive: true });
+    return () => window.removeEventListener('scroll', updateScrollTopVisibility);
+  }, []);
+
+  const scrollToTop = () => {
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    window.scrollTo({ top: 0, behavior: reducedMotion ? 'auto' : 'smooth' });
+  };
+
   return (
     <header
       ref={headerRef}
@@ -141,6 +159,19 @@ export function SiteHeader({
         </a>
 
         <div className="shell-header__actions">
+          <button
+            className={`site-scroll-top-trigger${showScrollTop ? ' is-visible' : ''}`}
+            type="button"
+            aria-label="ページ上部へ戻る"
+            aria-hidden={!showScrollTop || undefined}
+            tabIndex={showScrollTop ? undefined : -1}
+            disabled={!showScrollTop}
+            onClick={scrollToTop}
+          >
+            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none">
+              <path d="m6 14 6-6 6 6" />
+            </svg>
+          </button>
           <button
             className="site-refresh-trigger"
             type="button"

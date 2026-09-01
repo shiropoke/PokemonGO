@@ -1,7 +1,9 @@
 import { describe, expect, it, vi } from 'vitest';
 import { APP_LOCAL_STORAGE_KEYS, HOME_SECTION_ORDER_STORAGE_KEY } from './appStorage';
 import {
+  HOME_SECTION_IDS,
   moveHomeSection,
+  moveHomeSectionToIndex,
   resolveInitialHomeSectionOrder,
   saveHomeSectionOrder,
 } from './homeSectionOrder';
@@ -44,7 +46,25 @@ describe('home section order preferences', () => {
     )).toEqual(['featured', 'limited-today', 'favorites', 'ongoing', 'weekly', 'raids']);
   });
 
+  it.each([
+    ['featured', 5, ['limited-today', 'ongoing', 'weekly', 'raids', 'favorites', 'featured']],
+    ['favorites', 0, ['favorites', 'featured', 'limited-today', 'ongoing', 'weekly', 'raids']],
+    ['limited-today', 4, ['featured', 'ongoing', 'weekly', 'raids', 'limited-today', 'favorites']],
+    ['raids', 1, ['featured', 'raids', 'limited-today', 'ongoing', 'weekly', 'favorites']],
+  ] as const)('moves %s directly to destination index %i', (source, destinationIndex, expected) => {
+    expect(moveHomeSectionToIndex(
+      ['featured', 'limited-today', 'ongoing', 'weekly', 'raids', 'favorites'],
+      source,
+      destinationIndex,
+    )).toEqual(expected);
+  });
+
   it('registers the preference as app-owned storage', () => {
     expect(APP_LOCAL_STORAGE_KEYS).toContain(HOME_SECTION_ORDER_STORAGE_KEY);
+  });
+
+  it('keeps the edit control outside the six persisted sections', () => {
+    expect(HOME_SECTION_IDS).toHaveLength(6);
+    expect(HOME_SECTION_IDS as readonly string[]).not.toContain('home-section-order-edit');
   });
 });

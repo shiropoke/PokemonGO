@@ -78,10 +78,7 @@ export function ResearchPage() {
 
   return (
     <div className="dataset-page research-page">
-      <DatasetPageHeader
-        title="フィールドリサーチ"
-        fetchedAt={state.result?.fetchedAt}
-      />
+      <DatasetPageHeader title="フィールドリサーチ" />
 
       {state.result?.stale ? <StaleDataNotice /> : null}
       {state.loading && !state.result ? <DatasetSkeleton /> : null}

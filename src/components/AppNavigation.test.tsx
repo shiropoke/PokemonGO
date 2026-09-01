@@ -1,10 +1,10 @@
 import { createRef } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it, vi } from 'vitest';
-import { PrimaryNavigation, SideDrawer, SiteHeader } from './AppNavigation';
+import { PrimaryNavigation, SCROLL_TO_TOP_THRESHOLD, SideDrawer, SiteHeader } from './AppNavigation';
 
 describe('SiteHeader', () => {
-  it('更新、検索、設定の順にアイコン操作を表示し、設定ページではactiveにする', () => {
+  it('上部へ戻る、更新、検索、設定の順にアイコン操作を表示し、設定ページではactiveにする', () => {
     const markup = renderToStaticMarkup(
       <SiteHeader
         current="settings"
@@ -21,15 +21,22 @@ describe('SiteHeader', () => {
       />,
     );
 
+    const scrollTopIndex = markup.indexOf('aria-label="ページ上部へ戻る"');
     const refreshIndex = markup.indexOf('aria-label="サイトを更新"');
     const searchIndex = markup.indexOf('aria-label="サイト内を検索"');
     const settingsIndex = markup.indexOf('aria-label="設定"');
+    expect(scrollTopIndex).toBeGreaterThan(-1);
     expect(refreshIndex).toBeGreaterThan(-1);
+    expect(refreshIndex).toBeGreaterThan(scrollTopIndex);
     expect(searchIndex).toBeGreaterThan(-1);
     expect(searchIndex).toBeGreaterThan(refreshIndex);
     expect(settingsIndex).toBeGreaterThan(searchIndex);
     expect(markup).toContain('href="#/settings"');
     expect(markup).toContain('aria-current="page"');
+  });
+
+  it('uses a 240px scroll threshold for the page-top action', () => {
+    expect(SCROLL_TO_TOP_THRESHOLD).toBe(240);
   });
 });
 

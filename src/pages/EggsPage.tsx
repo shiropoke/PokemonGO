@@ -67,10 +67,7 @@ export function EggsPage() {
 
   return (
     <div className="dataset-page eggs-page">
-      <DatasetPageHeader
-        title="タマゴ"
-        fetchedAt={state.result?.fetchedAt}
-      />
+      <DatasetPageHeader title="タマゴ" />
 
       {state.result?.stale ? <StaleDataNotice /> : null}
       {state.loading && !state.result ? <DatasetSkeleton /> : null}

@@ -1,7 +1,8 @@
 import { createPortal } from 'react-dom';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import {
   moveHomeSection,
+  moveHomeSectionToIndex,
   type HomeSectionId,
   type HomeSectionOrder,
 } from '../services/homeSectionOrder';
@@ -27,7 +28,51 @@ export function HomeSectionOrderDialog({ order, onCancel, onSave }: HomeSectionO
   const [draft, setDraft] = useState<HomeSectionOrder>(order);
   const [dragging, setDragging] = useState<HomeSectionId | null>(null);
   const dialogRef = useRef<HTMLElement>(null);
+  const listRef = useRef<HTMLOListElement>(null);
   const saveButtonRef = useRef<HTMLButtonElement>(null);
+  const draftRef = useRef<HomeSectionOrder>(order);
+  const draggingRef = useRef<HomeSectionId | null>(null);
+  const previousRowPositionsRef = useRef(new Map<HomeSectionId, DOMRect>());
+
+  const captureRowPositions = () => {
+    const positions = new Map<HomeSectionId, DOMRect>();
+    listRef.current?.querySelectorAll<HTMLElement>('[data-home-section-id]').forEach((row) => {
+      const id = row.dataset.homeSectionId as HomeSectionId | undefined;
+      if (id) positions.set(id, row.getBoundingClientRect());
+    });
+    previousRowPositionsRef.current = positions;
+  };
+
+  const replaceDraft = (next: HomeSectionOrder) => {
+    if (next.every((id, index) => id === draftRef.current[index])) return;
+    captureRowPositions();
+    draftRef.current = next;
+    setDraft(next);
+  };
+
+  useLayoutEffect(() => {
+    const previousPositions = previousRowPositionsRef.current;
+    previousRowPositionsRef.current = new Map();
+    if (
+      previousPositions.size === 0 ||
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    ) return;
+
+    listRef.current?.querySelectorAll<HTMLElement>('[data-home-section-id]').forEach((row) => {
+      const id = row.dataset.homeSectionId as HomeSectionId | undefined;
+      const previous = id ? previousPositions.get(id) : undefined;
+      const current = row.getBoundingClientRect();
+      const offsetY = previous ? previous.top - current.top : 0;
+      if (!offsetY || id === draggingRef.current) return;
+      row.animate(
+        [
+          { transform: `translateY(${offsetY}px)` },
+          { transform: 'translateY(0)' },
+        ],
+        { duration: 180, easing: 'ease-out' },
+      );
+    });
+  }, [draft]);
 
   useEffect(() => {
     saveButtonRef.current?.focus({ preventScroll: true });
@@ -56,9 +101,29 @@ export function HomeSectionOrderDialog({ order, onCancel, onSave }: HomeSectionO
   }, [onCancel]);
 
   const move = (source: HomeSectionId, offset: -1 | 1) => {
-    const sourceIndex = draft.indexOf(source);
-    const target = draft[sourceIndex + offset];
-    if (target) setDraft((current) => moveHomeSection(current, source, target));
+    const current = draftRef.current;
+    const sourceIndex = current.indexOf(source);
+    const target = current[sourceIndex + offset];
+    if (target) replaceDraft(moveHomeSection(current, source, target));
+  };
+
+  const destinationIndexAt = (source: HomeSectionId, clientY: number): number => {
+    const rows = Array.from(
+      listRef.current?.querySelectorAll<HTMLElement>('[data-home-section-id]') ?? [],
+    ).filter((row) => row.dataset.homeSectionId !== source);
+
+    for (let index = 0; index < rows.length; index += 1) {
+      const row = rows[index];
+      if (row && clientY < row.getBoundingClientRect().top + row.getBoundingClientRect().height / 2) {
+        return index;
+      }
+    }
+    return rows.length;
+  };
+
+  const finishDrag = () => {
+    draggingRef.current = null;
+    setDragging(null);
   };
 
   return createPortal(
@@ -68,7 +133,7 @@ export function HomeSectionOrderDialog({ order, onCancel, onSave }: HomeSectionO
       <section ref={dialogRef} className="home-section-order-dialog" role="dialog" aria-modal="true" aria-labelledby="home-section-order-title">
         <h2 id="home-section-order-title">ホームの並び順を編集</h2>
         <p>右端のハンドルを押したまま、上下へ動かして並び替えます。</p>
-        <ol className="home-section-order-list">
+        <ol ref={listRef} className="home-section-order-list">
           {draft.map((id, index) => (
             <li className={dragging === id ? 'is-dragging' : ''} data-home-section-id={id} key={id}>
               <span>{SECTION_LABELS[id]}</span>
@@ -81,17 +146,16 @@ export function HomeSectionOrderDialog({ order, onCancel, onSave }: HomeSectionO
                   aria-label={`${SECTION_LABELS[id]}をドラッグして並び替え`}
                   onPointerDown={(event) => {
                     event.currentTarget.setPointerCapture(event.pointerId);
+                    draggingRef.current = id;
                     setDragging(id);
                   }}
                   onPointerMove={(event) => {
-                    if (dragging !== id) return;
-                    const target = document.elementFromPoint(event.clientX, event.clientY)
-                      ?.closest<HTMLElement>('[data-home-section-id]')
-                      ?.dataset.homeSectionId as HomeSectionId | undefined;
-                    if (target && target !== id) setDraft((current) => moveHomeSection(current, id, target));
+                    if (draggingRef.current !== id) return;
+                    const destinationIndex = destinationIndexAt(id, event.clientY);
+                    replaceDraft(moveHomeSectionToIndex(draftRef.current, id, destinationIndex));
                   }}
-                  onPointerUp={() => setDragging(null)}
-                  onPointerCancel={() => setDragging(null)}
+                  onPointerUp={finishDrag}
+                  onPointerCancel={finishDrag}
                 >
                   <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 7h14M5 12h14M5 17h14" /></svg>
                 </button>

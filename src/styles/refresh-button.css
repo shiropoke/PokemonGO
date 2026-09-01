@@ -1,5 +1,4 @@
 .refresh-button,
-.dataset-page__update .refresh-button,
 .dataset-error .refresh-button,
 .events-error .refresh-button {
   display: inline-flex;
@@ -52,7 +51,6 @@
 
 @media (max-width: 520px) {
   .refresh-button,
-  .dataset-page__update .refresh-button,
   .dataset-error .refresh-button,
   .events-error .refresh-button {
     min-height: 38px;

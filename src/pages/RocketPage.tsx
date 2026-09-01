@@ -151,10 +151,7 @@ export function RocketPage() {
 
   return (
     <div className="dataset-page rocket-page">
-      <DatasetPageHeader
-        title="GOロケット団"
-        fetchedAt={state.result?.fetchedAt}
-      />
+      <DatasetPageHeader title="GOロケット団" />
 
       {state.result?.stale ? <StaleDataNotice /> : null}
       {state.loading && !state.result ? <DatasetSkeleton /> : null}

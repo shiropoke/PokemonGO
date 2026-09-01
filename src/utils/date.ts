@@ -108,15 +108,31 @@ export function formatEventDate(
   return `${datePart} ${timePart}`;
 }
 
-export function formatLastUpdated(timestamp: number): string {
-  const date = new Date(timestamp);
-  if (Number.isNaN(date.getTime())) {
-    return "";
-  }
+/** GitHub Pages のビルド時刻を日本時間で表示する。未設定・不正値は表示しない。 */
+export function formatSiteUpdatedAt(value: string | undefined): string | null {
+  if (!value) return null;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
 
-  return `${String(date.getHours()).padStart(2, "0")}:${String(
-    date.getMinutes(),
-  ).padStart(2, "0")}`;
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Tokyo',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    hourCycle: 'h23',
+  }).formatToParts(date);
+  const part = (type: Intl.DateTimeFormatPartTypes) =>
+    parts.find((item) => item.type === type)?.value;
+  const year = part('year');
+  const month = part('month');
+  const day = part('day');
+  const hour = part('hour');
+  const minute = part('minute');
+  return year && month && day && hour && minute
+    ? `${year}/${month}/${day} ${hour}:${minute}`
+    : null;
 }
 
 export function getEventTimingStatus(

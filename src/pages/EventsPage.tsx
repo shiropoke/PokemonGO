@@ -11,11 +11,7 @@ import type {
   EventsFetchResult,
   ScrapedDuckEvent,
 } from "../types/events";
-import {
-  formatLastUpdated,
-  getEventCategory,
-  groupAndSortEvents,
-} from "../utils/date";
+import { getEventCategory, groupAndSortEvents } from "../utils/date";
 import { getHashQueryParam } from "../types/navigation";
 
 interface EventSectionProps {
@@ -197,11 +193,6 @@ export function EventsPage() {
         <div>
           <h1>イベント</h1>
         </div>
-        {result ? (
-          <div className="events-page__update">
-            <span>最終更新 {formatLastUpdated(result.fetchedAt)}</span>
-          </div>
-        ) : null}
       </header>
 
       {result?.stale ? (

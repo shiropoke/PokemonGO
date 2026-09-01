@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { HomeSectionOrderDialog } from '../components/HomeSectionOrderDialog';
 import { useFavorites } from '../contexts/FavoritesContext';
 import { loadEvents } from '../services/events';
@@ -15,20 +15,13 @@ import type { NavigationQuery, Page } from '../types/navigation';
 import {
   formatCountdown,
   formatEventDate,
-  formatLastUpdated,
+  formatSiteUpdatedAt,
   groupAndSortEvents,
   parseEventDate,
 } from '../utils/date';
 import { getEventTypeLabel, localizeEventTitle } from '../utils/eventLocalization';
 import { selectFeaturedEvent } from '../utils/featuredEvent';
-import {
-  HOME_DATASET_KEYS,
-  HOME_DATASET_LABELS,
-  createEmptyHomeDataUpdates,
-  formatHomeDataUpdateSummary,
-  hasStaleHomeData,
-  type HomeDataUpdates,
-} from '../utils/homeDataUpdates';
+import { createEmptyHomeDataUpdates, hasStaleHomeData, type HomeDataUpdates } from '../utils/homeDataUpdates';
 import { eventTitleMentionsPokemon, externalPokemonMatches } from '../utils/pokemonMatching';
 import { groupRaidsByTier } from '../utils/raidClassification';
 import { getRaidTierLabel } from '../utils/scrapedDuckLocalization';
@@ -72,6 +65,8 @@ const LIMITED_EVENT_TYPES = new Set([
   'community-day-classic',
   'research-day',
 ]);
+
+const siteUpdatedAt = formatSiteUpdatedAt(import.meta.env.VITE_SITE_UPDATED_AT);
 
 function HomeEventList({
   events,
@@ -323,10 +318,6 @@ export function HomePage({ onNavigate }: { onNavigate: NavigateHandler }) {
     () => selectFeaturedEvent(state.events, now),
     [now, state.events],
   );
-  const dataUpdateSummary = useMemo(
-    () => formatHomeDataUpdateSummary(state.updates),
-    [state.updates],
-  );
   const hasStaleData = useMemo(
     () => hasStaleHomeData(state.updates),
     [state.updates],
@@ -403,29 +394,7 @@ export function HomePage({ onNavigate }: { onNavigate: NavigateHandler }) {
             day: 'numeric',
             weekday: 'short',
           }).format(today)}</time>
-          {dataUpdateSummary ? (
-            <details className="home-data-updates">
-              <summary>{dataUpdateSummary}</summary>
-              <dl className="home-data-updates__panel">
-                {HOME_DATASET_KEYS.map((key) => {
-                  const update = state.updates[key];
-                  return (
-                    <div key={key}>
-                      <dt>{HOME_DATASET_LABELS[key]}</dt>
-                      <dd>
-                        <span>
-                          {update.fetchedAt !== null
-                            ? formatLastUpdated(update.fetchedAt)
-                            : '取得できませんでした'}
-                        </span>
-                        {update.stale ? <small>保存済みデータ</small> : null}
-                      </dd>
-                    </div>
-                  );
-                })}
-              </dl>
-            </details>
-          ) : null}
+          {siteUpdatedAt ? <span className="home-site-updated">最終更新 {siteUpdatedAt}</span> : null}
         </div>
         <div className="home-hero-heading__copy">
           <h1>ホーム</h1>
@@ -443,7 +412,12 @@ export function HomePage({ onNavigate }: { onNavigate: NavigateHandler }) {
         </div>
       ) : (
         <div className="dashboard-grid">
-          {sectionOrder.map((id) => <Fragment key={id}>{renderHomeSection(id)}{id === 'favorites' ? <div className="home-section-order-edit"><button ref={editButtonRef} type="button" onClick={() => setIsOrderDialogOpen(true)}>ホームを編集</button></div> : null}</Fragment>)}
+          {sectionOrder.map((id) => renderHomeSection(id))}
+          <div className="home-section-order-edit">
+            <button ref={editButtonRef} type="button" onClick={() => setIsOrderDialogOpen(true)}>
+              ホームを編集
+            </button>
+          </div>
         </div>
       )}
       {isOrderDialogOpen ? <HomeSectionOrderDialog order={sectionOrder} onCancel={closeOrderDialog} onSave={saveSectionOrder} /> : null}

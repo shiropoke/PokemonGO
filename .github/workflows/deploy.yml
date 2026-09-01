@@ -50,6 +50,8 @@ jobs:
       - name: Refresh PvPoke rankings
         continue-on-error: true
         run: npm run data:pvp
+      - name: Set site update timestamp
+        run: echo "VITE_SITE_UPDATED_AT=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> "$GITHUB_ENV"
       - name: Build
         run: npm run build
       - name: Setup Pages

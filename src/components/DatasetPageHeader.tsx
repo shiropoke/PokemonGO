@@ -1,16 +1,13 @@
 import type { ReactNode } from 'react';
-import { formatLastUpdated } from '../utils/date';
 
 interface DatasetPageHeaderProps {
   eyebrow?: string;
   title: string;
-  fetchedAt?: number;
 }
 
 export function DatasetPageHeader({
   eyebrow,
   title,
-  fetchedAt,
 }: DatasetPageHeaderProps) {
   return (
     <header className="page-heading dataset-page__heading">
@@ -18,11 +15,6 @@ export function DatasetPageHeader({
         {eyebrow ? <p className="page-heading__eyebrow">{eyebrow}</p> : null}
         <h1>{title}</h1>
       </div>
-      {fetchedAt !== undefined ? (
-        <div className="dataset-page__update">
-          <span>最終更新 {formatLastUpdated(fetchedAt)}</span>
-        </div>
-      ) : null}
     </header>
   );
 }

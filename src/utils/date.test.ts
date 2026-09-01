@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { ScrapedDuckEvent } from '../types/events';
 import {
+  formatSiteUpdatedAt,
   getEventCategory,
   getEventTimingStatus,
   groupAndSortEvents,
@@ -26,6 +27,12 @@ function event(
 }
 
 describe('ScrapedDuck event dates', () => {
+  it('formats a build timestamp in Japan time without using the current time', () => {
+    expect(formatSiteUpdatedAt('2026-09-01T03:17:00Z')).toBe('2026/09/01 12:17');
+    expect(formatSiteUpdatedAt(undefined)).toBeNull();
+    expect(formatSiteUpdatedAt('invalid')).toBeNull();
+  });
+
   it('parses a trailing Z as an absolute UTC timestamp', () => {
     expect(parseEventDate('2026-08-18T20:00:00.000Z')?.toISOString()).toBe(
       '2026-08-18T20:00:00.000Z',

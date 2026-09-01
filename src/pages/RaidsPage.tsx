@@ -79,10 +79,7 @@ export function RaidsPage() {
 
   return (
     <div className="dataset-page raids-page">
-      <DatasetPageHeader
-        title="レイド"
-        fetchedAt={state.result?.fetchedAt}
-      />
+      <DatasetPageHeader title="レイド" />
 
       {state.result?.stale ? <StaleDataNotice /> : null}
       {state.loading && !state.result ? <DatasetSkeleton /> : null}
